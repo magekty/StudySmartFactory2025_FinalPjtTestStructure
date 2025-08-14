@@ -1,0 +1,17 @@
+﻿services:
+  db:
+    image: mysql:8.0.32
+    container_name: GlobalMedMES_db
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=globalmed
+      - MYSQL_USER=mes_user
+      - MYSQL_PASSWORD=mes_pwd
+      - TZ=UTC
+    command: ["--default-time-zone=+00:00","--character-set-server=utf8mb4","--collation-server=utf8mb4_0900_ai_ci"]
+    ports: ["3307:3306"]
+    healthcheck:
+      test: ["CMD","mysqladmin","ping","-h","127.0.0.1","-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
