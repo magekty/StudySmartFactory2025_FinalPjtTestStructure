@@ -1,24 +1,37 @@
 // rbac/MenuController.java
 package com.globalmed.mes.mes_api.rbac;
 
-
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
-@RestController @RequestMapping("/menus")
+@RestController
+@RequestMapping("/menus")
 @RequiredArgsConstructor
 public class MenuController {
-    private final MenuService svc;
+
+    private final MenuService menuService;
+
     @GetMapping("/my")
-    public Map<String,Object> my(){
-        var auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        String userId = String.valueOf(auth.getPrincipal()); // 토큰 subject = userId
-        return Map.of("user", userId, "menus", svc.getMenusForUser(userId));
+    public ResponseEntity<?> myMenus() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).build();
+        }
+
+        // In JwtAuthFilter, subject is set as userId
+        String userId = String.valueOf(auth.getPrincipal());
+
+        return ResponseEntity.ok(Map.of(
+                "user", userId,
+                "menus", menuService.getTreeForUser(userId)
+        ));
     }
 }
