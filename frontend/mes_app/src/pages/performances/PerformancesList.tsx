@@ -5,6 +5,7 @@ import type { PageResponse, PageResult } from "../../types/api";
 import Pagination from "../../components/common/Pagination";
 import SortSelect from "../../components/common/SortSelect";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 type PerfItem = {
   performanceId: number;
@@ -52,7 +53,10 @@ export default function PerformancesList(){
       </div>
       <div className="flex items-center justify-between mb-3">
         <h1 className="text-lg font-semibold">실적</h1>
-        <SortSelect value={sort} options={sortOptions} onChange={(v) => { setPage(0); setSort(v); }} />
+        <div className="flex items-center gap-2">
+          <SortSelect value={sort} options={sortOptions} onChange={(v)=>{ setPage(0); setSort(v); }} />
+          <Link className="border px-3 py-1 rounded" to="/performances/new">+ 새 실적</Link>
+        </div>
       </div>
 
       {isLoading && <div>로딩...</div>}

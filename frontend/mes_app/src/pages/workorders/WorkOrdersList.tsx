@@ -9,6 +9,8 @@ import { isAxiosError } from "axios";
 import Pagination from "../../components/common/Pagination";
 import SortSelect from "../../components/common/SortSelect";
 import { useState } from "react";
+import Can from "../../components/common/Can";
+import { useToast } from "../../store/toast";
 
 const sortOptions = [
   { label: "최신 생성순", value: "createdAt,desc" },
@@ -41,16 +43,18 @@ export default function WorkOrdersList() {
     }
   });
 
+  const toast = useToast();
   async function transition(id: string, to: "R" | "C") {
+    if (!window.confirm(`상태를 ${to}로 변경할까요?`)) return;
     try {
       await changeWorkOrderStatus(id, { toStatus: to });
       await qc.invalidateQueries({ queryKey: ["work-orders"] });
-      alert(`상태가 ${to}로 변경되었습니다.`);
+      toast.push(`상태가 ${to}로 변경되었습니다.`, "success");
     } catch (err: unknown) {
       const msg = isAxiosError<{ message?: string }>(err)
         ? err.response?.data?.message ?? "상태 변경 실패"
         : "상태 변경 실패";
-      alert(msg);
+      toast.push(msg, "error");
     }
   }
 
@@ -108,17 +112,35 @@ export default function WorkOrdersList() {
                     <td className="p-2 text-right">{it.orderQty}</td>
                     <td className="p-2 text-right">{it.producedQty}</td>
                     <td className="p-2">{it.status ?? "-"}</td>
+
                     <td className="p-2 text-center space-x-2">
-                      <button
-                        className={`px-2 py-1 rounded ${canToR ? "bg-blue-600 text-white" : "bg-gray-300 text-gray-600"}`}
-                        disabled={!canToR}
-                        onClick={() => transition(it.workOrderId, "R")}
-                      >P→R</button>
-                      <button
-                        className={`px-2 py-1 rounded ${canToC ? "bg-green-600 text-white" : "bg-gray-300 text-gray-600"}`}
-                        disabled={!canToC}
-                        onClick={() => transition(it.workOrderId, "C")}
-                      >R→C</button>
+                      <Can write>
+                        <button
+                          className={`px-2 py-1 rounded ${canToR ? "bg-blue-600 text-white" : "bg-gray-300 text-gray-600"}`}
+                          disabled={!canToR}
+                          onClick={() => transition(it.workOrderId, "R")}
+                        >P→R</button>
+                      </Can>
+                      <Can write>
+                        <button
+                          className={`px-2 py-1 rounded ${canToC ? "bg-green-600 text-white" : "bg-gray-300 text-gray-600"}`}
+                          disabled={!canToC}
+                          onClick={() => transition(it.workOrderId, "C")}
+                        >R→C</button>
+                      </Can>
+                      {it.status === "R" && (
+                        <Link
+                          className="px-2 py-1 rounded border"
+                          to={`/performances/new?woId=${encodeURIComponent(it.workOrderId.trim())}` +
+                            `&woNumber=${encodeURIComponent(it.workOrderNumber.trim())}` +
+                            `&itemId=${encodeURIComponent(it.itemId.trim())}` +
+                            `&processId=${encodeURIComponent(it.processId.trim())}` +
+                            `&equipmentId=${encodeURIComponent(it.equipmentId.trim())}` +
+                            `&status=R`}
+                        >
+                          실적 등록
+                        </Link>
+                      )}
                     </td>
                   </tr>
                 );
