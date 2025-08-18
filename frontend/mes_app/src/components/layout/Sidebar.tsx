@@ -30,7 +30,8 @@ export default function Sidebar() {
       <nav className="flex flex-col gap-2">
         {menus.map((m) => (
           <Link key={m.key}
-                className={`px-2 py-1 rounded ${loc.pathname.startsWith(m.path) ? "bg-gray-200" : ""}`}
+                className={`px-2 py-1 rounded ${loc.pathname.startsWith(m.path) 
+                  ? "bg-gray-200" : ""}`}
                 to={m.path}>
             {m.title}
           </Link>

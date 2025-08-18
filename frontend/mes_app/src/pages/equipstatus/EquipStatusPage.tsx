@@ -92,8 +92,8 @@ export default function EquipStatusPage(){
                 <th className="p-2">ID</th>
                 <th className="p-2">설비</th>
                 <th className="p-2">상태</th>
-                <th className="p-2">시작(UTC)</th>
-                <th className="p-2">종료(UTC)</th>
+                <th className="p-2">시작(KST)</th>
+                <th className="p-2">종료(KST)</th>
               </tr></thead>
               <tbody>
               {data.items.map((it: EquipStatusItem) => (

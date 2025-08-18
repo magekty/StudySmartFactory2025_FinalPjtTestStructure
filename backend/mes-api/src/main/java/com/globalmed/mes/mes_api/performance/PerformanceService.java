@@ -50,6 +50,15 @@ public class PerformanceService {
         String cur = (wo.getStatusCode() != null ? wo.getStatusCode().getCode() : null);
         if (!"R".equals(cur)) throw new IllegalStateException("WO_STATUS_INVALID");
 
+        // WorkOrderEntity 조회 직후, 상태 R 검증 바로 다음에 배치
+        LocalDateTime baseline = (wo.getStartTs() != null) ? wo.getStartTs() : wo.getCreatedAt();
+        // st/et는 이미 OffsetDateTime→UTC LocalDateTime 변환된 값
+        if (baseline != null) {
+            if (st.isBefore(baseline) || et.isBefore(baseline)) {
+                throw new IllegalArgumentException("PERF_BEFORE_WO"); // 400으로 매핑됨
+            }
+        }
+
         // 저장
         var p = new ProductionPerformanceEntity();
         p.setWorkOrderId(req.workOrderId());

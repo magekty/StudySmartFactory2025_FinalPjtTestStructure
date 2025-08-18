@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { isAxiosError } from "axios";
 import { createPerformance } from "../../lib/perf";
-import { toUtcIso } from "../../lib/datetime";
+import { toUtcIso, parseServerDate } from "../../lib/datetime";
 import { api } from "../../lib/api";
 
 type WoDetail = {
@@ -14,6 +14,8 @@ type WoDetail = {
   orderQty: number;
   producedQty: number;
   status: string | null; // "P"|"R"|"C"|null
+  startTs?: string | null; // ISO(UTC) 가정 
+  createdAt?: string | null; 
 };
 
 export default function PerformanceCreate() {
@@ -24,6 +26,7 @@ export default function PerformanceCreate() {
   const [processId, setProc] = useState("");
   const [equipmentId, setEqp] = useState("");
   const [woStatus, setWoStatus] = useState<string | null>(null);
+  const [woBaselineIso, setWoBaselineIso] = useState<string | null>(null);
 
   const [producedQty, setProduced] = useState<number>(100);
   const [defectQty, setDefect] = useState<number>(5);
@@ -38,13 +41,16 @@ export default function PerformanceCreate() {
   // 쿼리 파라미터 바인딩 + 서버에서 최신 지시 정보/상태 가져오기(R 가드에 사용)
   useEffect(() => {
     const t = (s: string | null) => (s ? s.trim() : "");
+
     const woId = t(sp.get("woId"));
-    const woNo = (sp.get("woNumber") || "").trim();
+    const woNo = t(sp.get("woNumber"));
     const itm  = t(sp.get("itemId"));
     const proc = t(sp.get("processId"));
     const eqp  = t(sp.get("equipmentId"));
-    const stat = t(sp.get("status")).toUpperCase(); // 'P'|'R'|'C' 기대
+    const stat = t(sp.get("status")).toUpperCase(); // 'P'|'R'|'C' or ""
+
     
+
     if (woId) setWo(woId);
     if (woNo) setWoNumber(woNo);
     if (itm)  setItem(itm);
@@ -52,41 +58,45 @@ export default function PerformanceCreate() {
     if (eqp)  setEqp(eqp);
     if (stat) setWoStatus(stat);
 
-    // 서버 상세로 최신값 보정(있을 때만, 실패해도 버튼 판단은 쿼리 stat으로 됨)
-    if (woId) {
-      api.get<WoDetail>(`/work-orders/${encodeURIComponent(woId)}`)
-        .then(({ data }) => {
-          setWoStatus((data.status ?? stat ?? "").toUpperCase() || null);
-          setItem((data.itemId || itm).trim());
-          setProc((data.processId || proc).trim());
-          setEqp((data.equipmentId || eqp).trim());
-        })
-        .catch(() => { /* 무시 */ });
-    }
-  }, [sp]);
+    if (!woId) return;
 
-  const fieldsOk =
-    workOrderId.trim().length > 0 &&
-    itemId.trim().length > 0 &&
-    processId.trim().length > 0 &&
-    equipmentId.trim().length > 0;
+    // 서버 상세로 최신값 보정
+    api.get<WoDetail>(`/work-orders/${encodeURIComponent(woId)}`)
+      .then(({ data: wo }) => {
+        // 상태 보정(서버 우선)
+        const statusCode = (wo.status ?? stat ?? "").toUpperCase();
+        setWoStatus(statusCode || null);
 
-  const qtyOk =
-    Number.isFinite(producedQty) &&
-    Number.isFinite(defectQty) &&
-    producedQty >= 0 &&
-    defectQty >= 0 &&
-    defectQty <= producedQty;
+        // 식별자 보정(서버 우선, 없으면 쿼리값)
+        setItem((wo.itemId || itm).trim());
+        setProc((wo.processId || proc).trim());
+        setEqp((wo.equipmentId || eqp).trim());
 
-  const stIso = toUtcIso(date, startTime);
-  const etIso = toUtcIso(date, endTime);
-  const stMs = new Date(stIso).getTime();
-  const etMs = new Date(etIso).getTime();
-  const timeOk = Number.isFinite(stMs) && Number.isFinite(etMs) && stMs <= etMs;
+        // 기준 시각(지시 시작이 우선, 없으면 생성 시각)
+        const baseDate = parseServerDate(wo.startTs ?? wo.createdAt);
+        if (baseDate) setWoBaselineIso(baseDate.toISOString()); // 내부 비교는 UTC 기준으로
+        
+      })
+      .catch(() => { /* 조회 실패면 쿼리 파라미터 기준으로만 진행 */ });
+  }, [sp]); // sp는 useSearchParams()로 얻은 객체
 
-  const statusOk = (woStatus ?? "").toUpperCase() === "R";
+              // ISO(UTC)로 내려오게
 
-  const canSave = fieldsOk && qtyOk && timeOk && statusOk && !isSubmitting;
+const stIso = toUtcIso(date, startTime);
+const etIso = toUtcIso(date, endTime);
+const stMs = new Date(stIso).getTime();
+const etMs = new Date(etIso).getTime();
+const baseMs = woBaselineIso ? new Date(woBaselineIso).getTime() : undefined;
+
+const fieldsOk = workOrderId.trim() && itemId.trim() && processId.trim() && equipmentId.trim();
+const qtyOk = Number.isFinite(producedQty) && Number.isFinite(defectQty)
+           && producedQty >= 0 && defectQty >= 0 && defectQty <= producedQty;
+const timeOk = Number.isFinite(stMs) && Number.isFinite(etMs) && stMs <= etMs;
+const baselineOk = baseMs === undefined ? true : (stMs >= baseMs && etMs >= baseMs);
+const statusOk = (woStatus ?? "").toUpperCase() === "R";
+
+const canSave = !!fieldsOk && qtyOk && timeOk && baselineOk && statusOk && !isSubmitting;
+
   
 
   async function submit(e: React.FormEvent) {
@@ -105,8 +115,9 @@ export default function PerformanceCreate() {
     equipmentId: equipmentId.trim(),
     producedQty,
     defectQty,
-    startTime: toUtcIso(date, startTime),
-    endTime: toUtcIso(date, endTime),
+    startTime: stIso, // UTC
+    endTime: etIso,   // UTC
+    // requestId: crypto.randomUUID() // 멱등키 적용 시
   };
 
   try {
@@ -115,15 +126,15 @@ export default function PerformanceCreate() {
     await createPerformance(dto); // 한 번만 호출
     alert("등록 완료");
     nav("/performances", { replace: true });
-  } catch (error) {
-    const msg = isAxiosError<{ message?: string }>(error)
-      ? error.response?.data?.message ?? "등록 실패"
-      : "등록 실패";
-    setErr(msg);
-  } finally {
-    setSubmitting(false);
+    } catch (error) {
+      const msg = isAxiosError<{ message?: string }>(error)
+        ? error.response?.data?.message ?? "등록 실패"
+        : "등록 실패";
+      setErr(msg);
+    } finally {
+      setSubmitting(false);
+    }
   }
-}
 
   return (
     <div>
@@ -132,15 +143,15 @@ export default function PerformanceCreate() {
         {err && <div className="text-red-600">{err}</div>}
 
         <input className="border px-2 py-1 bg-gray-50" placeholder="지시번호"
-              value={workOrderNumber} readOnly />
+              defaultValue={workOrderNumber} readOnly />
         <input className="border px-2 py-1 bg-gray-50" placeholder="작업지시ID(UUID)" 
-               value={workOrderId} hidden required />
+               defaultValue={workOrderId} hidden required />
         <input className="border px-2 py-1 bg-gray-50" placeholder="품목ID"
-               value={itemId} readOnly required />
+               defaultValue={itemId} readOnly required />
         <input className="border px-2 py-1 bg-gray-50" placeholder="공정ID"
-               value={processId} readOnly required />
+               defaultValue={processId} readOnly required />
         <input className="border px-2 py-1 bg-gray-50" placeholder="설비ID"
-               value={equipmentId} readOnly required />
+               defaultValue={equipmentId} readOnly required />
 
         <div className="text-sm text-gray-600">
           지시 상태: <b>{woStatus ?? "-"}</b> {woStatus !== "R" && "(R 상태에서만 등록 가능)"}
@@ -160,13 +171,18 @@ export default function PerformanceCreate() {
         </div>
 
         <div className="grid grid-cols-2 gap-2">
+          {woBaselineIso && (
+            <div className="text-xs text-gray-500">
+              기준 시각(지시 시작/생성, KST): {new Date(woBaselineIso).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })}
+            </div>
+          )}
           <div>
-            <label className="text-sm text-gray-600">날짜(UTC 기준)</label>
+            <label className="text-sm text-gray-600">날짜(KST 기준)</label>
             <input className="border px-2 py-1 w-full" type="date"
                    value={date} onChange={(e) => setDate(e.target.value)} />
           </div>
           <div>
-            <label className="text-sm text-gray-600">시작(UTC)</label>
+            <label className="text-sm text-gray-600">시작(KST)</label>
             <input className="border px-2 py-1 w-full" type="time"
                    value={startTime} onChange={(e) => setStart(e.target.value)} />
           </div>
@@ -174,7 +190,7 @@ export default function PerformanceCreate() {
 
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <label className="text-sm text-gray-600">종료(UTC)</label>
+            <label className="text-sm text-gray-600">종료(KST)</label>
             <input className="border px-2 py-1 w-full" type="time"
                    value={endTime} onChange={(e) => setEnd(e.target.value)} />
           </div>

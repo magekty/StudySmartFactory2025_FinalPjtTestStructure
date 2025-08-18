@@ -13,6 +13,11 @@ spring:
       hibernate:
         jdbc:
           time_zone: UTC           # DB-UTC 일치
+          serialization:
+  jackson:
+    time-zone: UTC
+    serialization:
+      write-dates-as-timestamps: false
 logging:
   level:
     root: INFO

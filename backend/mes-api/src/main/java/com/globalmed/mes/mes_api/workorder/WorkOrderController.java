@@ -2,20 +2,18 @@
 package com.globalmed.mes.mes_api.workorder;
 
 
-import com.globalmed.mes.mes_api.common.PageResponse;
-import com.globalmed.mes.mes_api.workorder.dto.WorkOrderListDto;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.globalmed.mes.mes_api.workorder.dto.WorkOrderDetailDto;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Map;
 
 @RestController
@@ -53,7 +51,33 @@ public class WorkOrderController {
                 "status", wo.getStatusCode().getCode()));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<WorkOrderDetailDto> get(@PathVariable String id){
+        var wo = repo.findById(id).orElseThrow();
+
+        // 엔티티 LocalDateTime 값을 “UTC 벽시계”로 간주 → 오프셋만 UTC로 부여
+        var startTsUtc = wo.getStartTs() == null ? null
+                : OffsetDateTime.of(wo.getStartTs(), java.time.ZoneOffset.UTC);
+        var createdAtUtc = wo.getCreatedAt() == null ? null
+                : OffsetDateTime.of(wo.getCreatedAt(), java.time.ZoneOffset.UTC);
+
+        var dto = new WorkOrderDetailDto(
+                wo.getWorkOrderId(),
+                wo.getWorkOrderNumber(),
+                wo.getItemId(),
+                wo.getProcessId(),
+                wo.getEquipmentId(),
+                wo.getOrderQty(),
+                wo.getProducedQty(),
+                wo.getStatusCode()!=null ? wo.getStatusCode().getCode() : null,
+                startTsUtc,
+                createdAtUtc
+        );
+        return ResponseEntity.ok(dto);
+    }
+
     public record StatusChangeReq(@NotBlank String toStatus) {}
+
 
 
 
