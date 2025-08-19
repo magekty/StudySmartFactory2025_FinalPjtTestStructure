@@ -11,6 +11,7 @@ import SortSelect from "../../components/common/SortSelect";
 import { useState } from "react";
 import Can from "../../components/common/Can";
 import { useToast } from "../../store/toast";
+import { useAuthStore } from "../../store/auth";
 
 const sortOptions = [
   { label: "최신 생성순", value: "createdAt,desc" },
@@ -21,6 +22,7 @@ const sortOptions = [
 
 export default function WorkOrdersList() {
   const qc = useQueryClient();
+  
   const [page, setPage] = useState<number>(0);
   const [size] = useState<number>(20);
   const [sort, setSort] = useState<string>("createdAt,desc");
@@ -28,20 +30,27 @@ export default function WorkOrdersList() {
   const [status, setStatus] = useState<string>(""); // "", "P", "R", "C"
   const [from, setFrom] = useState<string>("");     // ISO yyyy-MM-dd
   const [to, setTo] = useState<string>("");
+  const token = useAuthStore(s => s.token);
 
   const { data, isLoading, error } = useQuery<PageResult<WorkOrderItem>>({
-    queryKey: ["work-orders", page, size, sort, equipmentId, status, from, to],
-    queryFn: async () => {
-      const params: Record<string,string|number> = { page, size, sort };
-      if (equipmentId) params.equipmentId = equipmentId;
-      if (status) params.status = status;
-      // 날짜는 UTC ISO로 변환해서 전달(00:00 기준)
-      if (from) params.from = new Date(`${from}T00:00:00Z`).toISOString();
-      if (to)   params.to   = new Date(`${to}T23:59:59Z`).toISOString();
-      const res = await api.get<PageResponse<WorkOrderItem>>("/work-orders", { params });
-      return toPage(res.data);
-    }
+    queryKey: ["work-orders", page, size, sort],
+    enabled: !!token,                       // ← 토큰 준비 후 실행
+    retry: (failureCount, err) => {         // ← 401이면 재시도하지 않음
+      return !(isAxiosError(err) && err.response?.status === 401);
+    },
+      queryFn: async () => {
+        const params: Record<string,string|number> = { page, size, sort };
+        if (equipmentId) params.equipmentId = equipmentId;
+        if (status) params.status = status;
+        // 날짜는 UTC ISO로 변환해서 전달(00:00 기준)
+        if (from) params.from = new Date(`${from}T00:00:00Z`).toISOString();
+        if (to)   params.to   = new Date(`${to}T23:59:59Z`).toISOString();
+        const res = await api.get<PageResponse<WorkOrderItem>>("/work-orders", { params });
+        return toPage(res.data);
+      }
   });
+
+
 
   const toast = useToast();
   async function transition(id: string, to: "R" | "C") {
@@ -80,7 +89,9 @@ export default function WorkOrdersList() {
         <h1 className="text-lg font-semibold">작업지시</h1>
         <div className="flex items-center gap-2">
           <SortSelect value={sort} options={sortOptions} onChange={(v) => { setPage(0); setSort(v); }} />
-          <Link className="border px-3 py-1 rounded" to="/work-orders/new">+ 새 지시</Link>
+          <Can write>
+            <Link className="border px-3 py-1 rounded" to="/work-orders/new">+ 새 지시</Link>
+          </Can>
         </div>
       </div>
 
@@ -97,7 +108,9 @@ export default function WorkOrdersList() {
                 <th className="p-2 text-right">지시</th>
                 <th className="p-2 text-right">누적</th>
                 <th className="p-2 text-left">상태</th>
+                <Can write>
                 <th className="p-2 text-center">액션</th>
+                </Can>
               </tr>
             </thead>
             <tbody>
@@ -112,36 +125,33 @@ export default function WorkOrdersList() {
                     <td className="p-2 text-right">{it.orderQty}</td>
                     <td className="p-2 text-right">{it.producedQty}</td>
                     <td className="p-2">{it.status ?? "-"}</td>
-
-                    <td className="p-2 text-center space-x-2">
-                      <Can write>
-                        <button
-                          className={`px-2 py-1 rounded ${canToR ? "bg-blue-600 text-white" : "bg-gray-300 text-gray-600"}`}
-                          disabled={!canToR}
-                          onClick={() => transition(it.workOrderId, "R")}
-                        >P→R</button>
-                      </Can>
-                      <Can write>
-                        <button
-                          className={`px-2 py-1 rounded ${canToC ? "bg-green-600 text-white" : "bg-gray-300 text-gray-600"}`}
-                          disabled={!canToC}
-                          onClick={() => transition(it.workOrderId, "C")}
-                        >R→C</button>
-                      </Can>
-                      {it.status === "R" && (
-                        <Link
-                          className="px-2 py-1 rounded border"
-                          to={`/performances/new?woId=${encodeURIComponent(it.workOrderId.trim())}` +
-                            `&woNumber=${encodeURIComponent(it.workOrderNumber.trim())}` +
-                            `&itemId=${encodeURIComponent(it.itemId.trim())}` +
-                            `&processId=${encodeURIComponent(it.processId.trim())}` +
-                            `&equipmentId=${encodeURIComponent(it.equipmentId.trim())}` +
-                            `&status=R`}
-                        >
-                          실적 등록
-                        </Link>
-                      )}
-                    </td>
+                    <Can write>
+                      <td className="p-2 text-center space-x-2">
+                          <button
+                            className={`px-2 py-1 rounded ${canToR ? "bg-blue-600 text-white" : "bg-gray-300 text-gray-600"}`}
+                            disabled={!canToR}
+                            onClick={() => transition(it.workOrderId, "R")}
+                          >P→R</button>
+                          <button
+                            className={`px-2 py-1 rounded ${canToC ? "bg-green-600 text-white" : "bg-gray-300 text-gray-600"}`}
+                            disabled={!canToC}
+                            onClick={() => transition(it.workOrderId, "C")}
+                          >R→C</button>
+                        {it.status === "R" && (
+                            <Link
+                              className="px-2 py-1 rounded border"
+                              to={`/performances/new?woId=${encodeURIComponent(it.workOrderId.trim())}` +
+                                `&woNumber=${encodeURIComponent(it.workOrderNumber.trim())}` +
+                                `&itemId=${encodeURIComponent(it.itemId.trim())}` +
+                                `&processId=${encodeURIComponent(it.processId.trim())}` +
+                                `&equipmentId=${encodeURIComponent(it.equipmentId.trim())}` +
+                                `&status=R`}
+                            >
+                              실적 등록
+                            </Link>
+                        )}
+                      </td>
+                    </Can>
                   </tr>
                 );
               })}

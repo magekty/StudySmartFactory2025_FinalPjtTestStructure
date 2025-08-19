@@ -56,4 +56,11 @@ public class GlobalExceptionHandler {
                 "path", req.getRequestURI(), "method", req.getMethod()
         ));
     }
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<?> denied(HttpServletRequest req){
+        return ResponseEntity.status(403).body(Map.of(
+                "code","FORBIDDEN","message","FORBIDDEN",
+                "path", req.getRequestURI(), "method", req.getMethod()
+        ));
+    }
 }

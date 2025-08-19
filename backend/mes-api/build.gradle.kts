@@ -46,6 +46,7 @@ dependencies {
 	// captcha (캡챠 사용)
 	implementation("com.github.whvcse:easy-captcha:1.6.2")
 
+
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
