@@ -6,8 +6,6 @@ spring:
     url: jdbc:mysql://localhost:3307/globalmed?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC
     username: mes_user
     password: mes_pwd
-    hikari:
-      connectionInitSql: "SET time_zone = '+00:00'"
   jpa:
     hibernate:
       ddl-auto: validate           # 운영스럽게 validate(개발 중 create/update 쓰고 싶으면 팀 합의)

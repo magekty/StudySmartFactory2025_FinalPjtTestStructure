@@ -5,7 +5,6 @@ import type { PageResult } from "../../types/api";
 import type { EquipStatusItem } from "../../types/equip";
 import { fetchEquipStatus, createEquipStatus } from "../../lib/equip";
 import { isAxiosError } from "axios";
-import Can from "../../components/common/Can";
 
 export default function EquipStatusPage(){
   const qc = useQueryClient();
@@ -78,9 +77,7 @@ export default function EquipStatusPage(){
             <option value="DOWN">DOWN</option>
           </select>
         </div>
-        <Can write>
-          <button className="bg-black text-white px-3 py-2 rounded" type="submit">RUN 등록</button>
-        </Can>
+        <button className="bg-black text-white px-3 py-2 rounded" type="submit">RUN 등록</button>
         {err && <span className="text-red-600 ml-2">{err}</span>}
       </form>
 

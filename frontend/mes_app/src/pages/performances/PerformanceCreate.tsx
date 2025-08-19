@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { isAxiosError } from "axios";
 import { createPerformance } from "../../lib/perf";
-import { toUtcIso } from "../../lib/datetime";
+import { toUtcIso, parseServerDate } from "../../lib/datetime";
 import { api } from "../../lib/api";
-import Can from "../../components/common/Can";
 
 type WoDetail = {
   workOrderId: string;
@@ -72,14 +71,10 @@ export default function PerformanceCreate() {
         setItem((wo.itemId || itm).trim());
         setProc((wo.processId || proc).trim());
         setEqp((wo.equipmentId || eqp).trim());
-        // 기준 시각(지시 시작이 우선, 없으면 생성 시각)
-        const base = wo.startTs ?? wo.createdAt;     // 서버가 ...Z로 내려줌
-        const baseDate = base ? new Date(base) : null;
 
-        // 표시(항상 KST로)
-        baseDate?.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
+        // 기준 시각(지시 시작이 우선, 없으면 생성 시각)
+        const baseDate = parseServerDate(wo.startTs ?? wo.createdAt);
         if (baseDate) setWoBaselineIso(baseDate.toISOString()); // 내부 비교는 UTC 기준으로
-        
         
       })
       .catch(() => { /* 조회 실패면 쿼리 파라미터 기준으로만 진행 */ });
@@ -140,7 +135,7 @@ const canSave = !!fieldsOk && qtyOk && timeOk && baselineOk && statusOk && !isSu
       setSubmitting(false);
     }
   }
-  
+
   return (
     <div>
       <h1 className="text-lg font-semibold mb-3">실적 등록</h1>
@@ -178,19 +173,7 @@ const canSave = !!fieldsOk && qtyOk && timeOk && baselineOk && statusOk && !isSu
         <div className="grid grid-cols-2 gap-2">
           {woBaselineIso && (
             <div className="text-xs text-gray-500">
-              <time dateTime={woBaselineIso}>
-                기준 시각(지시 시작/생성, KST):{" "}
-                {new Date(woBaselineIso).toLocaleString("ko-KR", {
-                  timeZone: "Asia/Seoul",
-                  year: "numeric",
-                  month: "2-digit",
-                  day: "2-digit",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  second: "2-digit",
-                  hour12: false
-                })}
-              </time>
+              기준 시각(지시 시작/생성, KST): {new Date(woBaselineIso).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })}
             </div>
           )}
           <div>
@@ -212,14 +195,12 @@ const canSave = !!fieldsOk && qtyOk && timeOk && baselineOk && statusOk && !isSu
                    value={endTime} onChange={(e) => setEnd(e.target.value)} />
           </div>
           <div className="flex items-end">
-          <Can write>
-            <button
-              className={`px-3 py-2 rounded ${canSave ? "bg-black text-white" : "bg-gray-300 text-gray-600"}`}
-              disabled={!canSave}
-            >
-              {isSubmitting ? "저장 중..." : "저장"}
-            </button>
-          </Can>
+          <button
+            className={`px-3 py-2 rounded ${canSave ? "bg-black text-white" : "bg-gray-300 text-gray-600"}`}
+            disabled={!canSave}
+          >
+            {isSubmitting ? "저장 중..." : "저장"}
+          </button>
           </div>
         </div>
       </form>

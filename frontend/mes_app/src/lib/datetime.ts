@@ -7,5 +7,6 @@ export function parseServerDate(raw?: string | null): Date | null {
 
 // 로컬 입력(yyyy-MM-dd + HH:mm)을 UTC ISO로 변환해 전송
 export function toUtcIso(date: string, time: string): string {
+  // 로컬 시각으로 생성 → toISOString()으로 UTC 변환
   return new Date(`${date}T${time}:00`).toISOString();
 }
