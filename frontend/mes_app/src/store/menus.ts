@@ -1,11 +1,19 @@
+// src/store/menus.ts
 import { create } from "zustand";
 
 export type MenuPerms = { read: boolean; write: boolean; exec: boolean };
-export type MenuNode = { code: string; name: string; path: string; perms: MenuPerms; children: MenuNode[] };
+
+export type MenuNode = {
+  code: string;
+  name: string;
+  path: string;
+  perms: MenuPerms;
+  children: MenuNode[];
+};
 
 type MenusState = {
   tree: MenuNode[];
-  flat: Record<string, MenuPerms>; // path → perms
+  flat: Record<string, MenuPerms>;
   setMenus: (tree: MenuNode[]) => void;
   getPerms: (path: string) => MenuPerms | undefined;
 };
@@ -25,5 +33,13 @@ export const useMenusStore = create<MenusState>((set, get) => ({
     flatten(tree, flat);
     set({ tree, flat });
   },
-  getPerms: (path) => get().flat[path],
+  // prefix 매칭: /a/b/c → /a/b 권한도 허용
+  getPerms: (path) => {
+    const flat = get().flat;
+    if (flat[path]) return flat[path];
+    const hit = Object.keys(flat)
+      .filter((k) => path === k || path.startsWith(k + "/"))
+      .sort((a, b) => b.length - a.length)[0];
+    return hit ? flat[hit] : undefined;
+  },
 }));

@@ -9,6 +9,8 @@ import EquipStatusPage from "./pages/equipstatus/EquipStatusPage";
 import KpiPage from "./pages/kpi/KpiPage";
 import WorkOrderCreate from "./pages/workorders/WorkOrderCreate";
 import PerformanceCreate from "./pages/performances/PerformanceCreate";
+import PermRoute from "./routes/PermRoute";
+import Forbidden from "./pages/Forbidden";
 
 export default function App() {
   return (
@@ -21,7 +23,12 @@ export default function App() {
           <Route index element={<Dashboard/>}/>
           <Route path="work-orders" element={<WorkOrdersList/>}/>
           <Route path="performances" element={<PerformancesList/>}/>
-          <Route path="performances/new" element={<PerformanceCreate/>}/>
+          <Route path="performances/new" element={
+            <PermRoute require="write">
+              <PerformanceCreate/>
+            </PermRoute>
+          }/>
+          <Route path="403" element={<Forbidden/>}/>
 
           <Route path="equip-status" element={<EquipStatusPage/>}/>
           <Route path="kpi" element={<KpiPage/>}/>

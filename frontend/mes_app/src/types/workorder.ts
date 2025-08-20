@@ -7,6 +7,9 @@ export type WorkOrderItem = {
   orderQty: number;
   producedQty: number;
   status: string | null; // "P"|"R"|"C"|null
+  startTs?: string | null;      // UTC ISO
+  createdAt: string;
+  modifiedAt?: string | null;
 };
 
 export type WorkOrderCreateReq = {
