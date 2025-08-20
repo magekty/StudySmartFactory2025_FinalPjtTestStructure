@@ -56,10 +56,10 @@ public class WorkOrderController {
         var wo = repo.findById(id).orElseThrow();
 
         // 엔티티 LocalDateTime 값을 “UTC 벽시계”로 간주 → 오프셋만 UTC로 부여
-        var startTsUtc = wo.getStartTs() == null ? null
-                : OffsetDateTime.of(wo.getStartTs(), java.time.ZoneOffset.UTC);
-        var createdAtUtc = wo.getCreatedAt() == null ? null
-                : OffsetDateTime.of(wo.getCreatedAt(), java.time.ZoneOffset.UTC);
+        // src/main/java/.../workorder/WorkOrderController.java (상세)
+        var createdKst  = com.globalmed.mes.mes_api.common.DateTimeMapper.attachKst(wo.getCreatedAt());
+        var modifiedKst = com.globalmed.mes.mes_api.common.DateTimeMapper.attachKst(wo.getModifiedAt());
+        // DTO 생성 시 createdAt/modifiedAt에 위 값 전달
 
         var dto = new WorkOrderDetailDto(
                 wo.getWorkOrderId(),
@@ -70,8 +70,8 @@ public class WorkOrderController {
                 wo.getOrderQty(),
                 wo.getProducedQty(),
                 wo.getStatusCode()!=null ? wo.getStatusCode().getCode() : null,
-                startTsUtc,
-                createdAtUtc
+                createdKst,
+                modifiedKst
         );
         return ResponseEntity.ok(dto);
     }

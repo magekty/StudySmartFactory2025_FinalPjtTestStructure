@@ -8,6 +8,6 @@ public record WorkOrderDetailDto(
         String itemId, String processId, String equipmentId,
         BigDecimal orderQty, BigDecimal producedQty,
         String status,
-        OffsetDateTime startTs,
-        OffsetDateTime createdAt
-) {}
+        OffsetDateTime createdAt,
+        OffsetDateTime modifiedAt
+        ) {}
