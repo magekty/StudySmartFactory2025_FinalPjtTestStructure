@@ -737,3 +737,8 @@ CREATE TABLE `tb_audit_log` (
   CONSTRAINT `fk_audit_user` FOREIGN KEY (`user_id`) REFERENCES `tb_user`(`user_id`) ON DELETE SET NULL,
   CONSTRAINT `ck_audit_is_deleted` CHECK (`is_deleted` IN (0,1))
 ) ENGINE=InnoDB COMMENT='감사 로그: 사용자/리소스/시간 기준 조회 최적화, 사용자 삭제 시 로그 보존(SET NULL, UTC).';
+
+-- V__add_perf_request_id.sql
+ALTER TABLE tb_production_performance
+  ADD COLUMN request_id VARCHAR(64) NULL COMMENT 'idempotency key',
+  ADD UNIQUE KEY uk_perf_request_id (request_id);

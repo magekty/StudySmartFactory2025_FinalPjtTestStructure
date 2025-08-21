@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface PerformanceRepo extends JpaRepository<ProductionPerformanceEntity, Long>,
         JpaSpecificationExecutor<ProductionPerformanceEntity> {
@@ -29,4 +30,5 @@ public interface PerformanceRepo extends JpaRepository<ProductionPerformanceEnti
     PerfAgg aggregateForDay(@Param("eqp") String equipmentId,
                             @Param("fromTs") LocalDateTime fromTs,
                             @Param("toTs") LocalDateTime toTs);
+    Optional<ProductionPerformanceEntity> findByRequestId(String requestId);
 }

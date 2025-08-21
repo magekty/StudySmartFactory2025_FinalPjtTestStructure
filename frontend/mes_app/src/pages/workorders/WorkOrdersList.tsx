@@ -121,7 +121,7 @@ export default function WorkOrdersList() {
                         <GuardButton require="write"
                           className={`px-2 py-1 rounded ${canToR ? "bg-blue-600 text-white" : "bg-gray-300 text-gray-600"}`}
                           onClick={() => canToR && transition(it.workOrderId, "R")}
-                          renderDisabled
+                          renderDisabled={!canToR}
                         >
                           P→R
                         </GuardButton>
@@ -129,12 +129,13 @@ export default function WorkOrdersList() {
                         <GuardButton require="write"
                           className={`px-2 py-1 rounded ${canToC ? "bg-green-600 text-white" : "bg-gray-300 text-gray-600"}`}
                           onClick={() => canToC && transition(it.workOrderId, "C")}
-                          renderDisabled
+                          renderDisabled={!canToC}
                         >
                           R→C
                         </GuardButton>
 
                         {/* 실적 등록 링크(쓰기 권한일 때만 노출) */}
+                        {it.status === "R" && (
                         <CanWrite>
                           <Link
                             className="px-2 py-1 rounded border"
@@ -143,6 +144,7 @@ export default function WorkOrdersList() {
                             실적 등록
                           </Link>
                         </CanWrite>
+                        )}
                       </div>
                     </td>
                   </tr>

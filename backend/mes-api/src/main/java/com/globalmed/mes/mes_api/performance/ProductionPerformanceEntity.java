@@ -49,6 +49,9 @@ public class ProductionPerformanceEntity {
     @Column(name = "created_by", nullable = false, length = 50)
     private String createdBy;
 
+    @Column(name = "request_id", length = 64, unique = true)
+    private String requestId;
+
     @PrePersist
     void prePersist() {
         if (defectQty == null) defectQty = BigDecimal.ZERO;

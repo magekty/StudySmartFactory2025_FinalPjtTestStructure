@@ -19,13 +19,19 @@ public class PerformanceService {
     public record Req(
             String workOrderId, String itemId, String processId, String equipmentId,
             BigDecimal producedQty, BigDecimal defectQty,
-            String startTime, String endTime // ISO8601, 예: 2025-08-10T09:00:00Z
+            String startTime, String endTime, String requestId // ISO8601, 예: 2025-08-10T09:00:00Z
     ) {}
 
     public record Res(Long performanceId, BigDecimal goodQty) {}
 
     @Transactional
     public Res create(Req req) {
+        String woId = t(req.workOrderId());
+        String item = t(req.itemId());
+        String proc = t(req.processId());
+        String eqp  = t(req.equipmentId());
+        String rid  = t(req.requestId());
+
         // 필수값
         if (req.producedQty() == null || req.defectQty() == null
                 || req.workOrderId() == null || req.itemId() == null
@@ -58,18 +64,26 @@ public class PerformanceService {
                 throw new IllegalArgumentException("PERF_BEFORE_WO"); // 400으로 매핑됨
             }
         }
-
+        if (rid != null && !rid.isEmpty() && performanceRepo.findByRequestId(rid).isPresent()) {
+            throw new IllegalStateException("DUPLICATE_KEY");
+        }
         // 저장
         var p = new ProductionPerformanceEntity();
-        p.setWorkOrderId(req.workOrderId());
-        p.setItemId(req.itemId());
-        p.setProcessId(req.processId());
-        p.setEquipmentId(req.equipmentId());
+        p.setWorkOrderId(woId);
+        p.setItemId(item);
+        p.setProcessId(proc);
+        p.setEquipmentId(eqp);
         p.setProducedQty(req.producedQty());
         p.setDefectQty(req.defectQty());
         p.setStartTime(st);
         p.setEndTime(et);
-        p = performanceRepo.save(p);
+        if (rid != null && !rid.isEmpty()) p.setRequestId(rid);
+
+        try {
+            p = performanceRepo.save(p);
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+            throw new IllegalStateException("DUPLICATE_KEY");
+        }
 
         // 누적 갱신
         wo.setProducedQty(wo.getProducedQty().add(req.producedQty()));
@@ -78,6 +92,7 @@ public class PerformanceService {
         return new Res(p.getPerformanceId(), good);
     }
 
+    private static String t(String s){ return s==null ? null : s.trim(); }
     private LocalDateTime toUtcLdt(String isoZ) {
         return OffsetDateTime.parse(isoZ).atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
     }

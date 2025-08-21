@@ -104,7 +104,7 @@ export default function PerformanceCreate() {
       defectQty,
       startTime: stIso, // UTC
       endTime: etIso,   // UTC
-      // requestId: crypto.randomUUID(), // 멱등키 도입 시 활성화
+      requestId: crypto.randomUUID(), // 멱등키
     };
 
     try {
