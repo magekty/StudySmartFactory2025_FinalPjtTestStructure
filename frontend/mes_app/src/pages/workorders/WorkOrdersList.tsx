@@ -9,8 +9,9 @@ import { isAxiosError } from "axios";
 import Pagination from "../../components/common/Pagination";
 import SortSelect from "../../components/common/SortSelect";
 import { useState } from "react";
-import Can from "../../components/common/Can";
 import { useToast } from "../../store/toast";
+import CanWrite from "../../components/common/perm/CanWrite";
+import GuardButton from "../../components/common/perm/GuardButton";
 
 const sortOptions = [
   { label: "최신 생성순", value: "createdAt,desc" },
@@ -80,7 +81,9 @@ export default function WorkOrdersList() {
         <h1 className="text-lg font-semibold">작업지시</h1>
         <div className="flex items-center gap-2">
           <SortSelect value={sort} options={sortOptions} onChange={(v) => { setPage(0); setSort(v); }} />
-          <Link className="border px-3 py-1 rounded" to="/work-orders/new">+ 새 지시</Link>
+          <CanWrite>
+            <Link className="border px-3 py-1 rounded" to="/work-orders/new">+ 새 지시</Link>
+          </CanWrite>
         </div>
       </div>
 
@@ -114,33 +117,33 @@ export default function WorkOrdersList() {
                     <td className="p-2">{it.status ?? "-"}</td>
 
                     <td className="p-2 text-center space-x-2">
-                      <Can write>
-                        <button
+                      <div className="flex gap-2 justify-center">
+                        <GuardButton require="write"
                           className={`px-2 py-1 rounded ${canToR ? "bg-blue-600 text-white" : "bg-gray-300 text-gray-600"}`}
-                          disabled={!canToR}
-                          onClick={() => transition(it.workOrderId, "R")}
-                        >P→R</button>
-                      </Can>
-                      <Can write>
-                        <button
-                          className={`px-2 py-1 rounded ${canToC ? "bg-green-600 text-white" : "bg-gray-300 text-gray-600"}`}
-                          disabled={!canToC}
-                          onClick={() => transition(it.workOrderId, "C")}
-                        >R→C</button>
-                      </Can>
-                      {it.status === "R" && (
-                        <Link
-                          className="px-2 py-1 rounded border"
-                          to={`/performances/new?woId=${encodeURIComponent(it.workOrderId.trim())}` +
-                            `&woNumber=${encodeURIComponent(it.workOrderNumber.trim())}` +
-                            `&itemId=${encodeURIComponent(it.itemId.trim())}` +
-                            `&processId=${encodeURIComponent(it.processId.trim())}` +
-                            `&equipmentId=${encodeURIComponent(it.equipmentId.trim())}` +
-                            `&status=R`}
+                          onClick={() => canToR && transition(it.workOrderId, "R")}
+                          renderDisabled
                         >
-                          실적 등록
-                        </Link>
-                      )}
+                          P→R
+                        </GuardButton>
+
+                        <GuardButton require="write"
+                          className={`px-2 py-1 rounded ${canToC ? "bg-green-600 text-white" : "bg-gray-300 text-gray-600"}`}
+                          onClick={() => canToC && transition(it.workOrderId, "C")}
+                          renderDisabled
+                        >
+                          R→C
+                        </GuardButton>
+
+                        {/* 실적 등록 링크(쓰기 권한일 때만 노출) */}
+                        <CanWrite>
+                          <Link
+                            className="px-2 py-1 rounded border"
+                            to={`/performances/new?woId=${it.workOrderId}&woNumber=${it.workOrderNumber}&itemId=${it.itemId}&processId=${it.processId}&equipmentId=${it.equipmentId}&status=${it.status ?? ""}`}
+                          >
+                            실적 등록
+                          </Link>
+                        </CanWrite>
+                      </div>
                     </td>
                   </tr>
                 );

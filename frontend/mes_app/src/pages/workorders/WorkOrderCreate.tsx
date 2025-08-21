@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { createWorkOrder } from "../../lib/wo";
 import { isAxiosError } from "axios";
 import { useToast } from "../../store/toast";
+import { usePerms } from "../../hooks/usePerms";
 
 export default function WorkOrderCreate() {
   const [workOrderNumber, setNo] = useState("");
@@ -14,6 +15,10 @@ export default function WorkOrderCreate() {
   const nav = useNavigate();
   const toast = useToast();
   const [errors, setErrors] = useState<{[k:string]: string}>({});
+  const { canWrite } = usePerms();
+  const [isSubmitting, setSubmitting] = useState(false);
+  const canSave = canWrite && !isSubmitting;
+
   function validate() {
     const e: {[k:string]: string} = {};
     if (!workOrderNumber.trim()) e.workOrderNumber = "지시번호는 필수입니다.";
@@ -28,8 +33,11 @@ export default function WorkOrderCreate() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setErr("");
+    if (!canWrite) { setErr("권한이 없습니다"); return; }
+    if (!canSave) { setErr("입력값을 확인하세요."); return; }
     if (!validate()) return;
     try {
+      setSubmitting(true);
       await createWorkOrder({ workOrderNumber, itemId, processId, equipmentId, orderQty });
       toast.push("지시가 생성되었습니다.", "success");
       nav("/work-orders", { replace: true });
@@ -39,6 +47,8 @@ export default function WorkOrderCreate() {
         : "생성 실패";
         setErr(msg);
         toast.push(msg, "error");
+    } finally{
+      setSubmitting(false);
     }
   }
 
@@ -58,7 +68,7 @@ export default function WorkOrderCreate() {
         <input className="border px-2 py-1" type="number" step="1" min="0" placeholder="지시수량" value={orderQty} onChange={(e)=>setQty(Number(e.target.value))} required />
         {errors.workOrderNumber && <div className="text-red-600 text-sm">{errors.workOrderNumber}</div>}
         <div className="flex gap-2">
-          <button className="bg-black text-white px-3 py-1 rounded" type="submit">생성</button>
+          <button className="bg-black text-white px-3 py-1 rounded" disabled={!canSave} type="submit">{isSubmitting ? "생성 중..." : "생성"}</button>
           <button className="border px-3 py-1 rounded" type="button" onClick={()=>nav(-1)}>취소</button>
         </div>
       </form>

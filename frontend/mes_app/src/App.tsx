@@ -33,7 +33,11 @@ export default function App() {
           <Route path="equip-status" element={<EquipStatusPage/>}/>
           <Route path="kpi" element={<KpiPage/>}/>
           <Route path="work-orders" element={<WorkOrdersList/>}/>
-          <Route path="work-orders/new" element={<WorkOrderCreate/>}/>
+          <Route path="work-orders/new" element={
+            <PermRoute require="write">
+              <WorkOrderCreate/>
+            </PermRoute>
+            }/>
         </Route>
       </Routes>
     </BrowserRouter>

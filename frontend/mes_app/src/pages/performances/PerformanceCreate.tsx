@@ -5,6 +5,7 @@ import { isAxiosError } from "axios";
 import { api } from "../../lib/api";
 import { toUtcIso } from "../../lib/datetime";
 import type { WorkOrderItem } from "../../types/workorder";
+import { usePerms } from "../../hooks/usePerms";
 
 export default function PerformanceCreate() {
   const [sp] = useSearchParams();
@@ -25,6 +26,7 @@ export default function PerformanceCreate() {
   const [err, setErr] = useState<string>("");
   const [isSubmitting, setSubmitting] = useState(false);
   const nav = useNavigate();
+  const { canWrite } = usePerms();
 
   // 쿼리 파라미터 바인딩 + 상세 보정
   useEffect(() => {
@@ -82,7 +84,7 @@ export default function PerformanceCreate() {
     : stMs >= new Date(woBaselineIso).getTime() && etMs >= new Date(woBaselineIso).getTime();
 
   const statusOk = (woStatus ?? "").toUpperCase() === "R";
-  const canSave = fieldsOk && qtyOk && timeOk && baselineOk && statusOk && !isSubmitting;
+  const canSave = canWrite && fieldsOk && qtyOk && timeOk && baselineOk && statusOk && !isSubmitting;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
