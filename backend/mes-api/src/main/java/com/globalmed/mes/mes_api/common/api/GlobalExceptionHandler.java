@@ -49,11 +49,24 @@ public class GlobalExceptionHandler {
                 "path", req.getRequestURI(), "method", req.getMethod()
         ));
     }
+
     @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<?> invalid(IllegalStateException e, HttpServletRequest req){
-        return ResponseEntity.badRequest().body(Map.of(
-                "code", e.getMessage(), "message", e.getMessage(),
-                "path", req.getRequestURI(), "method", req.getMethod()
+    public ResponseEntity<?> illegalState(IllegalStateException e, HttpServletRequest req){
+        int status = "DUPLICATE_KEY".equals(e.getMessage()) ? 409 : 400;
+        return ResponseEntity.status(status).body(Map.of(
+                "code", e.getMessage(),
+                "message", e.getMessage(),
+                "path", req.getRequestURI(),
+                "method", req.getMethod()
+        ));
+    }
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<?> accessDenied(HttpServletRequest req) {
+        return ResponseEntity.status(403).body(Map.of(
+                "code","FORBIDDEN",
+                "message","Access Denied",
+                "path", req.getRequestURI(),
+                "method", req.getMethod()
         ));
     }
 }

@@ -5,8 +5,8 @@ import type { PageResponse, PageResult } from "../../types/api";
 import Pagination from "../../components/common/Pagination";
 import SortSelect from "../../components/common/SortSelect";
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import CanWrite from "../../components/common/perm/CanWrite";
+// import { Link } from "react-router-dom";
+// import CanWrite from "../../components/common/perm/CanWrite";
 
 type PerfItem = {
   performanceId: number;
@@ -56,9 +56,9 @@ export default function PerformancesList(){
         <h1 className="text-lg font-semibold">실적</h1>
         <div className="flex items-center gap-2">
           <SortSelect value={sort} options={sortOptions} onChange={(v)=>{ setPage(0); setSort(v); }} />
-          <CanWrite>
+          {/* <CanWrite>
             <Link className="border px-3 py-1 rounded" to="/performances/new">+ 새 실적</Link>
-          </CanWrite>
+          </CanWrite> */}
         </div>
       </div>
 

@@ -1,62 +1,67 @@
+// src/main/java/com/globalmed/mes/mes_api/config/SecurityConfig.java
 package com.globalmed.mes.mes_api.config;
 
+import com.globalmed.mes.mes_api.security.JsonAccessDeniedHandler;
+import com.globalmed.mes.mes_api.security.JsonAuthEntryPoint;
 import com.globalmed.mes.mes_api.security.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.*;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final JsonAuthEntryPoint jsonAuthEntryPoint;
+    private final JsonAccessDeniedHandler jsonAccessDeniedHandler;
 
     @Bean
-    SecurityFilterChain filter(HttpSecurity http) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint((req,res,e) -> res.sendError(401))
-                        .accessDeniedHandler((req,res,e) -> res.sendError(403))
-                )
                 .csrf(csrf -> csrf.disable())
-                .cors(Customizer.withDefaults())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ← 추가
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(jsonAuthEntryPoint)
+                        .accessDeniedHandler(jsonAccessDeniedHandler)
+                )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**","/swagger-ui/**","/v3/api-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/menus/**").authenticated()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // preflight 허용
+                        .requestMatchers("/auth/**","/v3/api-docs/**","/swagger-ui/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
-        var cfg = new CorsConfiguration();
-        cfg.setAllowedOrigins(java.util.List.of("http://localhost:5173")); // Vite dev
-        cfg.setAllowedMethods(java.util.List.of("GET","POST","PUT","DELETE","OPTIONS"));
-        // 인터셉터가 Authorization 헤더 추가하므로 반드시 허용
-        cfg.setAllowedHeaders(java.util.List.of("Authorization","Content-Type","Accept","X-Requested-With"));
-        // 필요 시 노출할 헤더 추가
-        cfg.setExposedHeaders(java.util.List.of("Location"));
-        // 쿠키/자격증명 쓰지 않으면 false 유지(기본 null=불허)
-        cfg.setAllowCredentials(false);
+        CorsConfiguration cfg = new CorsConfiguration();
+        cfg.setAllowedOrigins(List.of(
+                "http://localhost:5173",
+                "http://127.0.0.1:5173"  // ← 추가(로컬에서 종종 쓰임)
+        ));
+        cfg.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
+        cfg.setAllowedHeaders(List.of("Authorization","Content-Type","X-Requested-With","Accept"));
+        cfg.setExposedHeaders(List.of("Authorization","Content-Disposition"));
+        cfg.setAllowCredentials(true);
+        cfg.setMaxAge(3600L);
 
-        var source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", cfg);
-        return source;
+        UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
+        src.registerCorsConfiguration("/**", cfg);
+        return src;
     }
-
 }
