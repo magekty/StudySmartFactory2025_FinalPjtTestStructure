@@ -9,7 +9,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -24,7 +23,6 @@ public class WorkOrderController {
     private final WorkOrderService svc;
     private final WorkOrderRepo repo;
 
-    @PreAuthorize("@permChecker.has(authentication, '/work-orders','write') or hasAnyRole('ADMIN','OP')")
     @PostMapping
     public ResponseEntity<?> create(@RequestBody CreateReq req){
         var wo = svc.create(
@@ -45,7 +43,6 @@ public class WorkOrderController {
     ){}
 
     // 상태 전이: P->R, R->C
-    @PreAuthorize("@permChecker.has(authentication, '/work-orders','write') or hasAnyRole('ADMIN','OP')")
     @PutMapping("/{id}/status")
     public ResponseEntity<?> changeStatus(@PathVariable("id") String workOrderId,
                                           @RequestBody StatusChangeReq req) {
