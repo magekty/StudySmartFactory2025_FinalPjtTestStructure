@@ -57,7 +57,7 @@ export default function PerformancesList(){
         <div className="flex items-center gap-2">
           <SortSelect value={sort} options={sortOptions} onChange={(v)=>{ setPage(0); setSort(v); }} />
           {/* <CanWrite>
-            <Link className="border px-3 py-1 rounded" to="/performances/new">+ 새 실적</Link>
+            <Link className="border px-3 py-1 rounded" to="/performances/new">+ 새 1실적</Link>
           </CanWrite> */}
         </div>
       </div>
