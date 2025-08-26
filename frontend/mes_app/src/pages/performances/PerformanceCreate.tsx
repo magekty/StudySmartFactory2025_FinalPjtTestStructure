@@ -1,11 +1,11 @@
 // src/pages/performances/PerformanceCreate.tsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { isAxiosError } from "axios";
 import { api } from "../../lib/api";
-import { toUtcIso } from "../../lib/datetime";
 import type { WorkOrderItem } from "../../types/workorder";
 import { usePerms } from "../../hooks/usePerms";
+import { toBaseDateStrFromIso, toUtcIsoFromTime, isValidTimeStr } from "../../lib/datetime";
 
 export default function PerformanceCreate() {
   const [sp] = useSearchParams();
@@ -72,12 +72,20 @@ export default function PerformanceCreate() {
     producedQty >= 0 &&
     defectQty >= 0 &&
     defectQty <= producedQty;
+  // 기준 날짜(UTC): baseline 있으면 그 날짜(UTC), 없으면 오늘(UTC)
+  const baseDateStr = useMemo(
+    () => toBaseDateStrFromIso(woBaselineIso ?? null),
+    [woBaselineIso]
+  );
 
-  const stIso = toUtcIso(date, startTime);
-  const etIso = toUtcIso(date, endTime);
-  const stMs = new Date(stIso).getTime();
-  const etMs = new Date(etIso).getTime();
-  const timeOk = Number.isFinite(stMs) && Number.isFinite(etMs) && stMs <= etMs;
+  // HH:mm → UTC ISO(Z) 변환(유효할 때만)
+  const stIso = useMemo(() => toUtcIsoFromTime(startTime, baseDateStr), [startTime, baseDateStr]);
+  const etIso = useMemo(() => toUtcIsoFromTime(endTime, baseDateStr),   [endTime, baseDateStr]);
+const stMs = stIso ? new Date(stIso).getTime() : NaN;
+const etMs = etIso ? new Date(etIso).getTime() : NaN;
+  // 유효성
+  const timeOk  = isValidTimeStr(startTime) && isValidTimeStr(endTime) && !!stIso && !!etIso;
+  const orderOk = timeOk ? new Date(stIso!).getTime() <= new Date(etIso!).getTime() : false;
 
   const baselineOk = !woBaselineIso
     ? true
@@ -91,7 +99,11 @@ export default function PerformanceCreate() {
     setErr("");
 
     if (!canSave) {
-      setErr(statusOk ? "입력값을 확인하세요." : "작업지시 상태가 R이 아닙니다.");
+      setErr(!timeOk ? "시간 형식(HH:mm)을 확인해주세요."
+        : !orderOk ? "종료 시각이 시작보다 빠를 수 없어요."
+        : !baselineOk ? "기준선 이전 시각은 등록 불가에요."
+        : !statusOk ? "작업지시 상태가 R일 때만 등록 가능해요."
+        : "입력값을 확인해주세요.");
       return;
     }
 
@@ -104,7 +116,7 @@ export default function PerformanceCreate() {
       defectQty,
       startTime: stIso, // UTC
       endTime: etIso,   // UTC
-      requestId: crypto.randomUUID(), // 멱등키
+      requestId: crypto.randomUUID() ?? `${Date.now()}-${Math.random()}`, // 멱등키
     };
 
     try {
@@ -157,28 +169,40 @@ export default function PerformanceCreate() {
             <input className="border px-2 py-1 w-full" type="date"
                    value={date} onChange={(e) => setDate(e.target.value)} />
           </div>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
           <div>
             <label className="text-sm text-gray-600">시작</label>
-            <input className="border px-2 py-1 w-full" type="time"
-                   value={startTime} onChange={(e) => setStart(e.target.value)} />
+            <input
+              className="border px-2 py-1 w-full"
+              type="time"
+              value={startTime}
+              onChange={(e) => setStart(e.target.value)}
+            />
           </div>
         </div>
-
         <div className="grid grid-cols-2 gap-2">
           <div>
             <label className="text-sm text-gray-600">종료</label>
-            <input className="border px-2 py-1 w-full" type="time"
-                   value={endTime} onChange={(e) => setEnd(e.target.value)} />
-          </div>
-          <div className="flex items-end">
-            <button
-              className={`px-3 py-2 rounded ${canSave ? "bg-black text-white" : "bg-gray-300 text-gray-600"}`}
-              disabled={!canSave}
-            >
-              {isSubmitting ? "저장 중..." : "저장"}
-            </button>
+            <input
+              className="border px-2 py-1 w-full"
+              type="time"
+              value={endTime}
+              onChange={(e) => setEnd(e.target.value)}
+            />
           </div>
         </div>
+
+        <div className="flex items-end">
+          <button
+            className={`px-3 py-2 rounded ${canSave ? "bg-black text-white" : "bg-gray-300 text-gray-600"}`}
+            disabled={!canSave}
+          >
+            {isSubmitting ? "저장 중..." : "저장"}
+          </button>
+        </div>
+        
+        {err && <div className="text-red-600 text-sm mt-2">{err}</div>}
       </form>
     </div>
   );

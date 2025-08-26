@@ -5,8 +5,31 @@ export function parseServerDate(raw?: string | null): Date | null {
   return new Date(raw);
 }
 
-// 로컬 입력(yyyy-MM-dd + HH:mm)을 UTC ISO로 변환해 전송
-export function toUtcIso(date: string, time: string): string {
-  // 로컬 시각으로 생성 → toISOString()으로 UTC 변환
-  return new Date(`${date}T${time}:00`).toISOString();
+
+// HH:mm (24h) 형식 검증
+export function isValidTimeStr(t?: string | null): t is string {
+  if (!t) return false;
+  return /^([01]\d|2[0-3]):([0-5]\d)$/.test(t);
+}
+
+// 기준 날짜(UTC) 문자열: YYYY-MM-DD 반환
+export function toBaseDateStrFromIso(iso?: string | null): string {
+  // iso가 있으면 그 날짜(UTC), 없으면 오늘(UTC)
+  const d = iso ? new Date(iso) : new Date();
+  // 항상 UTC 날짜로 잘라서 씀
+  return d.toISOString().slice(0, 10); // YYYY-MM-DD
+}
+
+// HH:mm + 기준 날짜(YYYY-MM-DD) → UTC ISO(Z)
+// 유효하지 않으면 null 반환
+export function toUtcIsoFromTime(timeStr?: string | null, baseDateStr?: string | null): string | null {
+  if (!isValidTimeStr(timeStr)) return null;
+  const dateStr = baseDateStr && /^\d{4}-\d{2}-\d{2}$/.test(baseDateStr)
+    ? baseDateStr
+    : new Date().toISOString().slice(0, 10);
+
+  // UTC 기준 조합 (항상 Z 부착)
+  const ms = Date.parse(`${dateStr}T${timeStr}:00Z`);
+  if (Number.isNaN(ms)) return null;
+  return new Date(ms).toISOString();
 }
