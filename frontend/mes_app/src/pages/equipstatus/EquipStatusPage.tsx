@@ -75,10 +75,10 @@ export default function EquipStatusPage() {
   }
 
   return (
-    <div>
+ <div>
       <h1 className="text-lg font-semibold mb-3">설비 상태</h1>
 
-      {/* 필터 + 생성 폼 */}
+      {/* 검색 바 */}
       <form onSubmit={submit} className="flex flex-wrap items-end gap-2 mb-4">
         <div className="flex flex-col">
           <label className="text-sm text-gray-600">설비</label>
@@ -89,7 +89,6 @@ export default function EquipStatusPage() {
           />
         </div>
 
-        {/* 목록용 From/To 필터 */}
         <div className="flex flex-col">
           <label className="text-sm text-gray-600">시작 날짜(From)</label>
           <input
@@ -99,6 +98,7 @@ export default function EquipStatusPage() {
             onChange={(e) => setDate(e.target.value)}
           />
         </div>
+
         <div className="flex flex-col">
           <label className="text-sm text-gray-600">끝 날짜(To)</label>
           <input
@@ -108,10 +108,12 @@ export default function EquipStatusPage() {
             onChange={(e) => setToDate(e.target.value)}
           />
         </div>
+      </form>
 
-        {/* 생성용 입력(해당 날짜+시간으로 RUN/IDLE/DOWN 기록 생성) */}
+      {/* 등록 바 */}
+      <form onSubmit={submit} className="flex flex-wrap items-end gap-2 mb-4">
         <div className="flex flex-col">
-          <label className="text-sm text-gray-600">생성 날짜</label>
+          <label className="text-sm text-gray-600">등록 날짜</label>
           <input
             className="border px-2 py-1"
             type="date"
@@ -120,7 +122,7 @@ export default function EquipStatusPage() {
           />
         </div>
         <div className="flex flex-col">
-          <label className="text-sm text-gray-600">시각(UTC)</label>
+          <label className="text-sm text-gray-600">등록 시각(UTC)</label>
           <input
             className="border px-2 py-1"
             type="time"
@@ -133,9 +135,7 @@ export default function EquipStatusPage() {
           <select
             className="border px-2 py-1"
             value={statusCode}
-            onChange={(e) =>
-              setStatus(e.target.value as "RUN" | "IDLE" | "DOWN")
-            }
+            onChange={(e) => setStatus(e.target.value as "RUN" | "IDLE" | "DOWN")}
           >
             <option value="RUN">RUN</option>
             <option value="IDLE">IDLE</option>
@@ -144,7 +144,7 @@ export default function EquipStatusPage() {
         </div>
 
         <CanWrite>
-          <button className="bg-black text-white px-3 py-2 rounded" type="submit">
+          <button className="bg-green-500 text-white px-3 py-2 rounded" type="submit">
             RUN 등록
           </button>
         </CanWrite>
