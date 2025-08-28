@@ -1,0 +1,26 @@
+openapi: 3.0.0
+info: { title: GlobalMed MES API, version: v1 }
+paths:
+  /auth/login:
+    post: { summary: 로그인, responses: { '200': { description: OK } } }
+  /menus/my:
+    get:  { summary: 내 메뉴 트리, security: [ { bearerAuth: [] } ] }
+  /work-orders:
+    get:  { summary: 지시 목록, security: [ { bearerAuth: [] } ] }
+    post: { summary: 지시 생성, security: [ { bearerAuth: [] } ] }
+  /work-orders/{id}:
+    get:  { summary: 지시 상세, security: [ { bearerAuth: [] } ] }
+  /work-orders/{id}/status:
+    put:  { summary: 지시 상태 변경, security: [ { bearerAuth: [] } ] }
+  /equip-status:
+    post: { summary: 설비 상태 RUN 등록, security: [ { bearerAuth: [] } ] }
+  /performances:
+    get:  { summary: 실적 목록, security: [ { bearerAuth: [] } ] }
+    post: { summary: 실적 등록, security: [ { bearerAuth: [] } ] }
+  /kpi-targets:
+    get:  { summary: KPI 목표 조회, security: [ { bearerAuth: [] } ] }
+  /kpi/actuals:
+    get:  { summary: KPI 목표 vs 실적, security: [ { bearerAuth: [] } ] }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }

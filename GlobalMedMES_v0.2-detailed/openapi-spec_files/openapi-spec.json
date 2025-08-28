@@ -1,0 +1,355 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "GlobalMed MES API",
+    "description": "v1: 로그인→지시→RUN→실적→KPI 핵심 흐름",
+    "version": "v1"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Generated server url"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/work-orders/{id}/status": {
+      "put": {
+        "tags": [
+          "work-order-controller"
+        ],
+        "operationId": "changeStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatusChangeReq"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/work-orders": {
+      "post": {
+        "tags": [
+          "work-order-controller"
+        ],
+        "operationId": "create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReq"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/performances": {
+      "post": {
+        "tags": [
+          "performance-controller"
+        ],
+        "operationId": "create_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Req"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/equip-status": {
+      "post": {
+        "tags": [
+          "equipment-status-controller"
+        ],
+        "operationId": "create_2",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EquipStatusReq"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "auth-controller"
+        ],
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginReq"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/menus/my": {
+      "get": {
+        "tags": [
+          "menu-controller"
+        ],
+        "operationId": "myMenu",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/kpi/actuals": {
+      "get": {
+        "tags": [
+          "kpi-controller"
+        ],
+        "operationId": "actuals",
+        "parameters": [
+          {
+            "name": "kpiDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "equipmentId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "StatusChangeReq": {
+        "required": [
+          "toStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "toStatus": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateReq": {
+        "required": [
+          "equipmentId",
+          "itemId",
+          "orderQty",
+          "processId",
+          "workOrderNumber"
+        ],
+        "type": "object",
+        "properties": {
+          "workOrderNumber": {
+            "type": "string"
+          },
+          "itemId": {
+            "type": "string"
+          },
+          "processId": {
+            "type": "string"
+          },
+          "equipmentId": {
+            "type": "string"
+          },
+          "orderQty": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "createdBy": {
+            "type": "string"
+          }
+        }
+      },
+      "Req": {
+        "type": "object",
+        "properties": {
+          "workOrderId": {
+            "type": "string"
+          },
+          "itemId": {
+            "type": "string"
+          },
+          "processId": {
+            "type": "string"
+          },
+          "equipmentId": {
+            "type": "string"
+          },
+          "producedQty": {
+            "type": "number"
+          },
+          "defectQty": {
+            "type": "number"
+          },
+          "startTime": {
+            "type": "string"
+          },
+          "endTime": {
+            "type": "string"
+          }
+        }
+      },
+      "EquipStatusReq": {
+        "type": "object",
+        "properties": {
+          "equipmentId": {
+            "type": "string"
+          },
+          "statusCode": {
+            "type": "string"
+          },
+          "startTimeUtc": {
+            "type": "string"
+          },
+          "endTimeUtc": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginReq": {
+        "required": [
+          "password",
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "name": "Authorization",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

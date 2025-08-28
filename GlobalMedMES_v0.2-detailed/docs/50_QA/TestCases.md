@@ -1,0 +1,11 @@
+# Test Cases(발췌)
+- AUTH_001: 잘못된 비번 → 401, 실패 카운트 증가
+- MENU_001: ROLE_OP 계정 /admin 메뉴 접근 → 403
+- WO_001: 지시 생성(번호 중복) → 409
+- WO_002: 상태 전이(C→R) → 400 WO_STATUS_INVALID
+- STATUS_001: RUN 등록 → 최근 상태 카드 즉시 갱신
+- PERF_001: defect>produced → 400 VALIDATION
+- PERF_002: end<start → 400 VALIDATION
+- KPI_001: 수율 계산 반올림 정책 확인(소수 2자리)
+- KPI_002: KPI actuals 최근 7일 응답시간 < 500ms
+- LINT_001: db_lint 실행 결과 critical=0

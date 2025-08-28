@@ -1,0 +1,146 @@
+{
+  "info": {
+    "name": "GlobalMed MES v1 - Core Flow (9)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "globalmed-mes-v1-core"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "token", "value": "" },
+    { "key": "woId", "value": "WO-0001" },
+    { "key": "eqpId", "value": "E-0001" },
+    { "key": "date", "value": "2025-08-10" }
+  ],
+  "item": [
+    {
+      "name": "01 Login",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/auth/login",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"username\":\"op\",\n  \"password\":\"<your-password>\"\n}" }
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "const res = pm.response.json();",
+            "pm.test('Login 200', () => pm.response.code === 200);",
+            "pm.test('Token exists', () => !!res.token);",
+            "pm.collectionVariables.set('token', res.token);"
+          ]
+        }
+      }]
+    },
+    {
+      "name": "02 Menus (Unauthorized)",
+      "request": { "method": "GET", "url": "{{baseUrl}}/menus/my" },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('401 when no auth', () => pm.response.code === 401);"
+      ]}}]
+    },
+    {
+      "name": "03 Menus (Authorized)",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/menus/my",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('200 menus', () => pm.response.code === 200);",
+        "// TODO: assert menu items by role"
+      ]}}]
+    },
+    {
+      "name": "04 Create Work Order (P)",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/work-orders",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": { "mode": "raw", "raw": "{\n  \"workOrderNumber\":\"WO-API-0001\",\n  \"itemId\":\"I-0001\",\n  \"processId\":\"P-0001\",\n  \"equipmentId\":\"E-0001\",\n  \"orderQty\":100\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "const r = pm.response.json();",
+        "pm.test('201 create WO', () => pm.response.code === 201 || pm.response.code === 200);",
+        "pm.collectionVariables.set('woId', r.workOrderId || 'WO-API-0001');"
+      ]}}]
+    },
+    {
+      "name": "05 WO Status P→R",
+      "request": {
+        "method": "PUT",
+        "url": "{{baseUrl}}/work-orders/{{woId}}/status",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": { "mode": "raw", "raw": "{ \"toStatus\":\"R\" }" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('200 P->R', () => pm.response.code === 200);"
+      ]}}]
+    },
+    {
+      "name": "06 WO Status R→C",
+      "request": {
+        "method": "PUT",
+        "url": "{{baseUrl}}/work-orders/{{woId}}/status",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": { "mode": "raw", "raw": "{ \"toStatus\":\"C\" }" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('200 R->C', () => pm.response.code === 200);"
+      ]}}]
+    },
+    {
+      "name": "07 Equip RUN",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/equip-status",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": { "mode": "raw", "raw": "{\n  \"equipmentId\":\"{{eqpId}}\",\n  \"statusCode\":\"RUN\",\n  \"startTimeUtc\":\"{{date}}T09:00:00Z\"\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('201 RUN', () => pm.response.code === 201 || pm.response.code === 200);"
+      ]}}]
+    },
+    {
+      "name": "08 Performance (100/5)",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/performances",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": { "mode": "raw", "raw": "{\n  \"workOrderId\":\"{{woId}}\",\n  \"itemId\":\"I-0001\",\n  \"processId\":\"P-0001\",\n  \"equipmentId\":\"{{eqpId}}\",\n  \"producedQty\":100,\n  \"defectQty\":5,\n  \"startTime\":\"{{date}}T09:00:00Z\",\n  \"endTime\":\"{{date}}T09:30:00Z\"\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('201 perf', () => pm.response.code === 201 || pm.response.code === 200);",
+        "// TODO: validate goodQty or follow-up WO totals"
+      ]}}]
+    },
+    {
+      "name": "09 KPI Actuals",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/kpi/actuals?kpiDate={{date}}&equipmentId={{eqpId}}",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('200 kpi actuals', () => pm.response.code === 200);",
+        "// TODO: assert fields: targetOee/targetYield/actualOutput/actualYield"
+      ]}}]
+    }
+  ]
+}
