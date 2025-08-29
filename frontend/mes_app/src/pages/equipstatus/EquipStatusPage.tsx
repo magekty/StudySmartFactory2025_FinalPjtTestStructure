@@ -112,6 +112,7 @@ export default function EquipStatusPage() {
 
       {/* 등록 바 */}
       <form onSubmit={submit} className="flex flex-wrap items-end gap-2 mb-4">
+        <CanWrite>
         <div className="flex flex-col">
           <label className="text-sm text-gray-600">등록 날짜</label>
           <input
@@ -121,6 +122,8 @@ export default function EquipStatusPage() {
             onChange={(e) => setDate(e.target.value)}
           />
         </div>
+        </CanWrite>
+        <CanWrite>
         <div className="flex flex-col">
           <label className="text-sm text-gray-600">등록 시각(UTC)</label>
           <input
@@ -130,6 +133,8 @@ export default function EquipStatusPage() {
             onChange={(e) => setTime(e.target.value)}
           />
         </div>
+        </CanWrite>
+        <CanWrite>
         <div className="flex flex-col">
           <label className="text-sm text-gray-600">상태</label>
           <select
@@ -142,6 +147,7 @@ export default function EquipStatusPage() {
             <option value="DOWN">DOWN</option>
           </select>
         </div>
+        </CanWrite>
 
         <CanWrite>
           <button className="bg-green-500 text-white px-3 py-2 rounded" type="submit">

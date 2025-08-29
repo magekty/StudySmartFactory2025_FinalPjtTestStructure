@@ -5,5 +5,4 @@ import jakarta.validation.constraints.Pattern;
 
 import java.time.OffsetDateTime;
 
-public record WorkOrderStatusDto(@Pattern(regexp = "P|R|C") String status, @NotNull OffsetDateTime changedAt) {
-}
+public record WorkOrderStatusDto(@Pattern(regexp="P|R|C") String status, @NotNull OffsetDateTime changedAt) {}

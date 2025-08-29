@@ -3,9 +3,21 @@ server:
   port: 8081
 erp:
   apiKey: change-me-demo-key
+  shadow:
+    enabled: true
+    work-orders: false
+    performances: false
+    backflush: true
+    cost: true
 idempotency:
   ttlHours: 72
 spring:
   jackson:
     serialization:
       write-dates-as-timestamps: false
+outbox:
+  worker:
+    batch-size: 100
+    delay-ms: 1000
+    max-retry: 5
+    backoff-seq: 60000,300000,900000,3600000,21600000  # 1m,5m,15m,1h,6h
