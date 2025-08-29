@@ -3,16 +3,20 @@
   "WorkspaceRootPath": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\erp-demo-api\\src\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{62C5499E-3992-A11E-F3DE-DB6EB293624C}|ERP.Demo.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\backend\\erp-demo-api\\src\\test\\erp-be.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}",
+      "RelativeMoniker": "D:0:0:{62C5499E-3992-A11E-F3DE-DB6EB293624C}|ERP.Demo.csproj|solutionrelative:test\\erp-be.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{62C5499E-3992-A11E-F3DE-DB6EB293624C}|ERP.Demo.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\backend\\erp-demo-api\\src\\test\\erp-demo.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}",
+      "RelativeMoniker": "D:0:0:{62C5499E-3992-A11E-F3DE-DB6EB293624C}|ERP.Demo.csproj|solutionrelative:test\\erp-demo.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{62C5499E-3992-A11E-F3DE-DB6EB293624C}|ERP.Demo.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\backend\\erp-demo-api\\src\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{62C5499E-3992-A11E-F3DE-DB6EB293624C}|ERP.Demo.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{62C5499E-3992-A11E-F3DE-DB6EB293624C}|ERP.Demo.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\backend\\erp-demo-api\\src\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{62C5499E-3992-A11E-F3DE-DB6EB293624C}|ERP.Demo.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{62C5499E-3992-A11E-F3DE-DB6EB293624C}|ERP.Demo.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\backend\\erp-demo-api\\src\\test\\erp-demo.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}",
-      "RelativeMoniker": "D:0:0:{62C5499E-3992-A11E-F3DE-DB6EB293624C}|ERP.Demo.csproj|solutionrelative:test\\erp-demo.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{62C5499E-3992-A11E-F3DE-DB6EB293624C}|ERP.Demo.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\backend\\erp-demo-api\\src\\dockerfile||{3B902123-F8A7-4915-9F01-361F908088D0}",
@@ -38,7 +42,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 6,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -46,7 +50,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 0,
+              "Title": "erp-be.http",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\erp-demo-api\\src\\test\\erp-be.http",
+              "RelativeDocumentMoniker": "test\\erp-be.http",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\erp-demo-api\\src\\test\\erp-be.http",
+              "RelativeToolTip": "test\\erp-be.http",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB4AAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003502|",
+              "WhenOpened": "2025-08-28T22:21:41.841Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
               "Title": "launchSettings.json",
               "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\erp-demo-api\\src\\Properties\\launchSettings.json",
               "RelativeDocumentMoniker": "Properties\\launchSettings.json",
@@ -54,25 +71,24 @@
               "RelativeToolTip": "Properties\\launchSettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-08-27T05:49:31.639Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-27T05:49:31.639Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
               "Title": "erp-demo.http",
               "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\erp-demo-api\\src\\test\\erp-demo.http",
               "RelativeDocumentMoniker": "test\\erp-demo.http",
               "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\erp-demo-api\\src\\test\\erp-demo.http",
               "RelativeToolTip": "test\\erp-demo.http",
-              "ViewState": "AgIAABsAAAAAAAAAAAAywBAAAAAkAAAAAAAAAA==",
+              "ViewState": "AgIAABsAAAAAAAAAAAAywCQAAAAeAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003502|",
               "WhenOpened": "2025-08-27T05:46:16.826Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "Dockerfile",
               "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\erp-demo-api\\src\\Dockerfile",
               "RelativeDocumentMoniker": "Dockerfile",
@@ -80,12 +96,11 @@
               "RelativeToolTip": "Dockerfile",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAlAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2025-08-27T05:46:09.291Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-27T05:46:09.291Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "Dtos.cs",
               "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\erp-demo-api\\src\\Dtos.cs",
               "RelativeDocumentMoniker": "Dtos.cs",
@@ -93,12 +108,11 @@
               "RelativeToolTip": "Dtos.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAABJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-27T05:45:35.863Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-27T05:45:35.863Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "ApiUtils.cs",
               "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\erp-demo-api\\src\\ApiUtils.cs",
               "RelativeDocumentMoniker": "ApiUtils.cs",
@@ -106,25 +120,24 @@
               "RelativeToolTip": "ApiUtils.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-27T05:45:09.236Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-27T05:45:09.236Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
               "Title": "program.cs",
               "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\erp-demo-api\\src\\program.cs",
               "RelativeDocumentMoniker": "program.cs",
               "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\erp-demo-api\\src\\program.cs",
               "RelativeToolTip": "program.cs",
-              "ViewState": "AgIAAG8AAAAAAAAAAAAAAHkAAAAuAAAAAAAAAA==",
+              "ViewState": "AgIAAG8AAAAAAAAAAAAAAIcAAAADAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-27T05:31:11.656Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\erp-demo-api\\src\\appsettings.json",
               "RelativeDocumentMoniker": "appsettings.json",
@@ -132,8 +145,7 @@
               "RelativeToolTip": "appsettings.json",
               "ViewState": "AgIAAAMAAAAAAAAAAAAAAAIAAAALAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-08-27T05:28:41.112Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-27T05:28:41.112Z"
             }
           ]
         }

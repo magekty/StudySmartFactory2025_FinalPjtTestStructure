@@ -1,0 +1,11 @@
+# src/main/resources/application.yml
+server:
+  port: 8081
+erp:
+  apiKey: change-me-demo-key
+idempotency:
+  ttlHours: 72
+spring:
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
