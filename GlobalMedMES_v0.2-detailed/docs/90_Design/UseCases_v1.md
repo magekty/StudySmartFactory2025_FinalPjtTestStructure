@@ -6,7 +6,7 @@
 - Pre: 계정 is_active=1, locked_until 과거
 - Main:
   1) /auth/login에 자격 제출 → 서버 검증(비번 해시 비교)
-  2) JWT(Access 30m) + 세션(2h) 발급, 실패 카운트 리셋
+  2) JWT(Access 30m) + 세션(2h) 발급, 실패 카운트 리셋(리프레시토큰)
   3) /menus/my로 권한 기반 메뉴 트리 로드
   4) 네비게이션 렌더 및 대시보드 이동
   5) 감사로그 AUTH_LOGIN 기록
