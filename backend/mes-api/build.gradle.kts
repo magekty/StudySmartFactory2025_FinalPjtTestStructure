@@ -51,5 +51,4 @@ dependencies {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
-	enabled = false // 이 부분이 모든 Test 태스크를 비활성화합니다.
 }
