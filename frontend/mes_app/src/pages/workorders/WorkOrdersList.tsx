@@ -23,7 +23,7 @@ const sortOptions = [
 export default function WorkOrdersList() {
   const qc = useQueryClient();
   const [page, setPage] = useState<number>(0);
-  const [size] = useState<number>(20);
+  const [size] = useState<number>(10);
   const [sort, setSort] = useState<string>("createdAt,desc");
   const [equipmentId, setEqp] = useState<string>("");
   const [status, setStatus] = useState<string>(""); // "", "P", "R", "C"
