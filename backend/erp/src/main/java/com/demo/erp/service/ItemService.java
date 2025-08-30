@@ -16,8 +16,8 @@ public class ItemService {
 
     public List<ItemDto> list(OffsetDateTime updatedSince) {
         return store.values().stream()
-                .filter(i -> updatedSince == null || (i.updatedAt()!=null && i.updatedAt().isAfter(updatedSince)))
-                .sorted(Comparator.comparing(ItemDto::updatedAt, Comparator.nullsLast(Comparator.naturalOrder())))
+                .filter(i -> updatedSince == null || i.updatedAt().isAfter(updatedSince))
+                .sorted(Comparator.comparing(ItemDto::updatedAt))
                 .collect(Collectors.toList());
     }
 
@@ -25,12 +25,12 @@ public class ItemService {
         store.put(dto.itemId(), dto);
     }
 
+    // seed example
     public void seedIfEmpty() {
         if (store.isEmpty()) {
             var now = OffsetDateTime.now();
-            upsert(new ItemDto("I-0001","I-0001","EA","F", now.minusHours(2), false));
-            upsert(new ItemDto("RM-001","RM-001","EA","R", now.minusHours(1), false));
-            upsert(new ItemDto("RM-002","RM-002","EA","R", now.minusMinutes(30), false));
+            upsert(new ItemDto("I-0001", "EA", now.minusHours(2), false));
+            upsert(new ItemDto("I-0002", "EA", now.minusHours(1), false));
         }
     }
 }

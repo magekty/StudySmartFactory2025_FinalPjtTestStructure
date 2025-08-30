@@ -6,10 +6,4 @@ import jakarta.validation.constraints.NotNull;
 import java.time.OffsetDateTime;
 
 public record ItemDto(
-        String itemId,
-        String itemCode,
-        String unit,
-        String itemType,      // 'R' | 'P' | 'F'
-        OffsetDateTime updatedAt,
-        boolean isDeleted
-) {}
+        @NotBlank String itemId, @NotBlank String uom, @NotNull OffsetDateTime updatedAt, boolean isDeleted) {}
