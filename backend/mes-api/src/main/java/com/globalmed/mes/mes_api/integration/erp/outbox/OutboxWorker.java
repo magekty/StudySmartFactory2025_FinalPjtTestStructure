@@ -25,8 +25,11 @@ public class OutboxWorker {
                         @Value("${outbox.worker.batch-size:100}") int batchSize,
                         @Value("${outbox.worker.max-retry:5}") int maxRetry,
                         @Value("${outbox.worker.backoff-seq:60000,300000,900000,3600000,21600000}") String seq) {
-        this.repo = repo; this.erp = erp; this.props = props;
-        this.batchSize = batchSize; this.maxRetry = maxRetry;
+        this.repo = repo;
+        this.erp = erp;
+        this.props = props;
+        this.batchSize = batchSize;
+        this.maxRetry = maxRetry;
         this.backoffSeq = Arrays.stream(seq.split(",")).mapToLong(Long::parseLong).toArray();
     }
 

@@ -18,3 +18,5 @@ INSERT INTO mes_outbox (event_type, payload_json, idempotency_key, status, retry
 SELECT outbox_id,event_type,status,retry_count,next_retry_at,last_error FROM mes_outbox ORDER BY outbox_id DESC LIMIT 5;
 UPDATE mes_outbox SET status='PENDING', retry_count=0, next_retry_at=NULL, last_error=NULL WHERE outbox_id = 9;
 SELECT outbox_id,event_type,status,retry_count,next_retry_at,last_error FROM mes_outbox WHERE outbox_id = 9;
+
+UPDATE tb_sync_cursor SET last_synced_at='1970-01-01 00:00:00' WHERE cursor_key IN ('erp_items','erp_boms');

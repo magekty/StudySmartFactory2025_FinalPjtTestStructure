@@ -14,7 +14,7 @@ DB = dict(
     password = "1121",
     host     = "127.0.0.1",
     port     = 3306,
-    database = "mes_pjt_test"
+    database = "globalmed"
 )
 DSN = f"mysql+mysqlconnector://{DB['user']}:{DB['password']}@{DB['host']}:{DB['port']}/{DB['database']}?charset=utf8mb4"
 
