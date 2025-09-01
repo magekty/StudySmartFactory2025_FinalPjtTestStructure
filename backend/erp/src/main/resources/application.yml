@@ -1,11 +1,24 @@
 # src/main/resources/application.yml
 server:
   port: 8081
+
 erp:
   apiKey: change-me-demo-key
 idempotency:
   ttlHours: 72
+
 spring:
   jackson:
     serialization:
       write-dates-as-timestamps: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+# 디버그 모드 활성화 (문제 해결 시 주석 처리 또는 제거)
+logging:
+  level:
+    org.springframework.security: DEBUG

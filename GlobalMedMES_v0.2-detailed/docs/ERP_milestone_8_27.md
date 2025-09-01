@@ -90,6 +90,25 @@ MES Outbox 워커 → ERP 호출(지시/전이/실적만 Shadow OFF)
 - Gate
 Outbox RETRY/FAILED 0, validation fail <0.5%면 M4
 
+# 진행 계획
+목표: ERP /plans(POST/PUT, isDeleted tombstone) → MES 계획 캐시 upsert + 증분 스케줄 연결
+작업 순서
+커서 키 추가: tb_sync_cursor에 erp_plans 등록(초기 1970-01-01).
+MES IncrementalSyncService.syncPlans() 추가
+upsert 키=(plan_id, plan_line_no)
+tombstone=is_deleted=1, deleted_at=UTC_TIMESTAMP()
+updatedAt 기반 커서 갱신(없으면 수신 시각으로 대체)
+스케줄러에 plans 동기 포함(5분 주기)
+스모크 3케이스
+신규: POST /plans → 캐시 201/업서트 반영
+수정: PUT /plans → 필드 변경 반영
+삭제: PUT isDeleted=true → 캐시 tombstone 반영
+DoD
+계획 캐시에서 신규/수정/삭제 3종 반영
+커서 erp_plans 최신화
+에러 발생 시 표준 400 포맷으로 로깅
+오늘 마무리 리스크 메모(재발 방지)
+
 # M4. Backflush·Cost Shadow 운용 고정(반나절)
 - 산출물
 Backflush: ERP 수신/검증만(Shadow ON), 에러 코드(BOM/UoM/유효기간) 정리

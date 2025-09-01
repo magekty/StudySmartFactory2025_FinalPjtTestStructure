@@ -63,7 +63,8 @@ Content-Type: application/json
 }
 
 ## 증분 테스트
-
+### ERP health테스트
+GET {{host}}/actuator/health
 ### Items 전체
 GET {{host}}/items
 X-API-Key: {{apiKey}}
@@ -111,4 +112,21 @@ Content-Type: application/json
   "planId":"PL-001","planLineNo":1,"itemId":"I-0001",
   "qty":0,"dueDateUtc":"2025-09-02T00:00:00Z",
   "priority":2,"isDeleted":true
+}
+
+### TIME_ORDER_INVALID 유도 (end < start)
+POST {{host}}/erp/performances
+X-API-Key: {{apiKey}}
+X-Idempotency-Key: 99999999-9999-9999-9999-999999999999
+Content-Type: application/json
+
+{
+  "workOrderId": "WO-TIME-TEST",
+  "itemId": "I-0001",
+  "processId": "P-0001",
+  "equipmentId": "E-0001",
+  "goodQty": 1,
+  "defectQty": 0,
+  "startTime": "2025-09-01T09:30:00Z",
+  "endTime":   "2025-09-01T09:00:00Z"  // start보다 과거
 }

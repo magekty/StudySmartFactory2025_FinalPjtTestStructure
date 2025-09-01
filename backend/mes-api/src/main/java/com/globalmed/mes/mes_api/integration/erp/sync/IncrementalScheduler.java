@@ -11,7 +11,7 @@ public class IncrementalScheduler {
     private final IncrementalSyncService svc;
 
     // 5분마다 증분
-    @Scheduled(fixedDelay = 300_000, initialDelay = 10_000)
+    @Scheduled(fixedDelay = 30_000, initialDelay = 10_000)
     public void run() {
         svc.syncItems();
         svc.syncBoms();

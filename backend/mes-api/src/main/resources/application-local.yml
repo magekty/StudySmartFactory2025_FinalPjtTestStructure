@@ -44,3 +44,9 @@ outbox:
     delay-ms: 1000
     max-retry: 5
     backoff-seq: 60000,300000,900000,3600000,21600000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

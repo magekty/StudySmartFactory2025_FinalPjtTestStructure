@@ -18,3 +18,9 @@ INSERT INTO mes_outbox (event_type, payload_json, idempotency_key, status, retry
 SELECT outbox_id,event_type,status,retry_count,next_retry_at,last_error FROM mes_outbox ORDER BY outbox_id DESC LIMIT 5;
 UPDATE mes_outbox SET status='PENDING', retry_count=0, next_retry_at=NULL, last_error=NULL WHERE outbox_id = 9;
 SELECT outbox_id,event_type,status,retry_count,next_retry_at,last_error FROM mes_outbox WHERE outbox_id = 9;
+SELECT * FROM tb_item;
+SELECT * FROM tb_sync_cursor WHERE cursor_key='erp_items';
+
+SELECT bom_id, item_id, revision, eff_from, eff_to, is_deleted
+FROM tb_bom_header
+WHERE bom_id='BOM-TEST-01';
