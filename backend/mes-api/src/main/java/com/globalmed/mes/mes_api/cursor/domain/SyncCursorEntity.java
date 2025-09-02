@@ -11,7 +11,7 @@ import java.time.ZoneOffset;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "tb_sync_cursor")
-public class SyncCursor {
+public class SyncCursorEntity {
 
     @Id
     @Column(name = "cursor_key", length = 50, nullable = false)
@@ -20,14 +20,14 @@ public class SyncCursor {
     @Column(name = "last_synced_at", nullable = false)
     private OffsetDateTime lastSyncedAt;
 
-    public static SyncCursor of(String key, OffsetDateTime ts) {
-        SyncCursor c = new SyncCursor();
+    public static SyncCursorEntity of(String key, OffsetDateTime ts) {
+        SyncCursorEntity c = new SyncCursorEntity();
         c.cursorKey = key;
         c.lastSyncedAt = (ts != null ? ts : OffsetDateTime.of(1970,1,1,0,0,0,0, ZoneOffset.UTC));
         return c;
     }
 
-    public static SyncCursor initAtEpoch(String key) {
+    public static SyncCursorEntity initAtEpoch(String key) {
         return of(key, OffsetDateTime.of(1970,1,1,0,0,0,0, ZoneOffset.UTC));
     }
 }

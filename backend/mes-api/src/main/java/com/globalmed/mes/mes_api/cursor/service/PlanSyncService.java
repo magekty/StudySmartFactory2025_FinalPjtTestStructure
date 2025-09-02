@@ -2,11 +2,11 @@
 package com.globalmed.mes.mes_api.cursor.service;
 
 import com.globalmed.mes.mes_api.cursor.repository.SyncCursorRepository;
-import com.globalmed.mes.mes_api.cursor.domain.SyncCursor;
+import com.globalmed.mes.mes_api.cursor.domain.SyncCursorEntity;
 import com.globalmed.mes.mes_api.integration.erp.ErpIncrementalClient;
 import com.globalmed.mes.mes_api.integration.erp.dto.PlanLineDto;
-import com.globalmed.mes.mes_api.plan.domain.ProductionPlan;
-import com.globalmed.mes.mes_api.plan.domain.ProductionPlanLine;
+import com.globalmed.mes.mes_api.plan.domain.ProductionPlanEntity;
+import com.globalmed.mes.mes_api.plan.domain.ProductionPlanLineEntity;
 import com.globalmed.mes.mes_api.plan.repository.ProductionPlanLineRepository;
 import com.globalmed.mes.mes_api.plan.repository.ProductionPlanRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,7 @@ public class PlanSyncService {
     @Transactional
     public void sync() {
         OffsetDateTime cursor = cursorRepo.findById(CURSOR_KEY)
-                .map(SyncCursor::getLastSyncedAt)
+                .map(SyncCursorEntity::getLastSyncedAt)
                 .orElse(OffsetDateTime.parse("1970-01-01T00:00:00Z"));
 
         int page = 0, size = 100;
@@ -59,8 +59,8 @@ public class PlanSyncService {
         }
 
         if (processedMaxTs.isAfter(cursor)) {
-            SyncCursor c = cursorRepo.findById(CURSOR_KEY)
-                    .orElseGet(() -> SyncCursor.of(CURSOR_KEY, cursor));
+            SyncCursorEntity c = cursorRepo.findById(CURSOR_KEY)
+                    .orElseGet(() -> SyncCursorEntity.of(CURSOR_KEY, cursor));
             c.setLastSyncedAt(processedMaxTs);
             cursorRepo.save(c);
         }
@@ -69,12 +69,12 @@ public class PlanSyncService {
     private void ensureHeader(PlanLineDto p) {
         if (planRepo.existsById(p.planId())) return;
         java.sql.Date day = java.sql.Date.valueOf(p.dueDateUtc().atZoneSameInstant(ZoneOffset.UTC).toLocalDate());
-        planRepo.save(ProductionPlan.seed(p.planId(), p.itemId(), day));
+        planRepo.save(ProductionPlanEntity.seed(p.planId(), p.itemId(), day));
     }
 
     private void upsertLine(PlanLineDto p) {
-        ProductionPlanLine line = lineRepo.findByPlanIdAndPlanLineNo(p.planId(), p.planLineNo())
-                .orElseGet(ProductionPlanLine::new);
+        ProductionPlanLineEntity line = lineRepo.findByPlanIdAndPlanLineNo(p.planId(), p.planLineNo())
+                .orElseGet(ProductionPlanLineEntity::new);
 
         if (line.getPlanLineId() == null) {
             line.setPlanId(p.planId());

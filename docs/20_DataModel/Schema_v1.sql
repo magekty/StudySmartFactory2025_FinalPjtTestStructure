@@ -849,3 +849,49 @@ GROUP BY p.plan_id;
 
 ALTER TABLE tb_production_plan
   MODIFY status VARCHAR(1) NOT NULL;
+  
+-- schema/reconciliation.sql
+CREATE TABLE IF NOT EXISTS `tb_daily_reconciliation` (
+  `recon_id`    BIGINT NOT NULL AUTO_INCREMENT,
+  `date_kst`    DATE   NOT NULL COMMENT '대상 일자(KST)',
+  `kind`        VARCHAR(20) NOT NULL COMMENT 'WO|PERF|BACKFLUSH',
+  `metric`      VARCHAR(50) NOT NULL COMMENT 'COUNT|GOOD_QTY|DEFECT_QTY|SHADOWED|SENT 등',
+  `value`       DECIMAL(18,6) NOT NULL DEFAULT 0,
+  `created_at`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'UTC',
+  PRIMARY KEY (`recon_id`),
+  UNIQUE KEY `uk_recon_day_kind_metric` (`date_kst`,`kind`,`metric`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='일일 대사 결과(지표별 1행)';
+
+-- 조회 성능 보조 인덱스(선택)
+CREATE INDEX `idx_recon_date` ON `tb_daily_reconciliation` (`date_kst`);
+
+-- 이벤트 로그(UTC, 일원화)
+CREATE TABLE IF NOT EXISTS `tb_production_log` (
+  `log_id`           BIGINT       NOT NULL AUTO_INCREMENT COMMENT 'PK',
+  `event_id`         VARCHAR(64)  NOT NULL COMMENT '멱등/추적 ID(중복 방지)',
+  `source`           VARCHAR(20)  NOT NULL COMMENT 'MES|ERP|MANUAL|SYSTEM',
+  `event_type`       VARCHAR(30)  NOT NULL COMMENT 'GoodQty|DefectQty|EquipmentStatus|WorkOrderStatus|Backflush|CostPost 등',
+  `event_timestamp`  DATETIME     NOT NULL COMMENT '이벤트 시각(UTC)',
+  `work_order_id`    VARCHAR(36)  NULL,
+  `plan_id`          VARCHAR(36)  NULL,
+  `plan_line_no`     INT          NULL,
+  `item_id`          VARCHAR(36)  NULL,
+  `equipment_id`     VARCHAR(36)  NULL,
+  `process_id`       VARCHAR(36)  NULL,
+  `value_qty`        DECIMAL(18,6) NULL DEFAULT NULL COMMENT '수량·시간 등 계량 값',
+  `uom`              VARCHAR(20)  NULL COMMENT 'EA|KG|SEC ...',
+  `status_code`      VARCHAR(10)  NULL COMMENT 'RUN|IDLE|DOWN|P|R|C 등',
+  `value_text`       VARCHAR(255) NULL COMMENT '메모/사유/레퍼런스',
+  `meta_json`        JSON         NULL COMMENT '추가 메타(유연 필드)',
+  `created_at`       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'UTC 생성',
+  PRIMARY KEY (`log_id`),
+  UNIQUE KEY `uk_event_id` (`event_id`),
+  KEY `idx_evt_ts` (`event_timestamp`),
+  KEY `idx_type_ts` (`event_type`, `event_timestamp`),
+  KEY `idx_eqp_ts` (`equipment_id`, `event_timestamp`),
+  KEY `idx_wo_ts` (`work_order_id`, `event_timestamp`),
+  KEY `idx_plan_ts` (`plan_id`, `plan_line_no`, `event_timestamp`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='생산 이벤트 로그(일원화, 증분/대사/감사 베이스)';
+
+-- 선택) 파티셔닝(일 단위) – MySQL 8 범위 파티션(운영 시 고려)
+-- ALTER TABLE tb_production_log PARTITION BY RANGE (TO_DAYS(event_timestamp)) (...);

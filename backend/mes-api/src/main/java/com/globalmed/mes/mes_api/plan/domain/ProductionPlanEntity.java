@@ -14,7 +14,7 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "tb_production_plan")
-public class ProductionPlan {
+public class ProductionPlanEntity {
 
     @Id
     @Column(name = "plan_id", length = 36, nullable = false)
@@ -57,8 +57,8 @@ public class ProductionPlan {
     @Column(name = "modified_at")
     private OffsetDateTime modifiedAt;
 
-    public static ProductionPlan seed(String planId, String itemId, java.sql.Date dayUtc) {
-        ProductionPlan p = new ProductionPlan();
+    public static ProductionPlanEntity seed(String planId, String itemId, java.sql.Date dayUtc) {
+        ProductionPlanEntity p = new ProductionPlanEntity();
         p.planId = planId;
         p.planNumber = planId;
         p.itemId = itemId;

@@ -41,3 +41,6 @@ SELECT plan_id FROM tb_production_plan WHERE plan_id = 'PL-001';
 UPDATE tb_sync_cursor SET last_synced_at='2025-09-02 03:09:00' WHERE cursor_key='erp_plans';
 
 SELECT cursor_key,last_synced_at FROM tb_sync_cursor WHERE cursor_key IN ('erp_items','erp_boms','erp_plans');
+
+INSERT INTO mes_outbox (event_type, payload_json, idempotency_key, status, retry_count, next_retry_at, created_at) VALUES ('BACKFLUSH', '{"workOrderId":"WO-RECON-TEST"}', NULL, 'SHADOWED', 0, NULL, UTC_TIMESTAMP()), ('BACKFLUSH', '{"workOrderId":"WO-RECON-TEST"}', NULL, 'SENT', 0, NULL, UTC_TIMESTAMP());
+INSERT INTO tb_production_log (event_id, source, event_type, event_timestamp, work_order_id, item_id, value_qty, uom) VALUES ('recon-g-1','MES','GoodQty', UTC_TIMESTAMP(),'WO-RECON-TEST','I-0001', 10.0,'EA'), ('recon-d-1','MES','DefectQty', UTC_TIMESTAMP(),'WO-RECON-TEST','I-0001', 2.0,'EA');

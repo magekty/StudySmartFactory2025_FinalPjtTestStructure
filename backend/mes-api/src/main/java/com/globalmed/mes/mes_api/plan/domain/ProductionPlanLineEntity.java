@@ -14,7 +14,7 @@ import java.time.OffsetDateTime;
 @Table(name = "tb_production_plan_line",
         uniqueConstraints = @UniqueConstraint(name="uk_plan_line",
                 columnNames = {"plan_id","plan_line_no"}))
-public class ProductionPlanLine {
+public class ProductionPlanLineEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
