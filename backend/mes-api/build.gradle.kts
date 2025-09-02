@@ -25,7 +25,7 @@ dependencies {
 //	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0")
 	implementation("org.apache.commons:commons-lang3:3.18.0")
-
+	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.1")
 	// 마이그레이션(원하면) — 아직 사용 안 하면 주석
 	// implementation("org.flywaydb:flyway-core")
 

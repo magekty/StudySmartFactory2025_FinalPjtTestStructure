@@ -1,6 +1,6 @@
+// src/main/java/com/globalmed/mes/mes_api/workorder/domain/WorkOrderEntity.java
 package com.globalmed.mes.mes_api.workorder.domain;
 
-import com.globalmed.mes.mes_api.code.CodeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -47,14 +47,14 @@ public class WorkOrderEntity {
     @Column(name = "end_ts")
     private LocalDateTime endTs;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "status_code_id", nullable = false)
-    private CodeEntity statusCode; // wo_status: P/R/C
+    // FK(CodeEntity) 제거 → 코드값 직접 보관(P/R/C)
+    @Column(name = "status_code", length = 1, nullable = false)
+    private String statusCode;
 
     @Column(name = "created_by", nullable = false, length = 50)
     private String createdBy;
 
-    // DB에서 DEFAULT CURRENT_TIMESTAMP / ON UPDATE 사용 → 읽기 전용 매핑
+    // DB DEFAULT/ON UPDATE 사용 → 읽기 전용
     @Column(name = "created_at", columnDefinition = "datetime", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -64,6 +64,9 @@ public class WorkOrderEntity {
     @PrePersist
     void prePersist() {
         if (producedQty == null) producedQty = BigDecimal.ZERO;
+        if (statusCode == null || statusCode.isBlank()) statusCode = "P";
+        else statusCode = statusCode.trim().toUpperCase();
+
         if (createdBy == null || createdBy.isBlank()) {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             createdBy = (auth != null && auth.isAuthenticated())

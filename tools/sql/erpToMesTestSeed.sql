@@ -44,3 +44,6 @@ SELECT cursor_key,last_synced_at FROM tb_sync_cursor WHERE cursor_key IN ('erp_i
 
 INSERT INTO mes_outbox (event_type, payload_json, idempotency_key, status, retry_count, next_retry_at, created_at) VALUES ('BACKFLUSH', '{"workOrderId":"WO-RECON-TEST"}', NULL, 'SHADOWED', 0, NULL, UTC_TIMESTAMP()), ('BACKFLUSH', '{"workOrderId":"WO-RECON-TEST"}', NULL, 'SENT', 0, NULL, UTC_TIMESTAMP());
 INSERT INTO tb_production_log (event_id, source, event_type, event_timestamp, work_order_id, item_id, value_qty, uom) VALUES ('recon-g-1','MES','GoodQty', UTC_TIMESTAMP(),'WO-RECON-TEST','I-0001', 10.0,'EA'), ('recon-d-1','MES','DefectQty', UTC_TIMESTAMP(),'WO-RECON-TEST','I-0001', 2.0,'EA');
+
+SELECT event_type, SUM(value_qty) qty FROM tb_production_log WHERE event_type IN ('GoodQty','DefectQty') AND event_timestamp BETWEEN UTC_TIMESTAMP() - INTERVAL 10 MINUTE AND UTC_TIMESTAMP() GROUP BY event_type;
+SELECT status_code, COUNT(*) cnt FROM tb_production_log WHERE event_type='EquipmentStatus' AND event_timestamp BETWEEN UTC_TIMESTAMP() - INTERVAL 10 MINUTE AND UTC_TIMESTAMP() GROUP BY status_code;

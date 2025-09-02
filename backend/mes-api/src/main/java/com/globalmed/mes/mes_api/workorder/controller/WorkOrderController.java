@@ -43,7 +43,7 @@ public class WorkOrderController {
                 req.equipmentId(), req.orderQty(), req.createdBy() // null 가능
         );
         return ResponseEntity.status(201)
-                .body(Map.of("workOrderId", wo.getWorkOrderId(), "status", wo.getStatusCode().getCode()));
+                .body(Map.of("workOrderId", wo.getWorkOrderId(), "status", wo.getStatusCode()));
     }
 
     public record CreateReq(
@@ -62,7 +62,7 @@ public class WorkOrderController {
                                           @RequestBody StatusChangeReq req) {
         var wo = workOrderService.transition(workOrderId, req.toStatus());
         return ResponseEntity.ok(Map.of("workOrderId", wo.getWorkOrderId(),
-                "status", wo.getStatusCode().getCode()));
+                "status", wo.getStatusCode()));
     }
 
     @GetMapping("/{id}")
@@ -84,7 +84,7 @@ public class WorkOrderController {
                 wo.getEquipmentId(),
                 wo.getOrderQty(),
                 wo.getProducedQty(),
-                wo.getStatusCode()!=null ? wo.getStatusCode().getCode() : null,
+                wo.getStatusCode()!=null ? wo.getStatusCode() : null,
                 startTsUtc,
                 createdUtc,
                 modifiedUtc
@@ -124,7 +124,7 @@ public class WorkOrderController {
                 wo.getEquipmentId(),
                 wo.getOrderQty(),
                 wo.getProducedQty(),
-                (wo.getStatusCode() != null ? wo.getStatusCode().getCode() : null)
+                (wo.getStatusCode() != null ? wo.getStatusCode() : null)
         ));
 
         return ResponseEntity.ok(PageResponse.of(dtoPage, sort));

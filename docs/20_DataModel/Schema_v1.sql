@@ -895,3 +895,22 @@ CREATE TABLE IF NOT EXISTS `tb_production_log` (
 
 -- 선택) 파티셔닝(일 단위) – MySQL 8 범위 파티션(운영 시 고려)
 -- ALTER TABLE tb_production_log PARTITION BY RANGE (TO_DAYS(event_timestamp)) (...);
+
+ALTER TABLE tb_work_order
+  ADD COLUMN status_code VARCHAR(1) NOT NULL DEFAULT 'P' AFTER end_ts;
+  
+UPDATE tb_work_order w
+JOIN tb_code c
+  ON c.code_id = w.status_code_id
+SET w.status_code = c.code
+WHERE c.group_code = 'WO_STATUS';
+
+ALTER TABLE tb_work_order
+  ADD CONSTRAINT ck_wo_status CHECK (status_code IN ('P','R','C'));
+  
+CREATE INDEX idx_wo_status ON tb_work_order(status_code);
+  
+ALTER TABLE tb_work_order
+  DROP FOREIGN KEY fk_wo_status_code;  -- ↑ 조회된 이름으로 교체
+ALTER TABLE tb_work_order
+  DROP COLUMN status_code_id;

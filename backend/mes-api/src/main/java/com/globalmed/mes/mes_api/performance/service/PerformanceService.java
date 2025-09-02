@@ -1,5 +1,7 @@
+// src/main/java/com/globalmed/mes/mes_api/performance/service/PerformanceService.java
 package com.globalmed.mes.mes_api.performance.service;
 
+import com.globalmed.mes.mes_api.log.ProdLogService;
 import com.globalmed.mes.mes_api.performance.domain.ProductionPerformanceEntity;
 import com.globalmed.mes.mes_api.performance.repository.PerformanceRepo;
 import com.globalmed.mes.mes_api.workorder.domain.WorkOrderEntity;
@@ -17,11 +19,12 @@ public class PerformanceService {
 
     private final PerformanceRepo performanceRepo;
     private final WorkOrderRepo workOrderRepo;
+    private final ProdLogService prodLogService;
 
     public record Req(
             String workOrderId, String itemId, String processId, String equipmentId,
             BigDecimal producedQty, BigDecimal defectQty,
-            String startTime, String endTime, String requestId // ISO8601, 예: 2025-08-10T09:00:00Z
+            String startTime, String endTime, String requestId
     ) {}
 
     public record Res(Long performanceId, BigDecimal goodQty) {}
@@ -34,42 +37,35 @@ public class PerformanceService {
         String eqp  = t(req.equipmentId());
         String rid  = t(req.requestId());
 
-        // 필수값
         if (req.producedQty() == null || req.defectQty() == null
                 || req.workOrderId() == null || req.itemId() == null
                 || req.processId() == null || req.equipmentId() == null
                 || req.startTime() == null || req.endTime() == null) {
             throw new IllegalArgumentException("VALIDATION_ERROR");
         }
-
-        // 수량 검증
         if (req.producedQty().compareTo(BigDecimal.ZERO) < 0) throw new IllegalArgumentException("VALIDATION_ERROR");
         if (req.defectQty().compareTo(BigDecimal.ZERO) < 0) throw new IllegalArgumentException("VALIDATION_ERROR");
         if (req.defectQty().compareTo(req.producedQty()) > 0) throw new IllegalArgumentException("VALIDATION_ERROR");
 
-        // 시간 파싱(UTC) 및 검증
         LocalDateTime st = toUtcLdt(req.startTime());
         LocalDateTime et = toUtcLdt(req.endTime());
         if (et.isBefore(st)) throw new IllegalArgumentException("TIME_ORDER_INVALID");
 
-        // WO 상태 검증(Released만 허용)
-        WorkOrderEntity wo = workOrderRepo.findById(req.workOrderId())
+        WorkOrderEntity wo = workOrderRepo.findById(woId)
                 .orElseThrow(() -> new IllegalArgumentException("NOT_FOUND"));
-        String cur = (wo.getStatusCode() != null ? wo.getStatusCode().getCode() : null);
+        String cur = (wo.getStatusCode() != null ? wo.getStatusCode() : null);
         if (!"R".equals(cur)) throw new IllegalStateException("WO_STATUS_INVALID");
 
-        // WorkOrderEntity 조회 직후, 상태 R 검증 바로 다음에 배치
         LocalDateTime baseline = (wo.getStartTs() != null) ? wo.getStartTs() : wo.getCreatedAt();
-        // st/et는 이미 OffsetDateTime→UTC LocalDateTime 변환된 값
         if (baseline != null) {
             if (st.isBefore(baseline) || et.isBefore(baseline)) {
-                throw new IllegalArgumentException("PERF_BEFORE_WO"); // 400으로 매핑됨
+                throw new IllegalArgumentException("PERF_BEFORE_WO");
             }
         }
         if (rid != null && !rid.isEmpty() && performanceRepo.findByRequestId(rid).isPresent()) {
             throw new IllegalStateException("DUPLICATE_KEY");
         }
-        // 저장
+
         var p = new ProductionPerformanceEntity();
         p.setWorkOrderId(woId);
         p.setItemId(item);
@@ -87,10 +83,29 @@ public class PerformanceService {
             throw new IllegalStateException("DUPLICATE_KEY");
         }
 
-        // 누적 갱신
+        if (wo.getProducedQty() == null) {
+            wo.setProducedQty(BigDecimal.ZERO);
+        }
         wo.setProducedQty(wo.getProducedQty().add(req.producedQty()));
 
         BigDecimal good = req.producedQty().subtract(req.defectQty());
+
+        // 듀얼 라이트(B안): 저장 직후 로그 적재
+        OffsetDateTime endUtc = et.atOffset(ZoneOffset.UTC);
+        String goodKey = (rid != null && !rid.isEmpty())
+                ? "REQ:" + rid + ":GOOD"
+                : "PERF:" + p.getPerformanceId() + ":GOOD";
+        String defectKey = (rid != null && !rid.isEmpty())
+                ? "REQ:" + rid + ":DEFECT"
+                : "PERF:" + p.getPerformanceId() + ":DEFECT";
+
+        if (good.compareTo(BigDecimal.ZERO) > 0) {
+            prodLogService.goodQty(woId, item, proc, eqp, good.doubleValue(), "EA", endUtc, goodKey);
+        }
+        if (req.defectQty().compareTo(BigDecimal.ZERO) > 0) {
+            prodLogService.defectQty(woId, item, proc, eqp, req.defectQty().doubleValue(), "EA", endUtc, defectKey);
+        }
+
         return new Res(p.getPerformanceId(), good);
     }
 

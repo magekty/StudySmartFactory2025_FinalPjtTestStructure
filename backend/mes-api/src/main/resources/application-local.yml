@@ -18,16 +18,16 @@ spring:
     scheduling:
       enabled: true
 
-recon:
-  cron: "0 0 2 * * *"   # 02:00 UTC
-#  cron: "*/30 * * * * *"   # 30초마다
-
   zone: "UTC"
 
   jackson:
     time-zone: UTC
     serialization:
       write-dates-as-timestamps: false
+
+recon:
+  #  cron: "0 0 2 * * *"   # 02:00 UTC
+  cron: "*/30 * * * * *"   # 30초마다
 
 logging:
   level:

@@ -1,8 +1,8 @@
-// com.globalmed.mes.mes_api.workorder.service.WorkOrderService.java
+// src/main/java/com/globalmed/mes/mes_api/workorder/service/WorkOrderService.java
 package com.globalmed.mes.mes_api.workorder.service;
 
-
 import com.globalmed.mes.mes_api.code.CodeRepo;
+import com.globalmed.mes.mes_api.log.ProdLogService;
 import com.globalmed.mes.mes_api.workorder.domain.WorkOrderEntity;
 import com.globalmed.mes.mes_api.workorder.repository.WorkOrderRepo;
 import jakarta.transaction.Transactional;
@@ -10,13 +10,19 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class WorkOrderService {
+
+    private static final String GROUP_WO_STATUS = "WO_STATUS";
+
     private final WorkOrderRepo woRepo;
     private final CodeRepo codeRepo;
+    private final ProdLogService prodLogService;
 
     @Transactional
     public WorkOrderEntity create(String workOrderNumber, String itemId, String processId,
@@ -26,8 +32,8 @@ public class WorkOrderService {
             throw new IllegalStateException("DUPLICATE_KEY");
         });
 
-        // 상태코드 P, use_yn='Y'
-        var status = codeRepo.findByGroupCodeAndCodeAndUseYn("WO_STATUS", "P", 'Y')
+        // 상태 코드 존재 검증(코드 테이블 기준) - FK 저장 아님
+        codeRepo.findByGroupCodeAndCodeAndUseYn(GROUP_WO_STATUS, "P", 'Y')
                 .orElseThrow(() -> new IllegalStateException("WO_STATUS_P_NOT_FOUND"));
 
         var wo = new WorkOrderEntity();
@@ -38,9 +44,11 @@ public class WorkOrderService {
         wo.setEquipmentId(equipmentId);
         wo.setOrderQty(orderQty);
         wo.setProducedQty(BigDecimal.ZERO);
-        wo.setStatusCode(status);        // ← status_code_id 매핑 완료
+        // 문자열 상태코드로 저장(엔티티 내부 필드는 VARCHAR(1) 가정)
+        wo.setStatusCode("P");
+
         if (createdByOpt != null && !createdByOpt.isBlank()) {
-            wo.setCreatedBy(createdByOpt); // 값 있으면 사용, 없으면 @PrePersist에서 자동 세팅
+            wo.setCreatedBy(createdByOpt);
         }
 
         return woRepo.save(wo);
@@ -51,22 +59,47 @@ public class WorkOrderService {
         var wo = woRepo.findById(workOrderId)
                 .orElseThrow(() -> new IllegalArgumentException("NOT_FOUND"));
 
-        var cur = wo.getStatusCode().getCode();         // 현재 P/R/C
-        var to  = toStatus != null ? toStatus.trim() : "";
+        String cur = normalize(wo.getStatusCode());               // 현재 'P' | 'R' | 'C'
+        String to  = normalize(toStatus);
 
-        // 허용 전이만 통과
-        boolean allowed = (cur.equals("P") && to.equals("R"))
-                || (cur.equals("R") && to.equals("C"));
-        if (!allowed) {
-            throw new IllegalStateException("WO_STATUS_INVALID");
-        }
+        boolean allowed = ("P".equals(cur) && "R".equals(to))
+                || ("R".equals(cur) && "C".equals(to));
+        if (!allowed) throw new IllegalStateException("WO_STATUS_INVALID");
 
-        // 상태 코드(P/R/C) 조회(use_yn='Y'), group_code는 네 DB 기준으로(소문자/대문자)
-        var next = codeRepo.findByGroupCodeAndCodeAndUseYn("wo_status", to, 'Y')
-                .orElseThrow(() -> new IllegalStateException("WO_STATUS_"+to+"_NOT_FOUND"));
+        // 코드 유효성 검증(코드 테이블) - 저장은 문자열만
+        codeRepo.findByGroupCodeAndCodeAndUseYn(GROUP_WO_STATUS, to, 'Y')
+                .orElseThrow(() -> new IllegalStateException("WO_STATUS_" + to + "_NOT_FOUND"));
 
-        wo.setStatusCode(next);           // status_code_id 매핑
-        return wo;                        // @Transactional로 플러시
+        wo.setStatusCode(to);  // 문자열 코드로 세팅
+
+        // 듀얼 라이트(상태 변경 로그)
+        prodLogService.workOrderStatus(
+                workOrderId,
+                to,
+                OffsetDateTime.now(ZoneOffset.UTC),
+                "WO-STS:" + workOrderId + ":" + to
+        );
+
+        return wo; // @Transactional 컨텍스트에서 플러시
     }
 
+    @Transactional
+    public void changeStatus(String woId, String nextStatus, OffsetDateTime changedUtc) {
+        String to = normalize(nextStatus);
+
+        // 코드 유효성 검증(코드 테이블)
+        codeRepo.findByGroupCodeAndCodeAndUseYn(GROUP_WO_STATUS, to, 'Y')
+                .orElseThrow(() -> new IllegalStateException("WO_STATUS_" + to + "_NOT_FOUND"));
+
+        prodLogService.workOrderStatus(
+                woId,
+                to,
+                (changedUtc != null ? changedUtc.withOffsetSameInstant(ZoneOffset.UTC) : OffsetDateTime.now(ZoneOffset.UTC)),
+                "WO-STS:" + woId + ":" + to
+        );
+    }
+
+    private String normalize(String s) {
+        return s == null ? "" : s.trim().toUpperCase();
+    }
 }
