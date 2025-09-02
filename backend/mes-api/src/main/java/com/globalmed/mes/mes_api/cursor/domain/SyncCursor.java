@@ -1,3 +1,4 @@
+// src/main/java/com/globalmed/mes/mes_api/cursor/domain/SyncCursor.java
 package com.globalmed.mes.mes_api.cursor.domain;
 
 import jakarta.persistence.*;
@@ -19,9 +20,8 @@ public class SyncCursor {
     @Column(name = "last_synced_at", nullable = false)
     private OffsetDateTime lastSyncedAt;
 
-    // 최소/명시 팩토리: 서비스에서 new를 호출하지 않도록 제공
     public static SyncCursor of(String key, OffsetDateTime ts) {
-        SyncCursor c = new SyncCursor(); // 클래스 내부라 protected 생성자 호출 가능
+        SyncCursor c = new SyncCursor();
         c.cursorKey = key;
         c.lastSyncedAt = (ts != null ? ts : OffsetDateTime.of(1970,1,1,0,0,0,0, ZoneOffset.UTC));
         return c;

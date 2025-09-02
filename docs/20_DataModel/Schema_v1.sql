@@ -846,3 +846,6 @@ SELECT
 FROM tb_production_plan p
 LEFT JOIN tb_production_plan_line l ON l.plan_id = p.plan_id
 GROUP BY p.plan_id;
+
+ALTER TABLE tb_production_plan
+  MODIFY status VARCHAR(1) NOT NULL;

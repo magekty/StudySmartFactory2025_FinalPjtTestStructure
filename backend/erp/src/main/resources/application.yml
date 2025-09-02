@@ -21,4 +21,4 @@ management:
 # 디버그 모드 활성화 (문제 해결 시 주석 처리 또는 제거)
 logging:
   level:
-    org.springframework.security: DEBUG
+    org.springframework.security: INFO

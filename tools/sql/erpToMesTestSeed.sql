@@ -37,3 +37,7 @@ ON DUPLICATE KEY UPDATE `last_synced_at` = VALUES(`last_synced_at`);
 
 SELECT DISTINCT l.plan_id FROM tb_production_plan_line l LEFT JOIN tb_production_plan p ON p.plan_id = l.plan_id WHERE p.plan_id IS NULL;
 SELECT plan_id FROM tb_production_plan WHERE plan_id = 'PL-001';
+
+UPDATE tb_sync_cursor SET last_synced_at='2025-09-02 03:09:00' WHERE cursor_key='erp_plans';
+
+SELECT cursor_key,last_synced_at FROM tb_sync_cursor WHERE cursor_key IN ('erp_items','erp_boms','erp_plans');
