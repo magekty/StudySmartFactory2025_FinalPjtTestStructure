@@ -24,3 +24,16 @@ SELECT * FROM tb_sync_cursor WHERE cursor_key='erp_items';
 SELECT bom_id, item_id, revision, eff_from, eff_to, is_deleted
 FROM tb_bom_header
 WHERE bom_id='BOM-TEST-01';
+
+SELECT COUNT(*) AS missing_fk
+FROM tb_bom_line bl
+LEFT JOIN tb_item i ON bl.component_id=i.item_id
+WHERE bl.bom_id='BOM-TEST-01' AND i.item_id IS NULL;
+
+-- erp_plans 커서 초기 등록(최초 1회)
+INSERT INTO `tb_sync_cursor` (`cursor_key`, `last_synced_at`)
+VALUES ('erp_plans', '1970-01-01 00:00:00')
+ON DUPLICATE KEY UPDATE `last_synced_at` = VALUES(`last_synced_at`);
+
+SELECT DISTINCT l.plan_id FROM tb_production_plan_line l LEFT JOIN tb_production_plan p ON p.plan_id = l.plan_id WHERE p.plan_id IS NULL;
+SELECT plan_id FROM tb_production_plan WHERE plan_id = 'PL-001';

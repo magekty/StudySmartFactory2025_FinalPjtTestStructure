@@ -14,6 +14,7 @@ public record PlanUpsertDto(
         @PositiveOrZero Double qty,
         @NotNull OffsetDateTime dueDateUtc,
         Integer priority,
+        String unit,
         @JsonProperty("isDeleted") @JsonAlias({"deleted","is_deleted"}) Boolean isDeleted
 ) {
     public PlanUpsertDto {

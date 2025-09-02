@@ -130,3 +130,29 @@ Content-Type: application/json
   "startTime": "2025-09-01T09:30:00Z",
   "endTime":   "2025-09-01T09:00:00Z"  // start보다 과거
 }
+
+### plans 신규
+POST {{host}}/plans
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{ "planId":"PL-0001","planLineNo":1,"itemId":"I-0001", "qty":100,"dueDateUtc":"2025-09-02T00:00:00Z", "priority":1,"unit":"EA","isDeleted":false }
+
+### plans 수정
+PUT {{host}}/plans
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{ "planId":"PL-0001","planLineNo":1,"itemId":"I-0001", "qty":120,"dueDateUtc":"2025-09-03T00:00:00Z", "priority":2,"unit":"BOX","isDeleted":false }
+
+### plans 삭제
+PUT {{host}}/plans
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+{ "planId":"PL-0001","planLineNo":1,"itemId":"I-0001", "qty":0,"dueDateUtc":"2025-09-03T00:00:00Z", "priority":2,"unit":"BOX","isDeleted":true }
+
+### plans 증분 확인
+GET {{host}}/plans?updatedSince=2025-09-02T03:09:17Z
+X-API-Key: {{apiKey}}
+Content-Type: application/json

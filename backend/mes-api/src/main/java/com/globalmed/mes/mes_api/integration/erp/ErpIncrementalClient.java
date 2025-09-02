@@ -37,4 +37,16 @@ public class ErpIncrementalClient {
                 .toEntity(new ParameterizedTypeReference<List<BomHeaderDto>>() {});
         return res.getBody();
     }
+
+    public List<PlanLineDto> plans(OffsetDateTime updatedSince, int page, int size) {
+        ResponseEntity<List<PlanLineDto>> res = rc.get()
+                .uri(uri -> {
+                    var b = uri.path("/plans").queryParam("page", page).queryParam("size", size);
+                    if (updatedSince != null) b.queryParam("updatedSince", updatedSince.toString());
+                    return b.build();
+                })
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List<PlanLineDto>>() {});
+        return res.getBody();
+    }
 }

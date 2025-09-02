@@ -6,6 +6,7 @@ import com.demo.erp.service.ItemService;
 import com.demo.erp.service.PlanService;
 import com.demo.erp.web.dto.BomHeaderDto;
 import com.demo.erp.web.dto.ItemDto;
+import com.demo.erp.web.dto.PlanLineView;
 import com.demo.erp.web.dto.PlanUpsertDto;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
@@ -54,4 +55,13 @@ public class ErpIncrementalController {
     public ResponseEntity<Void> planPut(@RequestBody @Valid PlanUpsertDto dto) {
         return planService.put(dto);
     }
+
+    @GetMapping("/plans")
+    public ResponseEntity<List<PlanLineView>> plans(@RequestParam(required = false) OffsetDateTime updatedSince,
+                                                    @RequestParam(defaultValue = "0") int page,
+                                                    @RequestParam(defaultValue = "100") int size) {
+        if (size > 100) size = 100;
+        return ResponseEntity.ok(planService.list(updatedSince, page, size));
+    }
+
 }

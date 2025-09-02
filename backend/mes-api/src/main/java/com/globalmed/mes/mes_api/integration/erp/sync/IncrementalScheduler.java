@@ -1,5 +1,6 @@
 package com.globalmed.mes.mes_api.integration.erp.sync;
 
+import com.globalmed.mes.mes_api.cursor.service.PlanSyncService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -7,14 +8,15 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class IncrementalScheduler {
-
-    private final IncrementalSyncService svc;
+    private final IncrementalSyncService incrementalSyncService; // items, boms
+    private final PlanSyncService planSyncService;              // plans
 
     // 5분마다 증분
-    @Scheduled(fixedDelay = 30_000, initialDelay = 10_000)
+    @Scheduled(fixedDelayString = "${sync.fixedDelay:300000}",
+            initialDelayString = "${sync.initialDelay:10000}")
     public void run() {
-        svc.syncItems();
-        svc.syncBoms();
-        // Plans는 내부 스키마/키에 맞춰 추후 연결(필요 시 추가 메서드 작성)
+        incrementalSyncService.syncItems();
+        incrementalSyncService.syncBoms();
+        planSyncService.sync();
     }
 }

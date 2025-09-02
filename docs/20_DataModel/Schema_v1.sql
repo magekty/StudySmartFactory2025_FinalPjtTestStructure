@@ -809,3 +809,40 @@ CREATE TABLE IF NOT EXISTS `tb_bom_line` (
   CONSTRAINT `ck_bomline_qty_nonneg` CHECK (`qty` >= 0),
   CONSTRAINT `ck_bomline_scrap_range` CHECK (`scrap_rate` >= 0 AND `scrap_rate` <= 1)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='BOM 라인: 구성품/수량/단위/스크랩율';
+
+-- 생산계획 라인
+-- tb_production_plan_line: 생산계획 라인(ERP 증분 수신 단위)
+CREATE TABLE IF NOT EXISTS `tb_production_plan_line` (
+  `plan_line_id`  BIGINT       NOT NULL AUTO_INCREMENT COMMENT '라인 ID (PK)',
+  `plan_id`       VARCHAR(36)  NOT NULL COMMENT '계획 ID (FK → tb_production_plan.plan_id)',
+  `plan_line_no`  INT          NOT NULL COMMENT '계획 라인 번호',
+  `item_id`       VARCHAR(36)  NOT NULL COMMENT '품목 ID (FK → tb_item.item_id)',
+  `qty`           DECIMAL(18,6) NOT NULL DEFAULT 0 COMMENT '계획 수량(라인)',
+  `unit`          VARCHAR(20)  NOT NULL COMMENT '단위(캐노니컬)',
+  `due_date`      DATETIME     NOT NULL COMMENT '납기(UTC DATETIME)',
+  `priority`      INT          DEFAULT NULL COMMENT '우선순위(옵션)',
+  `is_deleted`    TINYINT      DEFAULT 0 COMMENT '소프트삭제',
+  `deleted_at`    DATETIME     DEFAULT NULL COMMENT 'UTC',
+  `created_by`    VARCHAR(50)  NOT NULL DEFAULT 'sync',
+  `created_at`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'UTC',
+  `modified_by`   VARCHAR(50)  DEFAULT NULL,
+  `modified_at`   DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT 'UTC',
+  PRIMARY KEY (`plan_line_id`),
+  UNIQUE KEY `uk_plan_line` (`plan_id`, `plan_line_no`),
+  KEY `idx_plan_item` (`item_id`),
+  KEY `idx_plan_due` (`due_date`),
+  CONSTRAINT `fk_plan_line_plan` FOREIGN KEY (`plan_id`) REFERENCES `tb_production_plan`(`plan_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_plan_line_item` FOREIGN KEY (`item_id`) REFERENCES `tb_item`(`item_id`) ON DELETE RESTRICT,
+  CONSTRAINT `ck_plan_qty_ge0` CHECK (`qty` >= 0)
+) ENGINE=InnoDB COMMENT='생산계획 라인: planId+lineNo 기준, 단위/납기(UTC) 포함';
+
+-- 뷰: 헤더별 라인 합계/최소·최대 납기
+CREATE OR REPLACE VIEW `vw_production_plan_agg` AS
+SELECT
+  p.plan_id,
+  SUM(CASE WHEN l.is_deleted=0 THEN l.qty ELSE 0 END) AS total_line_qty,
+  MIN(CASE WHEN l.is_deleted=0 THEN l.due_date END)   AS first_due_utc,
+  MAX(CASE WHEN l.is_deleted=0 THEN l.due_date END)   AS last_due_utc
+FROM tb_production_plan p
+LEFT JOIN tb_production_plan_line l ON l.plan_id = p.plan_id
+GROUP BY p.plan_id;

@@ -10,9 +10,11 @@ spring:
     hibernate:
       ddl-auto: validate
     properties:
+      hibernate.type.preferred_boolean_jdbc_type: TINYINT   # Boolean -> TINYINT(1)로 매핑
       hibernate:
         jdbc:
           time_zone: UTC
+
   jackson:
     time-zone: UTC
     serialization:
@@ -50,3 +52,7 @@ management:
     web:
       exposure:
         include: health,info
+
+sync:
+  fixedDelay: 30000
+  initialDelay: 10000
