@@ -1,6 +1,7 @@
 // src/main/java/com/globalmed/mes/mes_api/performance/service/PerformanceService.java
 package com.globalmed.mes.mes_api.performance.service;
 
+import com.globalmed.mes.mes_api.backflush.service.BomConsumptionService;
 import com.globalmed.mes.mes_api.log.ProdLogService;
 import com.globalmed.mes.mes_api.performance.domain.ProductionPerformanceEntity;
 import com.globalmed.mes.mes_api.performance.repository.PerformanceRepo;
@@ -20,6 +21,7 @@ public class PerformanceService {
     private final PerformanceRepo performanceRepo;
     private final WorkOrderRepo workOrderRepo;
     private final ProdLogService prodLogService;
+    private final BomConsumptionService bomConsumptionService;
 
     public record Req(
             String workOrderId, String itemId, String processId, String equipmentId,
@@ -104,6 +106,10 @@ public class PerformanceService {
         }
         if (req.defectQty().compareTo(BigDecimal.ZERO) > 0) {
             prodLogService.defectQty(woId, item, proc, eqp, req.defectQty().doubleValue(), "EA", endUtc, defectKey);
+        }
+        String perfKey = (rid != null && !rid.isBlank()) ? ("REQ:" + rid) : ("PERF:" + p.getPerformanceId());
+        if (good.signum() > 0) {
+            bomConsumptionService.enqueueBackflushAndCost(woId, good, "EA", endUtc, perfKey);
         }
 
         return new Res(p.getPerformanceId(), good);

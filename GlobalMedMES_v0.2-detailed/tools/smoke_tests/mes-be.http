@@ -1,0 +1,19 @@
+# test/erp-be.http
+@host = http://localhost:8080
+@apiKey = change-me-demo-key
+
+### health
+GET {{host}}/actuator/health
+
+# Issue WO 스모크(.http)
+POST http://localhost:8080/internal/plans/PL-0001/1/issue-wo
+Content-Type: application/json
+
+{
+  "issueQty": 50.0,
+  "issueUom": "EA",
+  "processId": "PROC-001",
+  "equipmentId": "EQP-001",
+  "force": false,
+  "remark": "첫 발행"
+}

@@ -145,7 +145,7 @@ Shadow 로깅/대사 지표 확인되면 M5
 
 - 옵션 A: 컬럼 추가
 tb_production_plan_line.issued_wo_id VARCHAR(36) NULL
-- 옵션 B: 매핑 테이블
+### 옵션 B: 매핑 테이블
 tb_plan_wo_map(plan_id, plan_line_no, work_order_id, created_at)
 
 - API 계약(내부)

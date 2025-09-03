@@ -5,7 +5,12 @@ server:
     # 액세스 로그 활성화
     access log:
       enabled: true
+      basedir: .
       directory: logs
+      prefix: access
+      suffix: .log
+      rotate: true
+      pattern: "%t %a \"%r\" %s %D \"%{User-Agent}i\" \"%{X-Idempotency-Key}i\""
 
 erp:
   apiKey: change-me-demo-key

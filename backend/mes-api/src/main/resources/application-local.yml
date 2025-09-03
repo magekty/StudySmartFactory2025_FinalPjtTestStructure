@@ -44,10 +44,10 @@ erp:
   api-key: change-me-demo-key
   shadow:
     enabled: true
-    work-orders: false
-    performances: false
     backflush: true
     cost: true
+    work-orders: false
+    performances: false
 
 outbox:
   worker:

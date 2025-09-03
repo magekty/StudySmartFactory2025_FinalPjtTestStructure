@@ -3,7 +3,7 @@
 @apiKey = change-me-demo-key
 
 ### health
-GET {{host}}/
+GET {{host}}/actuator/health
 
 ### create work order (idempotent)
 POST {{host}}/erp/work-orders
@@ -156,3 +156,4 @@ Content-Type: application/json
 GET {{host}}/plans?updatedSince=2025-09-02T03:09:17Z
 X-API-Key: {{apiKey}}
 Content-Type: application/json
+

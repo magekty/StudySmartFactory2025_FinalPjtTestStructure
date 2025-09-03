@@ -102,3 +102,95 @@ VALUES ('PL-0001', 1, '85037982-02b1-4186-9dd5-aa732ae9926e', 50.000000, 'EA', '
 
 -- 4) 진행률 뷰 확인
 SELECT * FROM vw_plan_issue_progress WHERE plan_id='PL-0001' AND plan_line_no=1;
+
+-- 발행 후 검증 쿼리
+SELECT * FROM tb_plan_wo_map WHERE plan_id='PL-0001' AND plan_line_no=1 ORDER BY issued_at DESC;
+WITH RecentMap AS (
+    SELECT
+        work_order_id
+    FROM
+        tb_plan_wo_map
+    ORDER BY
+        map_id DESC
+    LIMIT 1
+)
+SELECT
+    *
+FROM
+    tb_work_order
+WHERE
+    work_order_id IN (SELECT work_order_id FROM RecentMap);
+
+-- 실적 후 Backflush/Cost 큐 확인
+SELECT outbox_id, event_type, status, idempotency_key, created_at
+FROM mes_outbox
+WHERE event_type IN ('BACKFLUSH','COST_POST')
+ORDER BY outbox_id DESC
+LIMIT 10;
+
+-- BACKFLUSH
+SELECT outbox_id,
+       JSON_EXTRACT(payload_json, '$.workOrderId') AS wo,
+       JSON_LENGTH(JSON_EXTRACT(payload_json, '$.lines')) AS line_cnt
+FROM mes_outbox
+WHERE event_type='BACKFLUSH'
+ORDER BY outbox_id DESC
+LIMIT 10;
+
+-- COST_POST
+SELECT outbox_id,
+       JSON_EXTRACT(payload_json, '$.workOrderId') AS wo,
+       JSON_EXTRACT(payload_json, '$.totalQty')    AS total_qty,
+       JSON_EXTRACT(payload_json, '$.uom')         AS uom
+FROM mes_outbox
+WHERE event_type='COST_POST'
+ORDER BY outbox_id DESC
+LIMIT 10;
+
+-- 0) 변수 지정
+SET @wo := '91f0b89e-3fbd-4de9-b300-c14b51fac049'; -- 실적을 조회할 작업 지시
+
+-- 1) asOf 시점과 BOM 유효성 확인
+SELECT @good := (produced_qty - defect_qty),
+       @asof := end_time
+FROM tb_production_performance
+WHERE work_order_id = @wo
+ORDER BY performance_id DESC LIMIT 1;
+
+SELECT @bom := h.bom_id
+FROM tb_bom_header h
+WHERE h.item_id = (SELECT item_id FROM tb_work_order WHERE work_order_id = @wo)
+  AND h.is_deleted = 0
+  AND h.eff_from <= @asof AND (h.eff_to IS NULL OR h.eff_to > @asof)
+ORDER BY h.eff_from DESC LIMIT 1;
+
+-- 2) 최신 BACKFLUSH 실적과 BOM 기대치 비교
+-- 첫 번째 코드의 JSON_TABLE 로직을 통합하고 @wo 변수를 사용합니다.
+WITH pl AS (
+  SELECT m.outbox_id,
+         JSON_UNQUOTE(JSON_EXTRACT(m.payload_json, '$.workOrderId')) AS wo_id,
+         jt.componentId,
+         CAST(jt.qty AS DECIMAL(18,6)) AS payload_qty
+  FROM mes_outbox m,
+       JSON_TABLE(m.payload_json, '$.lines[*]'
+         COLUMNS(
+           componentId VARCHAR(36) PATH '$.componentId',
+           qty DECIMAL(18,6) PATH '$.qty'
+         )
+       ) jt
+  WHERE m.event_type = 'BACKFLUSH'
+    AND JSON_UNQUOTE(JSON_EXTRACT(m.payload_json, '$.workOrderId')) = @wo
+  ORDER BY m.outbox_id DESC LIMIT 1 -- 최신 메시지 하나만 선택
+)
+SELECT pl.componentId,
+       pl.payload_qty,
+       -- BOM의 기대 소모량 계산
+       ROUND(bl.qty * (1 + IFNULL(bl.scrap_rate,0)) * @good, 6) AS expected_qty,
+       -- 실제 소모량과 기대 소모량의 차이 계산
+       ABS(pl.payload_qty - ROUND(bl.qty * (1 + IFNULL(bl.scrap_rate,0)) * @good, 6)) AS diff
+FROM pl
+JOIN tb_bom_line bl ON bl.bom_id = @bom AND bl.component_id = pl.componentId;
+-- 기대: diff가 모두 0 또는 0.000001 이하
+SELECT kind, metric, value
+FROM tb_daily_reconciliation
+WHERE date_kst = CURDATE() AND kind='BACKFLUSH';
