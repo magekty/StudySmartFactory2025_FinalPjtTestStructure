@@ -1,0 +1,20 @@
+﻿@* Pages/Forms/WorkOrder.cshtml *@
+@page
+@model ErpConsole.Pages.Forms.WorkOrderModel
+@{
+    ViewData["Title"] = "WO Create";
+}
+<h2>Work Order 생성</h2>
+<form method="post">
+    <div><label>No</label><br/><input name="WorkOrderNumber" value="@Model.WorkOrderNumber" /></div>
+    <div><label>ItemId</label><br/><input name="ItemId" value="@Model.ItemId" /></div>
+    <div><label>ProcessId</label><br/><input name="ProcessId" value="@Model.ProcessId" /></div>
+    <div><label>EquipmentId</label><br/><input name="EquipmentId" value="@Model.EquipmentId" /></div>
+    <div><label>Qty</label><br/><input type="number" step="0.000001" name="Qty" value="@Model.Qty" /></div>
+    <button type="submit">생성</button>
+</form>
+
+@if (!string.IsNullOrWhiteSpace(Model.Result))
+{
+    <pre>@Model.Result</pre>
+}

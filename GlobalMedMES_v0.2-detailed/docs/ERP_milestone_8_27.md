@@ -241,109 +241,166 @@ POST /internal/outbox/{id}/retry
 
 카드/리스트 렌더, 폼 호출 2xx, 멱등 재생 결과 UI 확인
 Shadow 배지(전역/엔드포인트) 표시
+
+# DoD(확장)
+카드 4종 수치 갱신 정상(폴링/수동)
+리스트 필터/기간/검색 정상, 클릭 시 상세 툴팁(옵션)
+폼 3종 2xx, 실적 멱등 재생 확인
+Shadow 배지 표시
+기간 기본값 7일로 설정되어 과거 이벤트까지 조회 가능
+#
+
 - 리스크/완화
 
 권한/CORS: 내부 API는 내부 권한/네트워크로 제한
 재전송 API는 M7.5에 분리 가능(스코프 관리)
-## M8. ERP FE(C#) 2차 — BOM 뷰어/리비전/유효기간
+
+
+# Milestones — 이후 계획 (WPF 화면 전환 + 경계 원칙 고정)
+버전: v1.0  
+작성일: 2025-09-03
+
+## 컨텍스트
+- 목표: 화면 채널만 WPF로 전환하면서, 기존 연동/운영 구조(MES Outbox·Shadow·증분)는 그대로 유지
+- 경계 원칙(고정)
+  - 쓰기: WPF → ERP(API) → Outbox → ERP(Shadow/Live). MES로 직행 X
+  - 읽기: 계획/품목/BOM은 ERP 조회/증분 API 사용. Outbox·대사는 웹 관제에서 조회(필요 시 읽기 전용 임베드)
+
+---
+
+## 남은 마일스톤 개요
+| 마일스톤 | 목적 | 예상기간 | 게이트(Go/No-Go) |
+|---|---|---|---|
+| M5’ 웹 관제 잠금 | 내부 관제 API(요약/목록/배지) 읽기 전용 확정 | 반나절 | /internal/** 접근정책 확정 + 응답 정합 |
+| M6’ WPF Shell/클라이언트 | WPF 프로젝트 스캐폴딩 + 공통 HttpClient/헤더/UTC/멱등 유틸 | 1일 | ERP API 핑/토큰/UTC 변환/에러 바인딩 OK |
+| M7’ WPF 화면 1차 | 지시 생성, 상태 전이(P→R→C), 실적 등록(멱등) | 1~2일 | 3폼 2xx + 에러 400 표준 포맷 표시 |
+| M8’ 관제 연계 | Outbox·Shadow 관제(웹 임베드 or 요약 수치) | 반나절 | SHADOWED/SENT 수치 UI 반영 |
+| M9’ ERP DB 영속화 | ERP 메모리→DB 전환(Items/BOM/Plans 최소셋) | 1일 | 재기동 후 데이터/증분/멱등 연속성 |
+| M10’ 원가 기초(옵션) | cost simulate/post(Shadow) + 표준원가/UoM | 2일 | 시뮬 산식·금액 일관 + wouldSend 로깅 |
+
+---
+
+## M8’ 웹 관제 잠금(반나절)
 - 목적
-
-생산 시 BOM 근거를 FE에서 명확히 확인/수정(권한 범위 내). 리비전·유효기간 탐색을 쉽게.
-- 스코프
-
-BOM 헤더/라인 조회(리비전·eff_from/eff_to)
-유효 리비전 선택(시점 기준)
-라인 편집(옵션, 운영 정책에 따라 R/O로 시작 가능)
-- API
-
-GET /boms?updatedSince=...
-GET /boms/{bomId}
-(옵션) PUT /boms — 편집 허용 시
+  - 내부 관제 API를 “읽기 전용”으로 확정하고 접근정책 문서화
+- 범위
+  - GET /internal/outbox/summary, GET /internal/outbox, GET /internal/config/shadow
+  - dev=permitAll, stg/prod=내부망/ROLE_INTERNAL
 - DoD
-
-특정 날짜·WO 기준 유효 BOM 확인 가능
-편집은 정책 확정 전까지 R/O 권장
+  - 3 API 응답 필드 고정(스키마 불변)
+  - 접근정책 문서화 + 점검 체크리스트 저장
 - 리스크/완화
+  - FE 기간 필터 착시 → sinceMinutes 프리셋(60/1440/10080) 가이드
 
-순환 BOM/유효기간 겹침: 서버 검증 로직 필요(경고/차단)
-변경 감사: modified_by/traceId 기록
-## M9. 원가 기초 — item_cost/uom_conv + /cost/simulate·/cost/post
+---
+
+## M9’ WPF Shell/클라이언트(1일)
 - 목적
-
-원가 계산의 최소 기초: 표준원가/단위 변환 테이블 도입, 시뮬레이션·wouldSend API 확정.
-- DB(최소)
-
-tb_item_cost(item_id, cost_type, amount, currency, eff_from, eff_to)
-tb_uom_conv(from_uom, to_uom, factor)
-- API
-
-POST /cost/simulate
-
-{
-  "workOrderId": "WO-123",
-  "goodQty": 10.0,
-  "bomId": "BOM-001",
-  "asOfUtc": "2025-09-02T00:00:00Z"
-}
-- 응답
-
-{
-  "totalMaterialQty": 15.0,
-  "totalMaterialCost": 12345.67,
-  "currency": "KRW",
-  "lines": [
-    { "componentId":"RM-001","qty":10,"uom":"EA","unitCost":100,"amount":1000 },
-    { "componentId":"RM-002","qty":5,"uom":"EA","unitCost":200,"amount":1000 }
-  ]
-}
-POST /cost/post (Shadow 유지)
-simulate 결과를 근거로 wouldSend 로깅(Outbox COST_POST)
+  - WPF 앱 골격 + ERP 호출 공통 모듈(헤더/멱등/UTC/에러) 확보
+- 범위
+  - 설정: Erp.BaseUrl, Erp.ApiKey(보안 저장), Env(dev/stg/prod)
+  - HttpClient: X-API-Key 기본 주입, 타임아웃/재시도 최소
+  - 유틸: 멱등키(Guid per 요청), UTC 변환(표시는 로컬 토글), 표준 에러 바인딩(code/message)
 - DoD
-
-동일 파라미터로 재계산 시 일관된 금액
-Shadow wouldSend 누적
+  - ERP 핑(헬스/샘플 POST) 2xx
+  - 400 에러 바디 화면 표준 표시
 - 리스크/완화
+  - 키 하드코딩 금지 → Windows Credential Manager 사용 가이드
 
-단위 변환 미스: uom_conv 필수 경로만 커버 → 점진 확장
-원가 기준 다양성: cost_type=‘STD’부터 시작, 최근단가/평균단가는 후속
-## M10. ERP DB 영속화 전환
+---
+
+## M10’ WPF 화면 1차(1~2일)
 - 목적
-
-ERP 재기동/증분/멱등/감사를 위한 영속 스토리지 도입.
-- 스코프
-
-ERP DB 테이블: items, boms(header/line), plans(line)
-공통 컬럼: updated_at(UTC), is_deleted, unique 키(코드/리비전/라인키)
-멱등/updatedSince 일관성
-- 이행
-
-메모리 스토어 → Repository(DB) 교체
-마이그레이션 스크립트/시드
-증분/멱등 검증(재기동 내구성)
+  - 핵심 3폼(지시/전이/실적) UX 완성, 멱등/UTC/검증이 화면에서 자연 동작
+- 범위
+  - 지시 생성: POST /erp/work-orders
+  - 상태 전이: PUT /erp/work-orders/{id}/status (P→R, R→C만)
+  - 실적 등록: POST /erp/performances (X-Idempotency-Key 필수)
+  - 조회(간단): ERP 계획/품목/BOM 리스트 검색(필수 필드만)
 - DoD
-
-ERP 재기동 후에도 데이터/updatedAt/멱등 기록 유지
-MES 증분 연속성 OK
+  - 각 폼 2xx 시 토스트, 400 시 표준 에러 바디 그대로 표시
+  - 실적: goodQty>0이면 Outbox에 BACKFLUSH/COST_POST 생성(Shadow), goodQty=0은 미생성
+  - 멱등: 동일 키 재전송 시 재생 확인(서버 응답 일관)
 - 리스크/완화
+  - 시간 입력(Z 누락) → 입력 컴포넌트에 UTC/Z 안내/검증
 
-시드 중복: unique 키 + upsert
-타임존 혼선: UTC ISO 고정
-## 부록: 공통 DoD/리스크/체크리스트
-- 공통 DoD
+---
 
-모든 시간: UTC ISO(…Z)
-표준 400 포맷 일관(code, message, path, method, timestamp)
-스케줄러 단일화(@Scheduled 1개), 부분성공 커서 전진
-/actuator/health=UP, /auth/login permitAll, Jwt 필터는 토큰 있을 때만
+## M11’ 관제 연계(반나절)
+- 목적
+  - 운영자가 현황을 바로 확인할 최소 관제 뷰 제공(읽기 전용)
+- 범위(택1 또는 병행)
+  - 웹 관제 임베드: Outbox 요약·목록 화면 WebView로 삽입(내부망)
+  - 요약 수치만 바인딩: GET /internal/outbox/summary → 카드 4종(SENT/RETRY/FAILED/SHADOWED)
+- DoD
+  - 실적 등록 후 SHADOWED 증가가 즉시/주기적으로 UI 반영
 - 리스크/완화
+  - 보안: 임베드 주소/쿠키 정책 문서화
 
-커서 루프: try/catch로 실패 건 스킵 + processedMaxTs로 커서 갱신
-FK 실패: ensureHeader(Plan→WO), Items 선행 동기
-상태코드: 문자열 status_code + CHECK 제약 + 서비스 검증
-- 체크리스트(릴리즈 전 5분)
+---
 
-Outbox SENT/RETRY/SHADOWED 정상
-Plans/Items/BOM 증분 3종 반영 + 커서 최신
-Backflush Shadow 202 + 대사값 반영
-FE 카드/리스트/폼 동작 + 멱등 재생 OK
-로그/알림 1회 수신
+## M12’ ERP DB 영속화(1일)
+- 목적
+  - ERP 재기동/증분/멱등 내구성 확보
+- 범위
+  - 테이블: items, bom_header/line(eff_from/eff_to), plan_line
+  - 공통 컬럼: updated_at(UTC), is_deleted, 유니크 키(코드/리비전/라인키)
+  - 리포지토리 교체: 메모리 → DB
+- DoD
+  - 재기동 후 데이터 유지
+  - updatedSince·멱등 기록 연속성 유지
+- 리스크/완화
+  - 마이그레이션: upsert 스크립트 + 스냅샷 백업
+
+---
+
+## M13’ 원가 기초(옵션, 2일)
+- 목적
+  - 원가 계산 최소틀: simulate/post(Shadow), 표준원가/UoM 변환
+- 범위
+  - DB: tb_item_cost(item_id, cost_type=STD, amount, currency, eff_*), tb_uom_conv(from,to,factor)
+  - API: POST /cost/simulate, POST /cost/post(Shadow)
+  - 산식: qty_component = goodQty × (bom.qty × (1+scrap)), 반올림 6자리(Half-Up)
+- DoD
+  - 동일 입력 → 동일 금액(일관성), COST_POST wouldSend 누적
+- 리스크/완화
+  - 단위 혼재: 초기엔 동일 단위 가정, 변환은 필수 경로부터 적용
+
+---
+
+## 공통 게이트/체크리스트
+- 에러 포맷: 400 바디 {code,message,path,method,timestamp} 일관
+- 시간대: 모든 요청/응답 UTC ISO(…Z), UI는 로컬 토글 표시
+- 멱등: X-Idempotency-Key 클라이언트 생성, 재시도 시 동일 키 유지
+- Shadow: Backflush/Cost=ON, 202 + wouldSend(ERP 미전송 증빙)
+- 보안: WPF는 ERP API만(쓰기). Outbox/대사는 웹 관제(읽기 전용)
+- 증분/커서: 부분 성공 기준 커서 전진(루프 방지), Items/BOM/Plans OK
+
+---
+
+## 운영 위험/완화 요약
+- WPF가 /internal/** 쓰기 호출 → 금지(읽기 임베드만 허용)
+- 키/시간 실수 → 입력 가드(UTC/Z), 키 저장 정책 문서화
+- sinceMinutes 착시 → FE 프리셋(기본 7일) 고정
+- BOM 미적중/양품 0 → 큐 미생성 정상(UX 안내 문구 포함)
+
+---
+
+## 타임라인(제안)
+| 주차/일 | 작업 | 메모 |
+|---|---|---|
+| D+0.5 | M5’ 웹 관제 잠금 | 접근정책/스키마 확정 |
+| D+1.5 | M6’ WPF Shell/클라 | HttpClient/멱등/UTC/에러 바인딩 |
+| D+3.5 | M7’ WPF 화면 1차 | 3폼 + ERP 조회(간단) |
+| D+4.0 | M8’ 관제 연계 | 요약 카드 or 임베드 |
+| D+5.0 | M9’ ERP DB(선택) | 영속화 전환 |
+| D+7.0 | M10’ 원가 기초(선택) | simulate/post(Shadow) |
+
+---
+
+## 참고(시연 스크립트, 5분)
+1) 작업지시 생성 → 상태 P→R → 실적(양품 10)  
+2) Outbox SHADOWED(Backflush/Cost) 증가 확인(관제)  
+3) 실적(양품 0) 재전송 → 큐 미생성(정책 설명)  
+4) 계획/품목/BOM 조회(ERP API)  
+5) Shadow 배지/정책 안내로 마무리

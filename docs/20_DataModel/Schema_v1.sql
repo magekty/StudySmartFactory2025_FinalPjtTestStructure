@@ -961,3 +961,5 @@ FROM tb_production_plan_line pl
 LEFT JOIN tb_plan_wo_map m
   ON m.plan_id = pl.plan_id AND m.plan_line_no = pl.plan_line_no
 GROUP BY pl.plan_id, pl.plan_line_no, pl.item_id, pl.qty;
+
+CREATE INDEX idx_outbox_event_status_ts ON mes_outbox (event_type, status, created_at);

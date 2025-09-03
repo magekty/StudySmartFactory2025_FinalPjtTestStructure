@@ -1,0 +1,50 @@
+﻿@* Pages/Outbox/Index.cshtml *@
+@page
+@model ErpConsole.Pages.Outbox.IndexModel
+@{
+    ViewData["Title"] = "Outbox";
+}
+<h2>Outbox</h2>
+
+<form method="get" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+    <select name="Status">
+        <option value="">ALL</option>
+        @foreach (var s in new[]{ "SENT","RETRY","FAILED","SHADOWED" })
+        {
+            <option value="@s" selected="@(Model.Status==s)">@s</option>
+        }
+    </select>
+    <select name="EventType">
+        <option value="">ALL</option>
+        @foreach (var s in new[]{ "WO_CREATE","WO_STATUS","PERF_CREATE","BACKFLUSH","COST_POST" })
+        {
+            <option value="@s" selected="@(Model.EventType==s)">@s</option>
+        }
+    </select>
+    <input type="number" name="SinceMinutes" value="@Model.SinceMinutes" min="5" step="5" style="width:120px;" />
+    <input type="number" name="Limit" value="@Model.Limit" min="10" max="500" step="10" style="width:100px;" />
+    <input type="text" name="SearchWo" value="@Model.SearchWo" placeholder="WO-xxxx" style="width:160px;" />
+    <button type="submit">검색</button>
+</form>
+
+<table border="1" cellpadding="6" cellspacing="0">
+    <thead>
+    <tr>
+        <th>ID</th><th>Type</th><th>Status</th><th>WO</th><th>IdemKey</th><th>LastError</th><th>Created(UTC)</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var r in Model.Data.rows)
+    {
+        <tr>
+            <td>@r.outboxId</td>
+            <td>@r.eventType</td>
+            <td>@r.status</td>
+            <td>@r.workOrderId</td>
+            <td style="max-width:280px; overflow:hidden; text-overflow:ellipsis;">@r.idempotencyKey</td>
+            <td style="max-width:280px; overflow:hidden; text-overflow:ellipsis; color:#a94442;">@r.lastError</td>
+            <td>@r.createdAtUtc.ToString("yyyy-MM-dd HH:mm:ss")</td>
+        </tr>
+    }
+    </tbody>
+</table>

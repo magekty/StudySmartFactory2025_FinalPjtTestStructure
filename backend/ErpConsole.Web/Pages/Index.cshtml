@@ -1,0 +1,39 @@
+﻿@* Pages/Index.cshtml *@
+@page
+@model ErpConsole.Pages.HomeModel
+@{
+    ViewData["Title"] = "Dashboard";
+    long Get(string k) => Model.ByStatus.TryGetValue(k, out var v) ? v : 0;
+}
+<h2>Dashboard</h2>
+
+<div style="display:flex; gap:16px; margin-bottom:20px;">
+    <div style="border:1px solid #ddd; padding:12px; border-radius:8px;">
+        <div>Status: SENT</div>
+        <div style="font-size:24px; font-weight:700;">@Get("SENT")</div>
+    </div>
+    <div style="border:1px solid #ddd; padding:12px; border-radius:8px;">
+        <div>Status: RETRY</div>
+        <div style="font-size:24px; font-weight:700; color:#d58512;">@Get("RETRY")</div>
+    </div>
+    <div style="border:1px solid #ddd; padding:12px; border-radius:8px;">
+        <div>Status: FAILED</div>
+        <div style="font-size:24px; font-weight:700; color:#a94442;">@Get("FAILED")</div>
+    </div>
+    <div style="border:1px solid #ddd; padding:12px; border-radius:8px;">
+        <div>Status: SHADOWED</div>
+        <div style="font-size:24px; font-weight:700; color:#31708f;">@Get("SHADOWED")</div>
+    </div>
+</div>
+
+<h3>Shadow 배지</h3>
+<ul>
+    <li>Global: @(Model.Shadow.enabled ? "ON" : "OFF")</li>
+    <li>WorkOrders: @(Model.Shadow.workOrders ? "ON" : "OFF")</li>
+    <li>Performances: @(Model.Shadow.performances ? "ON" : "OFF")</li>
+    <li>Backflush: @(Model.Shadow.backflush ? "ON" : "OFF")</li>
+    <li>Cost: @(Model.Shadow.cost ? "ON" : "OFF")</li>
+</ul>
+
+<p><a href="/Outbox">Outbox 리스트로 이동</a></p>
+<p><a href="/Forms/WorkOrder">지시 생성</a> | <a href="/Forms/Status">상태 전이</a> | <a href="/Forms/Performance">실적 등록</a></p>

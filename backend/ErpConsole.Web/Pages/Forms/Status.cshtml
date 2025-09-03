@@ -1,0 +1,21 @@
+﻿@* Pages/Forms/Status.cshtml *@
+@page
+@model ErpConsole.Pages.Forms.StatusModel
+@{
+    ViewData["Title"] = "WO Status";
+}
+<h2>WO 상태 전이</h2>
+<form method="post">
+    <div><label>WorkOrderId</label><br/><input name="WorkOrderId" value="@Model.WorkOrderId" /></div>
+    <div><label>Status</label><br/>
+        <select name="Status">
+            <option value="R" selected="@(Model.Status=="R")">P → R</option>
+            <option value="C" selected="@(Model.Status=="C")">R → C</option>
+        </select>
+    </div>
+    <button type="submit">전이</button>
+</form>
+@if (!string.IsNullOrWhiteSpace(Model.Result))
+{
+    <pre>@Model.Result</pre>
+}

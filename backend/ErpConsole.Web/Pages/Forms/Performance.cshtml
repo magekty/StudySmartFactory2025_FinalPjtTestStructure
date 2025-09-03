@@ -1,0 +1,25 @@
+﻿@* Pages/Forms/Performance.cshtml *@
+@page
+@model ErpConsole.Pages.Forms.PerformanceModel
+@{
+    ViewData["Title"] = "Performance";
+}
+<h2>실적 등록</h2>
+<form method="post">
+    <div><label>WorkOrderId</label><br/><input name="WorkOrderId" value="@Model.WorkOrderId" /></div>
+    <div><label>ItemId</label><br/><input name="ItemId" value="@Model.ItemId" /></div>
+    <div><label>ProcessId</label><br/><input name="ProcessId" value="@Model.ProcessId" /></div>
+    <div><label>EquipmentId</label><br/><input name="EquipmentId" value="@Model.EquipmentId" /></div>
+    <div><label>ProducedQty</label><br/><input type="number" step="0.000001" name="ProducedQty" value="@Model.ProducedQty" /></div>
+    <div><label>DefectQty</label><br/><input type="number" step="0.000001" name="DefectQty" value="@Model.DefectQty" /></div>
+    <div><label>Start(UTC)</label><br/><input type="datetime-local" name="StartUtc" value="@Model.StartUtc.ToString("yyyy-MM-ddTHH:mm")" /></div>
+    <div><label>End(UTC)</label><br/><input type="datetime-local" name="EndUtc" value="@Model.EndUtc.ToString("yyyy-MM-ddTHH:mm")" /></div>
+    <div><label>RequestId(옵션)</label><br/><input name="RequestId" value="@Model.RequestId" placeholder="멱등 추적용(선택)" /></div>
+    <button type="submit">등록</button>
+</form>
+
+@if (!string.IsNullOrWhiteSpace(Model.Result))
+{
+    <pre>@Model.Result</pre>
+    <div>Last X-Idempotency-Key: <b>@Model.IdempotencyKey</b></div>
+}

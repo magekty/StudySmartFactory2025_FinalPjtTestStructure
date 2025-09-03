@@ -1,0 +1,49 @@
+/* _content/ErpConsole.Web/Pages/Shared/_Layout.cshtml.rz.scp.css */
+/* Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
+for details on configuring this project to bundle and minify static web assets. */
+
+a.navbar-brand[b-pfc6r1cxxk] {
+  white-space: normal;
+  text-align: center;
+  word-break: break-all;
+}
+
+a[b-pfc6r1cxxk] {
+  color: #0077cc;
+}
+
+.btn-primary[b-pfc6r1cxxk] {
+  color: #fff;
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+}
+
+.nav-pills .nav-link.active[b-pfc6r1cxxk], .nav-pills .show > .nav-link[b-pfc6r1cxxk] {
+  color: #fff;
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+}
+
+.border-top[b-pfc6r1cxxk] {
+  border-top: 1px solid #e5e5e5;
+}
+.border-bottom[b-pfc6r1cxxk] {
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.box-shadow[b-pfc6r1cxxk] {
+  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+}
+
+button.accept-policy[b-pfc6r1cxxk] {
+  font-size: 1rem;
+  line-height: inherit;
+}
+
+.footer[b-pfc6r1cxxk] {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  white-space: nowrap;
+  line-height: 60px;
+}

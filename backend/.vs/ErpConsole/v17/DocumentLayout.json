@@ -1,0 +1,297 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\backend\\erpconsole.web\\services\\apiclients.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|solutionrelative:erpconsole.web\\services\\apiclients.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\backend\\erpconsole.web\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|solutionrelative:erpconsole.web\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\backend\\erpconsole.web\\pages\\outbox\\index.cshtml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|solutionrelative:erpconsole.web\\pages\\outbox\\index.cshtml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\backend\\erpconsole.web\\pages\\index.cshtml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|solutionrelative:erpconsole.web\\pages\\index.cshtml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\backend\\erpconsole.web\\erpconsole.web.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|solutionrelative:erpconsole.web\\erpconsole.web.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\backend\\erpconsole.web\\pages\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|solutionrelative:erpconsole.web\\pages\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\backend\\erpconsole.web\\mesoptions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|solutionrelative:erpconsole.web\\mesoptions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\backend\\erpconsole.web\\pages\\outbox - \uBCF5\uC0AC\\index.cshtml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|solutionrelative:erpconsole.web\\pages\\outbox - \uBCF5\uC0AC\\index.cshtml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\backend\\erpconsole.web\\pages\\outbox\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|solutionrelative:erpconsole.web\\pages\\outbox\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\backend\\erpconsole.web\\pages\\forms\\performance.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|solutionrelative:erpconsole.web\\pages\\forms\\performance.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\backend\\erpconsole.web\\pages\\forms\\performance.cshtml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|solutionrelative:erpconsole.web\\pages\\forms\\performance.cshtml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\backend\\erpconsole.web\\pages\\forms\\status.cshtml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|solutionrelative:erpconsole.web\\pages\\forms\\status.cshtml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\backend\\erpconsole.web\\pages\\forms\\status.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|solutionrelative:erpconsole.web\\pages\\forms\\status.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\backend\\erpconsole.web\\pages\\forms\\workorder.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|solutionrelative:erpconsole.web\\pages\\forms\\workorder.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\backend\\erpconsole.web\\pages\\forms\\workorder.cshtml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|solutionrelative:erpconsole.web\\pages\\forms\\workorder.cshtml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\backend\\erpconsole.web\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|solutionrelative:erpconsole.web\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\backend\\erpconsole.web\\erpoptions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{69ACB706-C544-4184-9037-8A55D1AC94A3}|ErpConsole.Web\\ErpConsole.Web.csproj|solutionrelative:erpconsole.web\\erpoptions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 13,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Index.cshtml.cs",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Pages\\Outbox - \uBCF5\uC0AC\\Index.cshtml.cs",
+              "RelativeDocumentMoniker": "ErpConsole.Web\\Pages\\Outbox - \uBCF5\uC0AC\\Index.cshtml.cs",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Pages\\Outbox - \uBCF5\uC0AC\\Index.cshtml.cs",
+              "RelativeToolTip": "ErpConsole.Web\\Pages\\Outbox - \uBCF5\uC0AC\\Index.cshtml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-03T06:48:50.045Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Performance.cshtml",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Pages\\Forms\\Performance.cshtml",
+              "RelativeDocumentMoniker": "ErpConsole.Web\\Pages\\Forms\\Performance.cshtml",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Pages\\Forms\\Performance.cshtml",
+              "RelativeToolTip": "ErpConsole.Web\\Pages\\Forms\\Performance.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-03T06:44:13.267Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "Performance.cshtml.cs",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Pages\\Forms\\Performance.cshtml.cs",
+              "RelativeDocumentMoniker": "ErpConsole.Web\\Pages\\Forms\\Performance.cshtml.cs",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Pages\\Forms\\Performance.cshtml.cs",
+              "RelativeToolTip": "ErpConsole.Web\\Pages\\Forms\\Performance.cshtml.cs",
+              "ViewState": "AgIAAAQAAAAAAAAAAAAgwC4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-03T06:43:34.272Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "Status.cshtml.cs",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Pages\\Forms\\Status.cshtml.cs",
+              "RelativeDocumentMoniker": "ErpConsole.Web\\Pages\\Forms\\Status.cshtml.cs",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Pages\\Forms\\Status.cshtml.cs",
+              "RelativeToolTip": "ErpConsole.Web\\Pages\\Forms\\Status.cshtml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-03T06:43:17.026Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Status.cshtml",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Pages\\Forms\\Status.cshtml",
+              "RelativeDocumentMoniker": "ErpConsole.Web\\Pages\\Forms\\Status.cshtml",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Pages\\Forms\\Status.cshtml",
+              "RelativeToolTip": "ErpConsole.Web\\Pages\\Forms\\Status.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-03T06:43:04.256Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "WorkOrder.cshtml",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Pages\\Forms\\WorkOrder.cshtml",
+              "RelativeDocumentMoniker": "ErpConsole.Web\\Pages\\Forms\\WorkOrder.cshtml",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Pages\\Forms\\WorkOrder.cshtml",
+              "RelativeToolTip": "ErpConsole.Web\\Pages\\Forms\\WorkOrder.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-03T06:42:36.837Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "WorkOrder.cshtml.cs",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Pages\\Forms\\WorkOrder.cshtml.cs",
+              "RelativeDocumentMoniker": "ErpConsole.Web\\Pages\\Forms\\WorkOrder.cshtml.cs",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Pages\\Forms\\WorkOrder.cshtml.cs",
+              "RelativeToolTip": "ErpConsole.Web\\Pages\\Forms\\WorkOrder.cshtml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-03T06:42:08.7Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Pages\\Outbox\\Index.cshtml",
+              "RelativeDocumentMoniker": "ErpConsole.Web\\Pages\\Outbox\\Index.cshtml",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Pages\\Outbox\\Index.cshtml",
+              "RelativeToolTip": "ErpConsole.Web\\Pages\\Outbox\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACYAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-03T06:41:18.212Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Index.cshtml.cs",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Pages\\Outbox\\Index.cshtml.cs",
+              "RelativeDocumentMoniker": "ErpConsole.Web\\Pages\\Outbox\\Index.cshtml.cs",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Pages\\Outbox\\Index.cshtml.cs",
+              "RelativeToolTip": "ErpConsole.Web\\Pages\\Outbox\\Index.cshtml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-03T06:41:19.45Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Index.cshtml.cs",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Pages\\Index.cshtml.cs",
+              "RelativeDocumentMoniker": "ErpConsole.Web\\Pages\\Index.cshtml.cs",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Pages\\Index.cshtml.cs",
+              "RelativeToolTip": "ErpConsole.Web\\Pages\\Index.cshtml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACAAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-03T06:40:47.975Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ErpConsole.Web.csproj",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\ErpConsole.Web.csproj",
+              "RelativeDocumentMoniker": "ErpConsole.Web\\ErpConsole.Web.csproj",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\ErpConsole.Web.csproj",
+              "RelativeToolTip": "ErpConsole.Web\\ErpConsole.Web.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-09-03T06:39:58.132Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Pages\\Index.cshtml",
+              "RelativeDocumentMoniker": "ErpConsole.Web\\Pages\\Index.cshtml",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Pages\\Index.cshtml",
+              "RelativeToolTip": "ErpConsole.Web\\Pages\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAABJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-03T06:37:49.846Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ApiClients.cs",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Services\\ApiClients.cs",
+              "RelativeDocumentMoniker": "ErpConsole.Web\\Services\\ApiClients.cs",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Services\\ApiClients.cs",
+              "RelativeToolTip": "ErpConsole.Web\\Services\\ApiClients.cs",
+              "ViewState": "AgIAABQAAAAAAAAAAAAswAIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-03T06:37:38.567Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "MesOptions.cs",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\MesOptions.cs",
+              "RelativeDocumentMoniker": "ErpConsole.Web\\MesOptions.cs",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\MesOptions.cs",
+              "RelativeToolTip": "ErpConsole.Web\\MesOptions.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-03T06:33:15.651Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "ErpOptions.cs",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\ErpOptions.cs",
+              "RelativeDocumentMoniker": "ErpConsole.Web\\ErpOptions.cs",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\ErpOptions.cs",
+              "RelativeToolTip": "ErpConsole.Web\\ErpOptions.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-03T06:32:59.865Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\appsettings.json",
+              "RelativeDocumentMoniker": "ErpConsole.Web\\appsettings.json",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\appsettings.json",
+              "RelativeToolTip": "ErpConsole.Web\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-09-03T06:32:14.207Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Program.cs",
+              "RelativeDocumentMoniker": "ErpConsole.Web\\Program.cs",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\backend\\ErpConsole.Web\\Program.cs",
+              "RelativeToolTip": "ErpConsole.Web\\Program.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAADYAAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-03T06:31:26.26Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
