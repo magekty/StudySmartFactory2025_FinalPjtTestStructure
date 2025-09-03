@@ -914,3 +914,50 @@ ALTER TABLE tb_work_order
   DROP FOREIGN KEY fk_wo_status_code;  -- ↑ 조회된 이름으로 교체
 ALTER TABLE tb_work_order
   DROP COLUMN status_code_id;
+  
+-- 접착-1: Plan 라인 ↔ Work Order 매핑(분할 발행까지 확장 가능)
+CREATE TABLE IF NOT EXISTS `tb_plan_wo_map` (
+  `map_id`        BIGINT       NOT NULL AUTO_INCREMENT COMMENT 'PK',
+  `plan_id`       VARCHAR(36)  NOT NULL COMMENT 'FK → tb_production_plan_line(plan_id)',
+  `plan_line_no`  INT          NOT NULL COMMENT 'FK → tb_production_plan_line(plan_line_no)',
+  `work_order_id` VARCHAR(36)  NOT NULL COMMENT 'FK → tb_work_order(work_order_id)',
+  `issue_qty`     DECIMAL(18,6) NOT NULL DEFAULT 0 COMMENT '발행 수량(분할 발행 대응)',
+  `issue_uom`     VARCHAR(20)  NOT NULL DEFAULT 'EA' COMMENT '단위',
+  `issued_by`     VARCHAR(50)  NOT NULL DEFAULT 'system',
+  `issued_at`     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'UTC',
+  `remark`        VARCHAR(255) NULL,
+  `status`        VARCHAR(20)  NULL DEFAULT 'ISSUED' COMMENT 'ISSUED|CANCELLED 등',
+  PRIMARY KEY (`map_id`),
+
+  -- 1:N 허용 기본 인덱스(동일 라인-작지-작업지시 조합의 중복만 방지)
+  UNIQUE KEY `uk_plan_wo_triplet` (`plan_id`,`plan_line_no`,`work_order_id`),
+
+  -- 조회 최적화용 보조 인덱스
+  KEY `idx_map_plan_line` (`plan_id`,`plan_line_no`),
+  KEY `idx_map_wo`        (`work_order_id`),
+  KEY `idx_map_issued_at` (`issued_at`),
+
+  -- FK: 라인 고유키(uk_plan_line(plan_id, plan_line_no))에 연결
+  CONSTRAINT `fk_map_plan_line`
+    FOREIGN KEY (`plan_id`,`plan_line_no`)
+    REFERENCES `tb_production_plan_line` (`plan_id`,`plan_line_no`)
+    ON DELETE RESTRICT,
+
+  CONSTRAINT `fk_map_work_order`
+    FOREIGN KEY (`work_order_id`)
+    REFERENCES `tb_work_order` (`work_order_id`)
+    ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='계획 라인 ↔ WO 매핑(발행 이력/분할 발행 대응)';
+
+CREATE OR REPLACE VIEW `vw_plan_issue_progress` AS
+SELECT
+  pl.plan_id,
+  pl.plan_line_no,
+  pl.item_id,
+  pl.qty             AS plan_qty,
+  COALESCE(SUM(CASE WHEN m.status IS NULL OR m.status='ISSUED' THEN m.issue_qty ELSE 0 END), 0) AS issued_qty,
+  (COALESCE(SUM(CASE WHEN m.status IS NULL OR m.status='ISSUED' THEN m.issue_qty ELSE 0 END), 0) / NULLIF(pl.qty,0)) AS issue_ratio
+FROM tb_production_plan_line pl
+LEFT JOIN tb_plan_wo_map m
+  ON m.plan_id = pl.plan_id AND m.plan_line_no = pl.plan_line_no
+GROUP BY pl.plan_id, pl.plan_line_no, pl.item_id, pl.qty;

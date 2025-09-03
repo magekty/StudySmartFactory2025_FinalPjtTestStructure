@@ -1,6 +1,11 @@
 # src/main/resources/application.yml
 server:
   port: 8081
+  tomcat:
+    # 액세스 로그 활성화
+    access log:
+      enabled: true
+      directory: logs
 
 erp:
   apiKey: change-me-demo-key
@@ -22,3 +27,4 @@ management:
 logging:
   level:
     org.springframework.security: INFO
+

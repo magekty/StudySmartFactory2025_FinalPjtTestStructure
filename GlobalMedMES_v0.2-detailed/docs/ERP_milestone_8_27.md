@@ -118,42 +118,232 @@ Backflush 202 + wouldSend 로깅 누적, 대사 리포트에 Shadow 통계 포�
 - Gate
 Shadow 로깅/대사 지표 확인되면 M5
 
-# M5. ERP 콘솔 FE(C# Razor) 1차(1일)
-- 산출물
-대시보드 카드(SENT/RETRY/FAILED/SHADOW), Outbox 리스트(재전송), Shadow 토글, 지시/전이·실적 폼
-- DoD
-전역/엔드포인트 Shadow 배지 표시, 재전송(지시/실적만) 동작
-- Gate
-관제에서 전환/재전송 테스트 OK면 M6
-# M6. 대사·알림·전환(반나절)
+### 목차
 
-- 산출물
-일일 02:00 UTC 대사(지시/실적/소모 합계) + 알림
-전환 기준표: validation 실패율 <0.5%, RETRY/FAILED 0, 대사 불일치 0 → 지시/실적 Live 유지, Backflush/Cost Shadow 유지
-- DoD
-첫 리포트 생성·알림 수신 확인
-- Gate
-기준 충족 시 “시연 가능” 상태 확정
+- M5. 접착-1 Plan → Work Order 발행
+- M6. 접착-2 Performance → Backflush 생성(Shadow) + Cost wouldSend
+- M7. ERP FE(C#) 1차: 대시보드·Outbox 리스트·폼(지시/전이/실적)
+- M8. ERP FE(C#) 2차: BOM 뷰어/리비전/유효기간
+- M9. 원가 기초: item_cost/uom_conv + /cost/simulate·/cost/post(API)
+- M10. ERP DB 영속화 전환(메모리→DB)
+- 부록: 표준 DoD/리스크/체크리스트
 
-# M7. 품질 보강(선택, 1일)
-- 산출물
-Swagger 전역 헤더(X-API-Key, X-Idempotency-Key)
-응답 헤더 X-Idempotency-Replayed 표식(모든 엔드포인트)
-캐시 키 범위 확장(method:path:key)
-- DoD
-Swagger에서도 멱등 재생 식별 가능, 키 충돌 없음
-—
+## M5. 접착-1 Plan → Work Order 발행 (수동/배치)
+- 목적
 
-## 하루 실행 루틴(요약)
-Day 1: M1
-Day 2: M2
-Day 3: M3
-Day 4: M4 + M5(절반 병행)
-Day 5: M5 마감 + M6
-(+1d 버퍼로 M7 품질 보강)
-## 스모크 체크(매일 끝에)
-지시 생성 201 → 같은 키 재전송 동일 201(바디 동일)
-전이 200 → 같은 키 재전송 동일 200
-실적 201 → 같은 키 재전송 동일 201
-Backflush 202(Shadow) → 대사 집계 반영
-오류 케이스: UOM_MAPPING_MISSING, BOM_NOT_EFFECTIVE, TIME_ORDER_INVALID, DUPLICATE_KEY 확인
+계획 라인을 실제 생산 흐름으로 연결(PlanLine → WO 생성). 실적·소모가 이어지도록 1:1 브리지 구성.
+- 스코프
+
+수동 발행 API + 배치(옵션) 중 택1 또는 병행
+중복 발행 방지(매핑 키 고정)
+- 산출물
+
+- API(내부): POST /internal/plans/{planId}/{lineNo}/issue-wo
+매핑: plan_line → work_order 1:1 기록(issued_wo_id 또는 매핑 테이블)
+- 로그: 발행 이력(누가/언제/몇 개)
+# DB 변경(선택지 중 택1)
+
+- 옵션 A: 컬럼 추가
+tb_production_plan_line.issued_wo_id VARCHAR(36) NULL
+- 옵션 B: 매핑 테이블
+tb_plan_wo_map(plan_id, plan_line_no, work_order_id, created_at)
+
+- API 계약(내부)
+
+POST /internal/plans/{planId}/{lineNo}/issue-wo
+요청: { "force": false }
+응답: { "workOrderId": "WO-...", "status": "P", "issued": true }
+규칙: 이미 issued_wo_id가 있으면 409(CONFLICT) 또는 force=true 시 재발행
+- 비즈 규칙
+
+WO 수량 = plan_line.qty, status=P
+키 충돌 방지: uk_wo_number, work_order_id UUID
+발행 후 plan_line.issued_wo_id 세팅(또는 매핑 테이블 INSERT)
+- DoD
+
+같은 라인 재발행 방지
+발행된 WO가 목록/상태 전이 흐름에서 사용 가능
+- 테스트
+
+신규 라인 → 발행 201 → WO 조회 OK
+재발행 시도 → 409 또는 force=true로 재발행 허용(정책 선택)
+- 리스크/완화
+
+중복 발행: issued_wo_id NOT NULL 조건/유니크 보조
+FK 실패: item_id/프로세스/설비 키 사전 검증
+## M6. 접착-2 Performance → Backflush(Shadow) + Cost wouldSend
+- 목적
+
+실적 발생 시 BOM 기준 소모량을 산출하고 Backflush 이벤트를 자동 생성(Shadow 전송). 동시에 Cost wouldSend를 남겨 원가 기초를 축적.
+- 스코프
+
+Perf 저장 직후 훅(Hook)에서 Outbox 적재 2건
+BACKFLUSH(SHADOWED), COST_POST(SHADOWED)
+BOM 유효 리비전 선택, 스크랩 반영, 단위(UoM) 가정
+- 소모 계산식(최소)
+
+구성품 소요량
+qty_component = goodQty × (bom_line.qty × (1 + scrap_rate))
+반올림: 소수 6자리, Half-Up
+단위: 최초엔 동일 단위(UoM) 가정(‘EA’). 단위 변환은 M9에서 보강.
+- Outbox 페이로드 예시
+
+{
+  "workOrderId": "WO-123",
+  "lines": [
+    { "componentId": "RM-001", "qty": 10.000000, "uom": "EA" },
+    { "componentId": "RM-002", "qty": 5.000000,  "uom": "EA" }
+  ]
+}
+
+- Cost wouldSend 예시
+
+{
+  "workOrderId": "WO-123",
+  "itemId": "I-0001",
+  "totalQty": 10.0,
+  "uom": "EA",
+  "unitCost": 0,
+  "currency": "KRW"
+}
+
+- DoD
+
+실적 1건 → BACKFLUSH(SHADOWED) 1건, COST_POST(SHADOWED) 1건 생성
+대사 리포트에 BACKFLUSH.SHADOWED 증가 반영
+ERP 수신 0건(Shadow ON, wouldSend 로그만)
+- 테스트
+
+Perf 등록 → mes_outbox 2건 생성 확인
+/internal/recon/run → BACKFLUSH.SHADOWED 증가
+- 리스크/완화
+
+BOM 리비전 미존재: 예외 스킵 + WARN(커서 전진 방해 금지)
+단위 변환 미정: 동일 단위 가정 문서화 → M9에서 uom_conv 도입
+## M7. ERP FE(C#) 1차 — 대시보드·Outbox 리스트·폼(지시/전이/실적)
+- 목적
+
+운영 검증판 확보. Shadow 배지/Outbox 상태 모니터링 + ERP 폼 3종 실행/멱등까지 눈으로 확인.
+- 스코프
+
+대시보드 카드 4종: SENT/RETRY/FAILED/SHADOW
+Outbox 최근 100건 리스트(상태/유형/에러/생성시각)
+폼: 지시 생성, 상태 전이(P→R→C), 실적 등록(멱등 헤더)
+- 데이터 소스
+
+ERP API(지시/전이/실적) — 8081
+Outbox 카드/리스트 — MES DB 조회 또는 내부 API(권장: /internal/outbox)
+- 내부 API(권장)
+
+GET /internal/outbox?status=SENT&limit=100
+POST /internal/outbox/{id}/retry
+- DoD
+
+카드/리스트 렌더, 폼 호출 2xx, 멱등 재생 결과 UI 확인
+Shadow 배지(전역/엔드포인트) 표시
+- 리스크/완화
+
+권한/CORS: 내부 API는 내부 권한/네트워크로 제한
+재전송 API는 M7.5에 분리 가능(스코프 관리)
+## M8. ERP FE(C#) 2차 — BOM 뷰어/리비전/유효기간
+- 목적
+
+생산 시 BOM 근거를 FE에서 명확히 확인/수정(권한 범위 내). 리비전·유효기간 탐색을 쉽게.
+- 스코프
+
+BOM 헤더/라인 조회(리비전·eff_from/eff_to)
+유효 리비전 선택(시점 기준)
+라인 편집(옵션, 운영 정책에 따라 R/O로 시작 가능)
+- API
+
+GET /boms?updatedSince=...
+GET /boms/{bomId}
+(옵션) PUT /boms — 편집 허용 시
+- DoD
+
+특정 날짜·WO 기준 유효 BOM 확인 가능
+편집은 정책 확정 전까지 R/O 권장
+- 리스크/완화
+
+순환 BOM/유효기간 겹침: 서버 검증 로직 필요(경고/차단)
+변경 감사: modified_by/traceId 기록
+## M9. 원가 기초 — item_cost/uom_conv + /cost/simulate·/cost/post
+- 목적
+
+원가 계산의 최소 기초: 표준원가/단위 변환 테이블 도입, 시뮬레이션·wouldSend API 확정.
+- DB(최소)
+
+tb_item_cost(item_id, cost_type, amount, currency, eff_from, eff_to)
+tb_uom_conv(from_uom, to_uom, factor)
+- API
+
+POST /cost/simulate
+
+{
+  "workOrderId": "WO-123",
+  "goodQty": 10.0,
+  "bomId": "BOM-001",
+  "asOfUtc": "2025-09-02T00:00:00Z"
+}
+- 응답
+
+{
+  "totalMaterialQty": 15.0,
+  "totalMaterialCost": 12345.67,
+  "currency": "KRW",
+  "lines": [
+    { "componentId":"RM-001","qty":10,"uom":"EA","unitCost":100,"amount":1000 },
+    { "componentId":"RM-002","qty":5,"uom":"EA","unitCost":200,"amount":1000 }
+  ]
+}
+POST /cost/post (Shadow 유지)
+simulate 결과를 근거로 wouldSend 로깅(Outbox COST_POST)
+- DoD
+
+동일 파라미터로 재계산 시 일관된 금액
+Shadow wouldSend 누적
+- 리스크/완화
+
+단위 변환 미스: uom_conv 필수 경로만 커버 → 점진 확장
+원가 기준 다양성: cost_type=‘STD’부터 시작, 최근단가/평균단가는 후속
+## M10. ERP DB 영속화 전환
+- 목적
+
+ERP 재기동/증분/멱등/감사를 위한 영속 스토리지 도입.
+- 스코프
+
+ERP DB 테이블: items, boms(header/line), plans(line)
+공통 컬럼: updated_at(UTC), is_deleted, unique 키(코드/리비전/라인키)
+멱등/updatedSince 일관성
+- 이행
+
+메모리 스토어 → Repository(DB) 교체
+마이그레이션 스크립트/시드
+증분/멱등 검증(재기동 내구성)
+- DoD
+
+ERP 재기동 후에도 데이터/updatedAt/멱등 기록 유지
+MES 증분 연속성 OK
+- 리스크/완화
+
+시드 중복: unique 키 + upsert
+타임존 혼선: UTC ISO 고정
+## 부록: 공통 DoD/리스크/체크리스트
+- 공통 DoD
+
+모든 시간: UTC ISO(…Z)
+표준 400 포맷 일관(code, message, path, method, timestamp)
+스케줄러 단일화(@Scheduled 1개), 부분성공 커서 전진
+/actuator/health=UP, /auth/login permitAll, Jwt 필터는 토큰 있을 때만
+- 리스크/완화
+
+커서 루프: try/catch로 실패 건 스킵 + processedMaxTs로 커서 갱신
+FK 실패: ensureHeader(Plan→WO), Items 선행 동기
+상태코드: 문자열 status_code + CHECK 제약 + 서비스 검증
+- 체크리스트(릴리즈 전 5분)
+
+Outbox SENT/RETRY/SHADOWED 정상
+Plans/Items/BOM 증분 3종 반영 + 커서 최신
+Backflush Shadow 202 + 대사값 반영
+FE 카드/리스트/폼 동작 + 멱등 재생 OK
+로그/알림 1회 수신

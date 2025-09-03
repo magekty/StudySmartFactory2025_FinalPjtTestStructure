@@ -12,6 +12,6 @@ import org.springframework.context.annotation.Configuration;
         return builder -> {
             builder.modulesToInstall(new JavaTimeModule());
             builder.featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        }; 
+        };
     }
 }
