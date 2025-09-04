@@ -1,0 +1,63 @@
+﻿<!-- ErpWpf.App/Views/Plans/PlanEditDialog.xaml -->
+<Window x:Class="ErpWpf.App.Views.Plans.PlanEditDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Plan 편집" Height="420" Width="520" WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </Window.Resources>
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="140"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="PlanId" VerticalAlignment="Center"/>
+            <TextBox Grid.Column="1" Text="{Binding PlanId}" />
+        </Grid>
+
+        <StackPanel Grid.Row="1" Orientation="Vertical">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <TextBlock Width="140" Text="PlanLineNo"/>
+                <TextBox Width="320" Text="{Binding PlanLineNo}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <TextBlock Width="140" Text="ItemId"/>
+                <TextBox Width="320" Text="{Binding ItemId}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <TextBlock Width="140" Text="Qty"/>
+                <TextBox Width="320" Text="{Binding Qty}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <TextBlock Width="140" Text="Unit"/>
+                <TextBox Width="320" Text="{Binding Unit}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <TextBlock Width="140" Text="Due(로컬)"/>
+                <DatePicker Width="160" SelectedDate="{Binding DueLocalDate, Mode=TwoWay}"/>
+                <TextBlock Width="60" Text="시간" Margin="8,0,0,0"/>
+                <TextBox Width="100" Text="{Binding DueLocalTimeText, Mode=TwoWay}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <TextBlock Width="140" Text="Priority"/>
+                <TextBox Width="320" Text="{Binding Priority}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <TextBlock Width="140" Text="Deleted"/>
+                <CheckBox IsChecked="{Binding IsDeleted}" />
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="저장" Width="100" Margin="0,0,8,0" Click="OnSave"/>
+            <Button Content="취소" Width="100" Click="OnCancel"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,44 @@
+﻿<!-- ErpWpf.App/Views/Plans/PlanListView.xaml -->
+<UserControl x:Class="ErpWpf.App.Views.Plans.PlanListView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel Margin="8">
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8" VerticalAlignment="Center">
+            <TextBlock Text="기간:" VerticalAlignment="Center"/>
+            <ComboBox x:Name="CboSince" Width="120" SelectedIndex="1" SelectionChanged="SinceChanged" Margin="6,0,0,0">
+                <ComboBoxItem Content="최근 1시간" Tag="1"/>
+                <ComboBoxItem Content="최근 24시간" Tag="24"/>
+                <ComboBoxItem Content="최근 7일" Tag="168"/>
+                <ComboBoxItem Content="최근 10일" Tag="240"/>
+            </ComboBox>
+            <TextBlock Text="품목:" VerticalAlignment="Center" Margin="12,0,0,0"/>
+            <TextBox x:Name="ItemFilterBox" Width="160" Margin="6,0,0,0"/>
+            <CheckBox x:Name="ChkDeleted" Content="삭제 포함" VerticalAlignment="Center" Margin="8,0,0,0"/>
+            <Button Content="조회" Margin="8,0,0,0" Click="OnLoad" />
+            <TextBlock Text="{Binding LastSyncUtc}" Margin="12,0,0,0" VerticalAlignment="Center"/>
+        </StackPanel>
+
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+            <Button Content="신규" Click="OnNew" Margin="0,0,8,0"/>
+            <Button Content="수정" Click="OnEdit"/>
+        </StackPanel>
+
+        <DataGrid x:Name="PlansGrid"
+              ItemsSource="{Binding Items}"
+              IsReadOnly="True"
+              AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="PlanId" Binding="{Binding PlanId}" Width="*" />
+                <DataGridTextColumn Header="LineNo" Binding="{Binding PlanLineNo}" Width="80" />
+                <DataGridTextColumn Header="Item" Binding="{Binding ItemId}" Width="*" />
+                <DataGridTextColumn Header="Qty" Binding="{Binding Qty}" Width="120" />
+                <DataGridTextColumn Header="Unit" Binding="{Binding Unit}" Width="80" />
+                <DataGridTextColumn Header="Due(UTC)" Binding="{Binding DueDateUtc}" Width="180" />
+                <DataGridTextColumn Header="Priority" Binding="{Binding Priority}" Width="80" />
+                <DataGridCheckBoxColumn Header="Deleted" Binding="{Binding IsDeleted}" Width="80" />
+                <DataGridTextColumn Header="UpdatedAt" Binding="{Binding UpdatedAt}" Width="200" />
+            </DataGrid.Columns>
+        </DataGrid>
+        
+    </DockPanel>
+</UserControl>

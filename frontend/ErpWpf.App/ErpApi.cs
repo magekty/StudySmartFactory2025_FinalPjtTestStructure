@@ -1,7 +1,10 @@
 ﻿// ErpWpf.App/ErpApi.cs
+// 반드시 같은 네임스페이스로 통일(namespace ErpWpf.App;)
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+
+namespace ErpWpf.App;
 
 public record WoCreateReq(string workOrderNumber, string itemId, string processId, string equipmentId, decimal qty);
 public record WoStatusReq(string status, string changedAt);
@@ -10,7 +13,7 @@ public record PerfCreateReq(
     decimal producedQty, decimal defectQty, string startTime, string endTime, string? requestId
 );
 
-public sealed class ErpApi
+public sealed partial class ErpApi
 {
     private readonly IHttpClientFactory _f;
     public ErpApi(IHttpClientFactory f) => _f = f;

@@ -18,10 +18,12 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         HostSvc = Host.CreateDefaultBuilder()
-            .ConfigureAppConfiguration(cfg =>
-            {
-                cfg.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-            })
+              .ConfigureAppConfiguration(cfg =>
+              {
+                  cfg.Sources.Clear();
+                  cfg.SetBasePath(AppContext.BaseDirectory) // 실행 파일 위치 기준
+                     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+              })
             .ConfigureServices((ctx, services) =>
             {
                 var erpBase = ctx.Configuration["Erp:BaseUrl"] ?? "http://localhost:8081";

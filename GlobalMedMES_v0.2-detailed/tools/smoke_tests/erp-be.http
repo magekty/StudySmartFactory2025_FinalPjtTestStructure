@@ -87,7 +87,7 @@ X-API-Key: {{apiKey}}
 Content-Type: application/json
 
 {
-  "planId":"PL-001","planLineNo":1,"itemId":"I-0001",
+  "planId":"PL-0001","planLineNo":1,"itemId":"I-0001",
   "qty":100,"dueDateUtc":"2025-09-01T00:00:00Z",
   "priority":1,"isDeleted":false
 }
@@ -98,7 +98,7 @@ X-API-Key: {{apiKey}}
 Content-Type: application/json
 
 {
-  "planId":"PL-001","planLineNo":1,"itemId":"I-0001",
+  "planId":"PL-0001","planLineNo":1,"itemId":"I-0001",
   "qty":120,"dueDateUtc":"2025-09-02T00:00:00Z",
   "priority":2,"isDeleted":false
 }
@@ -109,7 +109,7 @@ X-API-Key: {{apiKey}}
 Content-Type: application/json
 
 {
-  "planId":"PL-001","planLineNo":1,"itemId":"I-0001",
+  "planId":"PL-0001","planLineNo":1,"itemId":"I-0001",
   "qty":0,"dueDateUtc":"2025-09-02T00:00:00Z",
   "priority":2,"isDeleted":true
 }
