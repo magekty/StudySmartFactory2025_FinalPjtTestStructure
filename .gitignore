@@ -1,0 +1,23 @@
+Visual Studio
+.vs/
+
+Binaries and object files
+[Dd]ebug/
+[Rr]elease/
+*.pdb
+*.suo
+*.user
+*.userprefs
+
+ASP.NET Core
+bin/
+obj/
+wwwroot/lib/
+wwwroot/dist/
+
+Logs
+logs/
+*.log
+
+Windows
+Thumbs.db
