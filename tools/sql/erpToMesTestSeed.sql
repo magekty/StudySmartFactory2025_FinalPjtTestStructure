@@ -194,3 +194,5 @@ JOIN tb_bom_line bl ON bl.bom_id = @bom AND bl.component_id = pl.componentId;
 SELECT kind, metric, value
 FROM tb_daily_reconciliation
 WHERE date_kst = CURDATE() AND kind='BACKFLUSH';
+
+UPDATE tb_sync_cursor SET last_synced_at='1970-01-01 00:00:00' WHERE cursor_key='erp_plans';

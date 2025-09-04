@@ -65,3 +65,5 @@ management:
 sync:
   fixedDelay: 30000
   initialDelay: 10000
+  audit:
+    enabled: true

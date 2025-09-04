@@ -963,3 +963,20 @@ LEFT JOIN tb_plan_wo_map m
 GROUP BY pl.plan_id, pl.plan_line_no, pl.item_id, pl.qty;
 
 CREATE INDEX idx_outbox_event_status_ts ON mes_outbox (event_type, status, created_at);
+
+CREATE TABLE IF NOT EXISTS tb_sync_audit (
+  audit_id      BIGINT       NOT NULL AUTO_INCREMENT,
+  source        VARCHAR(20)  NOT NULL COMMENT 'ERP',
+  kind          VARCHAR(20)  NOT NULL COMMENT 'ITEMS|BOMS|PLANS',
+  from_utc      DATETIME     NULL,
+  to_utc        DATETIME     NULL,
+  fetched_cnt   INT          NOT NULL DEFAULT 0,
+  upsert_cnt    INT          NOT NULL DEFAULT 0,
+  delete_cnt    INT          NOT NULL DEFAULT 0,
+  ok            TINYINT(1)   NOT NULL DEFAULT 1,
+  message       VARCHAR(255) NULL,
+  started_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  finished_at   DATETIME     NULL,
+  PRIMARY KEY (audit_id),
+  KEY idx_kind_time (kind, started_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

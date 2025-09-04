@@ -1,9 +1,10 @@
-// src/main/java/com/globalmed/mes/mes_api/cursor/domain/SyncCursor.java
+// src/main/java/com/globalmed/mes/mes_api/cursor/domain/SyncCursorEntity.java
 package com.globalmed.mes.mes_api.cursor.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.OffsetDateTime;
+
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 @Getter
@@ -17,17 +18,26 @@ public class SyncCursorEntity {
     @Column(name = "cursor_key", length = 50, nullable = false)
     private String cursorKey;
 
-    @Column(name = "last_synced_at", nullable = false)
-    private OffsetDateTime lastSyncedAt;
+    // DATETIME ↔ LocalDateTime(UTC로 해석/저장)
+    @Column(name = "last_synced_at", nullable = false, columnDefinition = "datetime")
+    private LocalDateTime lastSyncedAt;
 
-    public static SyncCursorEntity of(String key, OffsetDateTime ts) {
+    @PrePersist
+    @PreUpdate
+    void normalize() {
+        if (lastSyncedAt == null) {
+            lastSyncedAt = LocalDateTime.ofEpochSecond(0, 0, ZoneOffset.UTC);
+        }
+    }
+
+    public static SyncCursorEntity of(String key, LocalDateTime utc) {
         SyncCursorEntity c = new SyncCursorEntity();
         c.cursorKey = key;
-        c.lastSyncedAt = (ts != null ? ts : OffsetDateTime.of(1970,1,1,0,0,0,0, ZoneOffset.UTC));
+        c.lastSyncedAt = (utc != null ? utc : LocalDateTime.ofEpochSecond(0, 0, ZoneOffset.UTC));
         return c;
     }
 
     public static SyncCursorEntity initAtEpoch(String key) {
-        return of(key, OffsetDateTime.of(1970,1,1,0,0,0,0, ZoneOffset.UTC));
+        return of(key, LocalDateTime.ofEpochSecond(0, 0, ZoneOffset.UTC));
     }
 }

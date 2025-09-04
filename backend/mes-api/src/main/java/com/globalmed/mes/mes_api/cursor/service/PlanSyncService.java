@@ -1,14 +1,15 @@
 // src/main/java/com/globalmed/mes/mes_api/cursor/service/PlanSyncService.java
 package com.globalmed.mes.mes_api.cursor.service;
 
-import com.globalmed.mes.mes_api.cursor.repository.SyncCursorRepository;
 import com.globalmed.mes.mes_api.cursor.domain.SyncCursorEntity;
+import com.globalmed.mes.mes_api.cursor.repository.SyncCursorRepository;
 import com.globalmed.mes.mes_api.integration.erp.ErpIncrementalClient;
 import com.globalmed.mes.mes_api.integration.erp.dto.PlanLineDto;
 import com.globalmed.mes.mes_api.plan.domain.ProductionPlanEntity;
 import com.globalmed.mes.mes_api.plan.domain.ProductionPlanLineEntity;
 import com.globalmed.mes.mes_api.plan.repository.ProductionPlanLineRepository;
 import com.globalmed.mes.mes_api.plan.repository.ProductionPlanRepository;
+import com.globalmed.mes.mes_api.sync.SyncAuditLogger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.*;
-
 import java.util.List;
 
 @Slf4j
@@ -29,46 +29,69 @@ public class PlanSyncService {
     private final ProductionPlanLineRepository lineRepo;
     private final ProductionPlanRepository planRepo;
     private final SyncCursorRepository cursorRepo;
+    private final SyncAuditLogger audit;
 
     @Transactional
     public void sync() {
-        OffsetDateTime cursor = cursorRepo.findById(CURSOR_KEY)
-                .map(SyncCursorEntity::getLastSyncedAt)
-                .orElse(OffsetDateTime.parse("1970-01-01T00:00:00Z"));
+        OffsetDateTime repoCursor = cursorRepo.findById(CURSOR_KEY)
+                .map(SyncCursorEntity::getLastSyncedAt)                 // LocalDateTime(UTC 저장)
+                .map(dt -> dt.atOffset(ZoneOffset.UTC))                 // → OffsetDateTime(UTC)
+                .orElse(Instant.EPOCH.atOffset(ZoneOffset.UTC));
+
+        OffsetDateTime nowUtc = OffsetDateTime.now(ZoneOffset.UTC);
+        OffsetDateTime since = repoCursor.isAfter(nowUtc) ? nowUtc.minusSeconds(1) : repoCursor.minusSeconds(1);
 
         int page = 0, size = 100;
-        OffsetDateTime processedMaxTs = cursor;
+        OffsetDateTime processedMaxTs = since;
+        int fetchedTotal = 0, upserts = 0, deletes = 0;
 
-        while (true) {
-            List<PlanLineDto> list = client.plans(cursor, page, size);
-            if (list == null || list.isEmpty()) break;
+        long auditId = audit.start("PLANS", since.toInstant(), nowUtc.toInstant());
 
-            for (PlanLineDto p : list) {
-                try {
+        try {
+            while (true) {
+                List<PlanLineDto> list = client.plans(since, page, size);
+                int got = (list == null ? 0 : list.size());
+                fetchedTotal += got;
+                log.info("[PLAN_SYNC] page={} got={}", page, got);
+                if (got == 0) break;
+
+                for (PlanLineDto p : list) {
                     ensureHeader(p);
                     upsertLine(p);
-                    if (p.updatedAt()!=null && p.updatedAt().isAfter(processedMaxTs)) {
+                    if (Boolean.TRUE.equals(p.isDeleted())) deletes++; else upserts++;
+                    if (p.updatedAt() != null && p.updatedAt().isAfter(processedMaxTs)) {
                         processedMaxTs = p.updatedAt();
                     }
-                } catch (Exception ex) {
-                    log.warn("PLAN_SYNC_FAILED planId={}, lineNo={}, cause={}", p.planId(), p.planLineNo(), ex.getMessage());
                 }
+                if (got < size) break;
+                page++;
             }
-            if (list.size() < size) break;
-            page++;
-        }
 
-        if (processedMaxTs.isAfter(cursor)) {
-            SyncCursorEntity c = cursorRepo.findById(CURSOR_KEY)
-                    .orElseGet(() -> SyncCursorEntity.of(CURSOR_KEY, cursor));
-            c.setLastSyncedAt(processedMaxTs);
-            cursorRepo.save(c);
+            if (processedMaxTs.isAfter(repoCursor)) {
+                OffsetDateTime saveTs = processedMaxTs.isAfter(nowUtc) ? nowUtc : processedMaxTs;
+                SyncCursorEntity c = cursorRepo.findById(CURSOR_KEY)
+                        .orElseGet(() -> SyncCursorEntity.initAtEpoch(CURSOR_KEY));
+                c.setLastSyncedAt(saveTs.withOffsetSameInstant(ZoneOffset.UTC).toLocalDateTime());
+                cursorRepo.save(c);
+                log.info("[PLAN_SYNC] done fetched={} upserts={} deletes={} newCursor={}",
+                        fetchedTotal, upserts, deletes, saveTs);
+            } else {
+                log.info("[PLAN_SYNC] done fetched={} upserts={} deletes={} cursorUnchanged={}",
+                        fetchedTotal, upserts, deletes, repoCursor);
+            }
+
+            audit.success(auditId, fetchedTotal, upserts, deletes, "OK");
+        } catch (Exception e) {
+            audit.fail(auditId, e.toString());
+            throw e;
         }
     }
 
     private void ensureHeader(PlanLineDto p) {
         if (planRepo.existsById(p.planId())) return;
-        java.sql.Date day = java.sql.Date.valueOf(p.dueDateUtc().atZoneSameInstant(ZoneOffset.UTC).toLocalDate());
+        java.sql.Date day = java.sql.Date.valueOf(
+                p.dueDateUtc().withOffsetSameInstant(ZoneOffset.UTC).toLocalDate()
+        );
         planRepo.save(ProductionPlanEntity.seed(p.planId(), p.itemId(), day));
     }
 
@@ -85,7 +108,7 @@ public class PlanSyncService {
 
         line.setItemId(p.itemId());
         line.setQty(BigDecimal.valueOf(p.qty() == null ? 0d : p.qty()));
-        line.setUnit((p.unit()==null || p.unit().isBlank()) ? "EA" : p.unit());
+        line.setUnit((p.unit() == null || p.unit().isBlank()) ? "EA" : p.unit());
         line.setDueDate(p.dueDateUtc());
         line.setPriority(p.priority());
         if (p.isDeleted()) { line.setIsDeleted(true); line.setDeletedAt(OffsetDateTime.now(ZoneOffset.UTC)); }
