@@ -16,6 +16,8 @@ spring:
           time_zone: UTC
   task:
     scheduling:
+      pool:
+        size: 1
       enabled: true
 
   zone: "UTC"

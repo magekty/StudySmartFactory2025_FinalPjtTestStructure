@@ -1,7 +1,6 @@
 // src/main/java/com/globalmed/mes/mes_api/cursor/service/PlanSyncService.java
 package com.globalmed.mes.mes_api.cursor.service;
 
-import com.globalmed.mes.mes_api.cursor.domain.SyncCursorEntity;
 import com.globalmed.mes.mes_api.cursor.repository.SyncCursorRepository;
 import com.globalmed.mes.mes_api.integration.erp.ErpIncrementalClient;
 import com.globalmed.mes.mes_api.integration.erp.dto.PlanLineDto;
@@ -33,19 +32,21 @@ public class PlanSyncService {
 
     @Transactional
     public void sync() {
-        OffsetDateTime repoCursor = cursorRepo.findById(CURSOR_KEY)
-                .map(SyncCursorEntity::getLastSyncedAt)                 // LocalDateTime(UTC 저장)
-                .map(dt -> dt.atOffset(ZoneOffset.UTC))                 // → OffsetDateTime(UTC)
-                .orElse(Instant.EPOCH.atOffset(ZoneOffset.UTC));
+        // 커서(UTC)
+        Instant repoCursor = cursorRepo.get(CURSOR_KEY);
+        Instant nowUtc = Instant.now();
 
-        OffsetDateTime nowUtc = OffsetDateTime.now(ZoneOffset.UTC);
-        OffsetDateTime since = repoCursor.isAfter(nowUtc) ? nowUtc.minusSeconds(1) : repoCursor.minusSeconds(1);
+        // since 계산: 미래 클램프 + 경계 스큐(-1s) 단, EPOCH일 때는 스큐 금지
+        Instant baseSince = repoCursor.isAfter(nowUtc) ? nowUtc : repoCursor;
+        Instant sinceInstant = baseSince.equals(Instant.EPOCH) ? Instant.EPOCH : baseSince.minusSeconds(1);
+        OffsetDateTime since = OffsetDateTime.ofInstant(sinceInstant, ZoneOffset.UTC);
 
         int page = 0, size = 100;
-        OffsetDateTime processedMaxTs = since;
+        // 처리 최대값은 "실제 커서값"에서 시작(스큐 값이 아닌)
+        Instant processedMax = repoCursor;
         int fetchedTotal = 0, upserts = 0, deletes = 0;
 
-        long auditId = audit.start("PLANS", since.toInstant(), nowUtc.toInstant());
+        long auditId = audit.start("PLANS", sinceInstant, nowUtc);
 
         try {
             while (true) {
@@ -59,20 +60,19 @@ public class PlanSyncService {
                     ensureHeader(p);
                     upsertLine(p);
                     if (Boolean.TRUE.equals(p.isDeleted())) deletes++; else upserts++;
-                    if (p.updatedAt() != null && p.updatedAt().isAfter(processedMaxTs)) {
-                        processedMaxTs = p.updatedAt();
+
+                    if (p.updatedAt() != null) {
+                        Instant u = p.updatedAt().toInstant();
+                        if (u.isAfter(processedMax)) processedMax = u;
                     }
                 }
                 if (got < size) break;
                 page++;
             }
 
-            if (processedMaxTs.isAfter(repoCursor)) {
-                OffsetDateTime saveTs = processedMaxTs.isAfter(nowUtc) ? nowUtc : processedMaxTs;
-                SyncCursorEntity c = cursorRepo.findById(CURSOR_KEY)
-                        .orElseGet(() -> SyncCursorEntity.initAtEpoch(CURSOR_KEY));
-                c.setLastSyncedAt(saveTs.withOffsetSameInstant(ZoneOffset.UTC).toLocalDateTime());
-                cursorRepo.save(c);
+            if (processedMax.isAfter(repoCursor)) {
+                Instant saveTs = processedMax.isAfter(nowUtc) ? nowUtc : processedMax; // 미래 클램프
+                cursorRepo.set(CURSOR_KEY, saveTs);                                   // UTC 저장
                 log.info("[PLAN_SYNC] done fetched={} upserts={} deletes={} newCursor={}",
                         fetchedTotal, upserts, deletes, saveTs);
             } else {

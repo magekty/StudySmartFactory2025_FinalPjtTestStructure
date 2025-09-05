@@ -4,6 +4,7 @@ package com.globalmed.mes.mes_api.cursor.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
@@ -18,7 +19,8 @@ public class SyncCursorEntity {
     @Column(name = "cursor_key", length = 50, nullable = false)
     private String cursorKey;
 
-    // DATETIME ↔ LocalDateTime(UTC로 해석/저장)
+    // DB DATETIME ←→ UTC LocalDateTime 보장
+    @Convert(converter = UtcLocalDateTimeConverter.class)
     @Column(name = "last_synced_at", nullable = false, columnDefinition = "datetime")
     private LocalDateTime lastSyncedAt;
 
@@ -39,5 +41,20 @@ public class SyncCursorEntity {
 
     public static SyncCursorEntity initAtEpoch(String key) {
         return of(key, LocalDateTime.ofEpochSecond(0, 0, ZoneOffset.UTC));
+    }
+
+    // 엔티티 내부에 두는 UTC 컨버터(추가 파일 없이 적용)
+    @Converter(autoApply = false)
+    public static class UtcLocalDateTimeConverter implements AttributeConverter<LocalDateTime, Timestamp> {
+        @Override
+        public Timestamp convertToDatabaseColumn(LocalDateTime attribute) {
+            if (attribute == null) return Timestamp.from(java.time.Instant.EPOCH);
+            return Timestamp.from(attribute.atOffset(ZoneOffset.UTC).toInstant());
+        }
+        @Override
+        public LocalDateTime convertToEntityAttribute(Timestamp dbData) {
+            if (dbData == null) return LocalDateTime.ofEpochSecond(0, 0, ZoneOffset.UTC);
+            return LocalDateTime.ofInstant(dbData.toInstant(), ZoneOffset.UTC);
+        }
     }
 }
