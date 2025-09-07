@@ -1,20 +1,29 @@
+// src/main/java/com/globalmed/mes/mes_api/integration/erp/ErpIncrementalClient.java
 package com.globalmed.mes.mes_api.integration.erp;
 
 import com.globalmed.mes.mes_api.integration.erp.dto.*;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+@Slf4j
 @Component
+@RequiredArgsConstructor
 public class ErpIncrementalClient {
     private final RestClient rc;
-    public ErpIncrementalClient(RestClient erpRestClient){ this.rc = erpRestClient; }
 
     public List<ItemDto> items(OffsetDateTime updatedSince) {
+        String qs = (updatedSince == null) ? "" : "?updatedSince=" + URLEncoder.encode(updatedSince.toString(), StandardCharsets.UTF_8);
+        log.info("[MES->ERP] GET /items{}", qs);
+
         ResponseEntity<List<ItemDto>> res = rc.get()
                 .uri(uri -> {
                     var b = uri.path("/items");
@@ -27,6 +36,9 @@ public class ErpIncrementalClient {
     }
 
     public List<BomHeaderDto> boms(OffsetDateTime updatedSince) {
+        String qs = (updatedSince == null) ? "" : "?updatedSince=" + URLEncoder.encode(updatedSince.toString(), StandardCharsets.UTF_8);
+        log.info("[MES->ERP] GET /boms{}", qs);
+
         ResponseEntity<List<BomHeaderDto>> res = rc.get()
                 .uri(uri -> {
                     var b = uri.path("/boms");
@@ -39,6 +51,10 @@ public class ErpIncrementalClient {
     }
 
     public List<PlanLineDto> plans(OffsetDateTime updatedSince, int page, int size) {
+        String qs = "?page=" + page + "&size=" + size
+                + (updatedSince == null ? "" : "&updatedSince=" + URLEncoder.encode(updatedSince.toString(), StandardCharsets.UTF_8));
+        log.info("[MES->ERP] GET /plans{}", qs);
+
         ResponseEntity<List<PlanLineDto>> res = rc.get()
                 .uri(uri -> {
                     var b = uri.path("/plans").queryParam("page", page).queryParam("size", size);

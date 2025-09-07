@@ -1,0 +1,75 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3307/globalmed?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC
+    username: mes_user
+    password: mes_pwd
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.type.preferred_boolean_jdbc_type: TINYINT   # Boolean -> TINYINT(1)로 매핑
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  task:
+    scheduling:
+      pool:
+        size: 1
+  jackson:
+    time-zone: UTC
+    serialization:
+      write-dates-as-timestamps: false
+
+recon:
+  #  cron: "0 0 2 * * *"   # 02:00 UTC
+  cron: "*/30 * * * * *"   # 30초마다
+
+logging:
+  level:
+    root: INFO
+
+app:
+  security:
+    jwt:
+      secret: 0123456789abcdef0123456789abcdef
+      ttl-minutes: 30
+
+erp:
+  base-url: http://localhost:8081/mock
+  api-key: change-me-demo-key
+  shadow:
+    enabled: true
+    backflush: true
+    cost: true
+    work-orders: false
+    performances: false
+
+outbox:
+  worker:
+    batch-size: 100
+    delay-ms: 1000
+    max-retry: 5
+    backoff-seq: 60000,300000,900000,3600000,21600000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+sync:
+  fixedDelay: 30000
+  initialDelay: 10000
+  audit:
+    enabled: true
+  boms:
+    enabled: true
+    maxHops: 1000               # A: HOP 상한(운영은 1000이면 넉넉)
+    skipUnknownComponent: true # C: 컴포넌트 미존재 라인 스킵 토글(운영은 false 권장, QA에선 true로도 점검)
+  items:
+    enabled: false
+  plans:
+    enabled: false

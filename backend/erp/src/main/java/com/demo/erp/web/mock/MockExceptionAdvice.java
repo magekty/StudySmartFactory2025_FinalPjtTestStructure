@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.format.DateTimeParseException;
 import java.util.NoSuchElementException;
@@ -31,5 +32,9 @@ public class MockExceptionAdvice {
     public ResponseEntity<String> handleOthers(Exception e) {
         log.error("[MOCK-ERP] 500", e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("INTERNAL_ERROR");
+    }
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<String> mismatch(MethodArgumentTypeMismatchException e) {
+        return ResponseEntity.badRequest().body("BAD_REQUEST: " + e.getMessage());
     }
 }

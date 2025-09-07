@@ -177,13 +177,52 @@ X-API-Key: {{apiKey}}
 Content-Type: application/json
 
 ### boms deletes 카운트 증가 확인
-POST {{host}}/dev/boms/delete-header?bomId=BOM-ITEM-100|A
+POST {{host}}/dev/boms/delete-header?bomId=BOM-ITEM-1001|A|STD
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+### BOM 라인 컴포넌트 업데이트
+POST http://localhost:8081/mock/dev/boms/set-line-component?bomId=BOM-ITEM-1003%7CA%7CSTD&lineNo=1&componentId=ZZZ-DOES-NOT-EXIST
 X-API-Key: {{apiKey}}
 Content-Type: application/json
 
 ### boms deletes 카운트 증가 확인
-POST {{host}}/dev/boms/set-line-component?bomId=BOM-ITEM-200|A\&lineNo=1\&componentId=DOES\_NOT\_EXIST
+POST {{host}}/dev/boms/seed-bulk?count=5
 X-API-Key: {{apiKey}}
 ### boms deletes 카운트 증가 확인
-POST {{host}}/dev/boms/seed-bulk?count=30
+POST {{host}}/dev/boms/touch-bulk?count=5
+X-API-Key: {{apiKey}}
+
+### boms 1
+POST http://localhost:8081/mock/dev/boms/touch-line?bomId=BOM-ITEM-1003%7CA%7CSTD&lineNo=2&deltaQty=0.001
+X-API-Key: {{apiKey}}
+### boms deletes 카운트 증가 확인
+POST {{host}}/dev/items/touch?itemId=ITEM-200\&unit=EA\&itemType=F
+X-API-Key: {{apiKey}}
+### boms deletes 카운트 증가 확인
+POST {{host}}/dev/boms/touch-header?bomId=BOM-ITEM-1003|A|STD
+X-API-Key: {{apiKey}}
+### boms deletes 카운트 증가 확인
+POST {{host}}/dev/boms/touch-header?bomId=BOM-ITEM-1004|A|STD
+X-API-Key: {{apiKey}}
+### boms deletes 카운트 증가 확인
+POST {{host}}/dev/boms/touch-header?bomId=BOM-ITEM-1005|A|STD
+X-API-Key: {{apiKey}}
+### boms deletes 카운트 증가 확인
+POST {{host}}/dev/boms/touch-header?bomId=BOM-ITEM-1006|A|STD
+X-API-Key: {{apiKey}}
+### boms deletes 카운트 증가 확인
+POST {{host}}/dev/boms/touch-header?bomId=BOM-ITEM-1007|A|STD
+X-API-Key: {{apiKey}}
+### boms deletes 카운트 증가 확인
+POST {{host}}/dev/boms/touch-header?bomId=BOM-ITEM-1008|A|STD
+X-API-Key: {{apiKey}}
+### boms deletes 카운트 증가 확인
+POST {{host}}/dev/boms/touch-header?bomId=BOM-ITEM-1009|A|STD
+X-API-Key: {{apiKey}}
+### boms deletes 카운트 증가 확인
+POST {{host}}/dev/boms/touch-header?bomId=BOM-ITEM-1010|A|STD
+X-API-Key: {{apiKey}}
+### boms 11
+POST {{host}}/dev/boms/touch-header?bomId=BOM-ITEM-1011|A|STD
 X-API-Key: {{apiKey}}

@@ -1,0 +1,43 @@
+# src/main/resources/application.yml
+server:
+  port: 8081
+  tomcat:
+    # 액세스 로그 활성화
+    access log:
+      enabled: true
+      basedir: .
+      directory: logs
+      prefix: access
+      suffix: .log
+      rotate: true
+      pattern: "%t %a \"%r\" %s %D \"%{User-Agent}i\" \"%{X-Idempotency-Key}i\""
+
+erp:
+  apiKey: change-me-demo-key
+idempotency:
+  ttlHours: 72
+
+spring:
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+# 디버그 모드 활성화 (문제 해결 시 주석 처리 또는 제거)
+logging:
+  level:
+    org.springframework.security: INFO
+
+mock:
+  enabled: true
+  api-key: change-me-demo-key           # 필요 시 X-API-KEY 체크 사용. 비우면 체크 안함
+  items:
+    max-rows: 100
+  boms:
+    max-rows: 5        # HOP 동작 눈에 보이게 작게. 필요 시 500 등으로
+

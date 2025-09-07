@@ -31,6 +31,19 @@ public class MockErpController {
 
     @Value("${mock.boms.max-rows:2}")
     private int bomsMaxRows;
+    @GetMapping("/plans")
+    public ResponseEntity<java.util.List<?>> plans(
+            @RequestHeader(value = "X-Caller", required = false) String caller,
+            @RequestParam(required = false) String updatedSince,
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "100") Integer size) {
+
+        log.info("[MOCK-ERP] caller={} GET /mock/plans raw updatedSince={} page={} size={}",
+                caller, updatedSince, page, size);
+
+        // 테스트 집중을 위해 빈 배열로 항상 200 반환
+        return ResponseEntity.ok(java.util.Collections.emptyList());
+    }
 
     // ITEMS
     @GetMapping("/items")
@@ -49,17 +62,15 @@ public class MockErpController {
 
     // BOMS
     @GetMapping("/boms")
-    public ResponseEntity<List<BomHeaderDto>> boms(@RequestParam(required = false) String updatedSince) {
-        try {
-            bomStore.seedIfEmpty();
-            OffsetDateTime since = parse(updatedSince);
-            var out = bomStore.listSince(since, bomsMaxRows);
-            log.info("[MOCK-ERP] GET /mock/boms since={} -> {}", since, out.size());
-            return ResponseEntity.ok(out);
-        } catch (Exception e) {
-            log.error("[MOCK-ERP] /mock/boms failed", e);
-            return ResponseEntity.ok(List.of()); // 테스트 편의
-        }
+    public ResponseEntity<List<BomHeaderDto>> boms(
+            @RequestHeader(value = "X-Caller", required = false) String caller,
+            @RequestParam(required = false) String updatedSince) {
+        bomStore.seedIfEmpty();
+        log.info("[MOCK-ERP] caller={} raw updatedSince={}", caller, updatedSince);
+        OffsetDateTime since = parse(updatedSince);
+        var out = bomStore.listSince(since, bomsMaxRows);
+        log.info("[MOCK-ERP] GET /mock/boms since={} -> {}", since, out.size());
+        return ResponseEntity.ok(out);
     }
 
     // DEV 시드/터치
@@ -96,33 +107,41 @@ public class MockErpController {
         return "OK";
     }
 
-    // 삭제/Unknown component/대량 시드 (경로 앞에 /mock 중복 제거)
+
     @PostMapping("/dev/boms/delete-header")
     public String deleteBomHeader(@RequestParam String bomId) {
-        if (bomId == null || bomId.isBlank()) throw new IllegalArgumentException("bomId empty");
         bomStore.deleteHeader(bomId);
         return "OK";
     }
 
     @PostMapping("/dev/boms/set-line-component")
+// 클래스에 @RequestMapping("/mock")가 있으면 메서드는 "/dev/..." 로!
     public String setLineComponent(@RequestParam String bomId,
-                                   @RequestParam Integer lineNo,
+                                   @RequestParam String lineNo,
                                    @RequestParam String componentId) {
-        if (bomId == null || bomId.isBlank()) throw new IllegalArgumentException("bomId empty");
-        if (lineNo == null || lineNo <= 0) throw new IllegalArgumentException("lineNo invalid");
-        if (componentId == null || componentId.isBlank()) throw new IllegalArgumentException("componentId empty");
-        bomStore.setLineComponent(bomId, lineNo, componentId);
+        int ln = Integer.parseInt(lineNo.replaceAll("\\D", "")); // 숫자만 추출(DEV 편의)
+        bomStore.setLineComponent(bomId, ln, componentId);
         return "OK";
     }
 
     @PostMapping("/dev/boms/seed-bulk")
-    public String seedBomBulk(@RequestParam(defaultValue = "50") Integer count) {
+    public String seedBomBulk(@RequestParam(defaultValue="50") Integer count) {
         int c = (count == null || count < 1) ? 1 : Math.min(count, 1000);
-        var base = OffsetDateTime.now().minusMinutes(20);
-        for (int i = 1; i <= c; i++) {
-            String itemId = "ITEM-" + (1000 + i);
-            // addOrReplace(itemId, revision, effFrom/updatedAt 기준 시각)
-            bomStore.addOrReplace(itemId, "A", "", base); // ← 빈 문자열 파라미터 제거(시그니처 일치)
+        var base = java.time.OffsetDateTime.now().minusMinutes(20);
+        for (int i=1; i<=c; i++) {
+            String itemId = "ITEM-" + (1000+i);
+            // altCode는 기본 "STD"
+            bomStore.addOrReplace(itemId, "A", "STD", base);
+        }
+        return "OK";
+    }
+
+    @PostMapping("/dev/boms/touch-bulk")
+    public String touchBomBulk(@RequestParam(defaultValue="50") Integer count) {
+        int c = (count == null || count < 1) ? 1 : Math.min(count, 1000);
+        for (int i=1; i<=c; i++) {
+            String bomId = "BOM-ITEM-" + (1000+i) + "|A|STD";
+            try { bomStore.touchHeader(bomId); } catch (Exception ignore) {}
         }
         return "OK";
     }
