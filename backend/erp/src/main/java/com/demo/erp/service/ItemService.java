@@ -32,6 +32,8 @@ public class ItemService {
             upsert(new ItemDto("I-0002", "I-0002","EA","F", now.minusHours(2), false));
             upsert(new ItemDto("RM-001","RM-001","EA","R", now.minusHours(1), true));
             upsert(new ItemDto("RM-002","RM-002","EA","R", now.minusMinutes(30), false));
+            upsert(new ItemDto("RM-003","RM-003","EA","R", now.plusHours(2), false));
+            upsert(new ItemDto("RM-004","RM-004","EA","R", now.plusHours(4), false));
         }
     }
 }

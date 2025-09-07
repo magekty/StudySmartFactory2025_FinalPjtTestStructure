@@ -143,7 +143,7 @@ PUT {{host}}/plans
 X-API-Key: {{apiKey}}
 Content-Type: application/json
 
-{ "planId":"PL-0001","planLineNo":1,"itemId":"I-0001", "qty":120,"dueDateUtc":"2025-09-03T00:00:00Z", "priority":2,"unit":"BOX","isDeleted":false }
+{ "planId":"PL-0001","planLineNo":1,"itemId":"I-0001", "qty":130,"dueDateUtc":"2025-09-04T00:00:00Z", "priority":2,"unit":"BOX","isDeleted":false }
 
 ### plans 삭제
 PUT {{host}}/plans

@@ -196,3 +196,5 @@ FROM tb_daily_reconciliation
 WHERE date_kst = CURDATE() AND kind='BACKFLUSH';
 
 UPDATE tb_sync_cursor SET last_synced_at='1970-01-01 00:00:00' WHERE cursor_key='erp_plans';
+SELECT item_id, revision, alt_code, COUNT(*) c FROM tb_bom_header GROUP BY 1,2,3 HAVING c>1;
+SELECT bom_id, line_no, COUNT(*) c FROM tb_bom_line GROUP BY 1,2 HAVING c>1;

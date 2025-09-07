@@ -1,17 +1,28 @@
 package com.globalmed.mes.mes_api.integration.erp.sync;
 
+import com.globalmed.mes.mes_api.config.SyncProperties;
 import com.globalmed.mes.mes_api.integration.erp.ErpIncrementalClient;
-import com.globalmed.mes.mes_api.integration.erp.dto.*;
+import com.globalmed.mes.mes_api.integration.erp.dto.BomHeaderDto;
+import com.globalmed.mes.mes_api.integration.erp.dto.BomLineDto;
+import com.globalmed.mes.mes_api.integration.erp.dto.ItemDto;
 import com.globalmed.mes.mes_api.sync.SyncAuditLogger;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.*;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class IncrementalSyncService {
@@ -19,6 +30,10 @@ public class IncrementalSyncService {
     private final ErpIncrementalClient client;
     private final JdbcTemplate jdbc;
     private final SyncAuditLogger audit;
+    private final SyncProperties syncProps;
+
+
+
 
     // ITEMS 증분
     public void syncItems() {
@@ -65,42 +80,37 @@ public class IncrementalSyncService {
         }
     }
 
-    // BOMS 증분 (Option B: alt_code/line_no 반영)
-    // BOMS 증분: 내부 HOP 루프 + 감사 로그 추가
+    // BOMS 증분: 내부 HOP 루프 + 감사 로그 추가, (Option B: alt_code/line_no 반영), HOP 루프 + 감사 + batch + 스킵 토글
     public void syncBoms() {
+        int maxHops = syncProps.getBoms().getMaxHops();
+
         OffsetDateTime cursor = getCursor("erp_boms");
 
-        // since 계산: UTC, 미래 클램프, EPOCH은 -1초 미적용
         OffsetDateTime nowUtcOdt = OffsetDateTime.now(ZoneOffset.UTC);
         OffsetDateTime base = (cursor == null) ? epochUtc() : cursor.withOffsetSameInstant(ZoneOffset.UTC);
         base = base.isAfter(nowUtcOdt) ? nowUtcOdt : base;
-        OffsetDateTime since = normalizeSince(cursor);
+        OffsetDateTime since = base.toInstant().equals(Instant.EPOCH) ? base : base.minusSeconds(1);
 
         long auditId = audit.start("BOMS", since.toInstant(), nowUtcOdt.toInstant());
 
-        int fetchedTotal = 0, upserts = 0, deletes = 0;
+        int fetchedTotal = 0, upserts = 0, deletes = 0, skips = 0;
         OffsetDateTime processedMax = (cursor == null) ? epochUtc() : cursor.withOffsetSameInstant(ZoneOffset.UTC);
 
         try {
-            final int MAX_HOPS = 1000;
+            OffsetDateTime pageSince = since;
 
-            for (int hop = 0; hop < MAX_HOPS; hop++) {
-                List<BomHeaderDto> headers = client.boms(since);
-                OffsetDateTime maxTs = (cursor == null) ? epochUtc() : cursor;
+            for (int hop = 0; hop < maxHops; hop++) {
+                List<BomHeaderDto> headers = client.boms(pageSince);
                 int got = (headers == null ? 0 : headers.size());
                 fetchedTotal += got;
 
-                // 페이지 로그
-                // 예: [BOM_SYNC] since=... got=...
-                System.out.println("[BOM_SYNC] since=" + since + " got=" + got);
-
+                log.info("[BOM_SYNC] hop={} since={} got={}", hop, pageSince, got);
                 if (got == 0) break;
 
                 for (BomHeaderDto h : headers) {
-                    // syncBoms() 내부, 헤더 루프 안에서 bom_id 결정/사용 부분 교체
                     String altCode = (h.altCode() == null || h.altCode().isBlank()) ? "STD" : h.altCode();
                     String computed = makeBomId(h.itemId(), h.revision(), altCode);
-                    String bomId = resolveBomId(h.itemId(), h.revision(), altCode, computed); // ← 핵심
+                    String bomId = resolveBomId(h.itemId(), h.revision(), altCode, computed);
 
                     if (Boolean.TRUE.equals(h.isDeleted())) {
                         jdbc.update("UPDATE tb_bom_header SET is_deleted=1, deleted_at=UTC_TIMESTAMP(), modified_by='sync', modified_at=UTC_TIMESTAMP() WHERE bom_id=?", bomId);
@@ -111,76 +121,111 @@ public class IncrementalSyncService {
                         OffsetDateTime effFrom = (h.effectiveFromUtc() != null) ? h.effectiveFromUtc() : nowUtc; // NOT NULL 보정
                         OffsetDateTime effTo   = h.effectiveToUtc();
 
-                        // 헤더 upsert: bom_id는 위에서 확정한 값 사용
+                        // 헤더 upsert
                         jdbc.update("""
-                                INSERT INTO tb_bom_header (bom_id, item_id, revision, alt_code, eff_from, eff_to, is_deleted, created_by, created_at)
-                                VALUES (?, ?, ?, ?, ?, ?, 0, 'sync', UTC_TIMESTAMP())
-                                ON DUPLICATE KEY UPDATE
-                                  item_id   = VALUES(item_id),
-                                  revision  = VALUES(revision),
-                                  alt_code  = VALUES(alt_code),
-                                  eff_from  = VALUES(eff_from),
-                                  eff_to    = VALUES(eff_to),
-                                  is_deleted= 0,
-                                  deleted_at= NULL,
-                                  modified_by='sync',
-                                  modified_at=UTC_TIMESTAMP()
-                                """,
+                            INSERT INTO tb_bom_header (bom_id, item_id, revision, alt_code, eff_from, eff_to, is_deleted, created_by, created_at)
+                            VALUES (?, ?, ?, ?, ?, ?, 0, 'sync', UTC_TIMESTAMP())
+                            ON DUPLICATE KEY UPDATE
+                              item_id   = VALUES(item_id),
+                              revision  = VALUES(revision),
+                              alt_code  = VALUES(alt_code),
+                              eff_from  = VALUES(eff_from),
+                              eff_to    = VALUES(eff_to),
+                              is_deleted= 0,
+                              deleted_at= NULL,
+                              modified_by='sync',
+                              modified_at=UTC_TIMESTAMP()
+                            """,
                                 bomId, h.itemId(), h.revision(), altCode, ts(effFrom), ts(effTo)
                         );
                         upserts++;
 
-                        // 라인 전량 교체: 같은 bomId로 삭제 후 재삽입
+                        // 라인 전량 교체
                         jdbc.update("DELETE FROM tb_bom_line WHERE bom_id=?", bomId);
 
                         if (h.lines() != null && !h.lines().isEmpty()) {
-                            for (int i = 0; i < h.lines().size(); i++) {
-                                BomLineDto l = h.lines().get(i);
+                            // batch 파라미터 구성
+                            final List<BomLineDto> lines = h.lines();
+                            final OffsetDateTime nowForLines = OffsetDateTime.now(ZoneOffset.UTC);
 
-                                Integer lineNo = (l.lineNo() != null ? l.lineNo() : (i + 1)); // 폴백
-                                if (lineNo <= 0) throw new IllegalStateException("BOM_LINE_NO_INVALID: bomId=" + bomId + ", idx=" + i);
+                            // component 매핑/lineNo 폴백을 먼저 적용하며, 스킵할 라인은 제거
+                            final java.util.ArrayList<BomLineDto> filtered = new java.util.ArrayList<>();
+                            final java.util.ArrayList<Integer> lineNos = new java.util.ArrayList<>();
+                            final java.util.ArrayList<String> compIds = new java.util.ArrayList<>();
 
-                                String componentItemId = findItemIdByIdOrCode(reqNonBlank(l.componentId(), "componentId"));
+                            for (int i = 0; i < lines.size(); i++) {
+                                BomLineDto l = lines.get(i);
 
-                                jdbc.update("""
-                                        INSERT INTO tb_bom_line (bom_id, line_no, component_id, qty, uom, scrap_rate, is_deleted, created_by, created_at)
-                                        VALUES (?, ?, ?, ?, ?, ?, 0, 'sync', UTC_TIMESTAMP())
-                                        ON DUPLICATE KEY UPDATE
-                                          qty        = VALUES(qty),
-                                          uom        = VALUES(uom),
-                                          scrap_rate = VALUES(scrap_rate),
-                                          is_deleted = 0,
-                                          deleted_at = NULL,
-                                          modified_by= 'sync',
-                                          modified_at= UTC_TIMESTAMP()
-                                        """,
-                                        bomId,
-                                        lineNo,
-                                        componentItemId,
-                                        l.qty() == null ? 0 : l.qty(),
-                                        (l.uom() == null || l.uom().isBlank()) ? "EA" : l.uom(),
-                                        l.scrapRate() == null ? 0 : l.scrapRate()
+                                // lineNo 폴백
+                                Integer lineNo = (l.lineNo() != null ? l.lineNo() : (i + 1));
+                                if (lineNo <= 0) {
+                                    log.warn("[BOM_SYNC] invalid lineNo -> skip: bomId={}, idx={}, rawLineNo={}", bomId, i, l.lineNo());
+                                    skips++;
+                                    continue; // 강제 스킵
+                                }
+
+                                // component 매핑 (스킵 토글 반영)
+                                String candidate = reqNonBlank(l.componentId(), "componentId");
+                                String itemId = resolveComponentItemId(candidate);
+                                if (itemId == null) {
+                                    // 스킵 모드에서만 여기 온다
+                                    log.warn("[BOM_SYNC] skip unknown component: bomId={}, lineNo={}, candidate={}", bomId, lineNo, candidate);
+                                    skips++;
+                                    continue;
+                                }
+
+                                filtered.add(l);
+                                lineNos.add(lineNo);
+                                compIds.add(itemId);
+                            }
+
+                            if (!filtered.isEmpty()) {
+                                // batch INSERT
+                                jdbc.batchUpdate("""
+                                    INSERT INTO tb_bom_line (bom_id, line_no, component_id, qty, uom, scrap_rate, is_deleted, created_by, created_at)
+                                    VALUES (?, ?, ?, ?, ?, ?, 0, 'sync', UTC_TIMESTAMP())
+                                    ON DUPLICATE KEY UPDATE
+                                      qty        = VALUES(qty),
+                                      uom        = VALUES(uom),
+                                      scrap_rate = VALUES(scrap_rate),
+                                      is_deleted = 0,
+                                      deleted_at = NULL,
+                                      modified_by= 'sync',
+                                      modified_at= UTC_TIMESTAMP()
+                                    """,
+                                        new BatchPreparedStatementSetter() {
+                                            @Override
+                                            public void setValues(PreparedStatement ps, int idx) throws SQLException {
+                                                BomLineDto l = filtered.get(idx);
+                                                ps.setString(1, bomId);
+                                                ps.setInt(2, lineNos.get(idx));
+                                                ps.setString(3, compIds.get(idx));
+                                                ps.setBigDecimal(4, l.qty() == null ? java.math.BigDecimal.ZERO : l.qty());
+                                                ps.setString(5, (l.uom() == null || l.uom().isBlank()) ? "EA" : l.uom());
+                                                ps.setBigDecimal(6, l.scrapRate() == null ? java.math.BigDecimal.ZERO : l.scrapRate());
+                                            }
+                                            @Override
+                                            public int getBatchSize() { return filtered.size(); }
+                                        }
                                 );
-                                upserts++;
+                                upserts += filtered.size();
                             }
                         }
                     }
 
-                    // processedMax 업데이트(헤더/라인의 updatedAt 최대)
-                    if (h.updatedAt() != null && (maxTs == null || h.updatedAt().isAfter(maxTs))) maxTs = h.updatedAt();
+                    // processedMax(헤더/라인 updatedAt 최대) 갱신
+                    if (h.updatedAt() != null && h.updatedAt().isAfter(processedMax)) processedMax = h.updatedAt();
                     if (h.lines() != null) {
                         for (BomLineDto l : h.lines()) {
-                            if (l.updatedAt() != null && (maxTs == null || l.updatedAt().isAfter(maxTs))) maxTs = l.updatedAt();
+                            if (l.updatedAt() != null && l.updatedAt().isAfter(processedMax)) processedMax = l.updatedAt();
                         }
                     }
                 }
-                if (!headers.isEmpty() && maxTs != null && (cursor == null || maxTs.isAfter(cursor))) {
-                    setCursor("erp_boms", clampToNow(maxTs));
-                }
-                // 다음 HOP: processedMax가 증가했을 때만 전진
+
+                // 다음 HOP
                 OffsetDateTime nextSince = processedMax.plusNanos(1);
-                if (!nextSince.isAfter(since)) break; // 진행 불가(무한루프 방지)
-                since = nextSince;
+                if (!nextSince.isAfter(pageSince)) break;
+                pageSince = nextSince;
             }
 
             // 커서 저장(미래 클램프)
@@ -188,9 +233,9 @@ public class IncrementalSyncService {
             if (processedMax != null && (cursor == null || processedMax.isAfter(cursor))) {
                 OffsetDateTime saveTs = processedMax.isAfter(nowClamp) ? nowClamp : processedMax;
                 setCursor("erp_boms", saveTs);
-                System.out.println("[BOM_SYNC] done fetched=" + fetchedTotal + " upserts=" + upserts + " deletes=" + deletes + " newCursor=" + saveTs);
+                log.info("[BOM_SYNC] done fetched={} upserts={} deletes={} skips={} newCursor={}", fetchedTotal, upserts, deletes, skips, saveTs);
             } else {
-                System.out.println("[BOM_SYNC] done fetched=" + fetchedTotal + " upserts=" + upserts + " deletes=" + deletes + " cursorUnchanged=" + cursor);
+                log.info("[BOM_SYNC] done fetched={} upserts={} deletes={} skips={} cursorUnchanged={}", fetchedTotal, upserts, deletes, skips, cursor);
             }
 
             audit.success(auditId, fetchedTotal, upserts, deletes, "OK");
@@ -284,6 +329,17 @@ public class IncrementalSyncService {
             );
         } catch (org.springframework.dao.EmptyResultDataAccessException e) {
             return computedBomId; // 없으면 새 규칙으로 생성한 bom_id 사용
+        }
+    }
+
+    private String resolveComponentItemId(String candidate) {
+        boolean skipUnknown = syncProps.getBoms().isSkipUnknownComponent();
+
+        try {
+            return findItemIdByIdOrCode(candidate);
+        } catch (Exception e) {
+            if (skipUnknown) return null; // 스킵 모드
+            throw e; // 엄격 모드
         }
     }
 }
