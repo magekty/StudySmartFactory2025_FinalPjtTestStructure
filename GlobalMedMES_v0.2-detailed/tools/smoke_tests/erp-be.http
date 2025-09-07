@@ -152,8 +152,38 @@ Content-Type: application/json
 
 { "planId":"PL-0001","planLineNo":1,"itemId":"I-0001", "qty":0,"dueDateUtc":"2025-09-03T00:00:00Z", "priority":2,"unit":"BOX","isDeleted":true }
 
-### plans 증분 확인
-GET {{host}}/plans?updatedSince=2025-09-02T03:09:17Z
+@host = http://localhost:8081/mock
+@apiKey = change-me-demo-key
+
+
+### items 시드 확인
+GET  {{host}}/items
 X-API-Key: {{apiKey}}
 Content-Type: application/json
 
+### boms 시드 확인
+GET  {{host}}/boms
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+### items 시드 POST 확인
+POST {{host}}/dev/items/seed
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+### boms 시드 POST 확인
+POST {{host}}/dev/boms/seed
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+### boms deletes 카운트 증가 확인
+POST {{host}}/dev/boms/delete-header?bomId=BOM-ITEM-100|A
+X-API-Key: {{apiKey}}
+Content-Type: application/json
+
+### boms deletes 카운트 증가 확인
+POST {{host}}/dev/boms/set-line-component?bomId=BOM-ITEM-200|A\&lineNo=1\&componentId=DOES\_NOT\_EXIST
+X-API-Key: {{apiKey}}
+### boms deletes 카운트 증가 확인
+POST {{host}}/dev/boms/seed-bulk?count=30
+X-API-Key: {{apiKey}}

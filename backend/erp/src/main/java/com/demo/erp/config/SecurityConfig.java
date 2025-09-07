@@ -14,6 +14,7 @@ import org.springframework.web.cors.*;
 
 import java.util.List;
 
+@Profile("dev")
 @Configuration
 @EnableConfigurationProperties(ErpSecurityProps.class)
 public class SecurityConfig {
@@ -43,9 +44,11 @@ public class SecurityConfig {
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                         "/", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
-                        "/actuator/**", "/error", "/favicon.ico"
+                        "/actuator/**", "/mock/**", "/error", "/items", "/boms", "/dev/**", "/favicon.ico"
                 ).permitAll()
-                .anyRequest().authenticated()
+                .anyRequest()
+                .permitAll()
+//                .authenticated() // 운영시 활성
         );
 
         http.addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter.class);

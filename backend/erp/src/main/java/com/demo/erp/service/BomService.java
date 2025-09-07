@@ -34,9 +34,9 @@ public class BomService {
                     "BOM-TEST-01", "I-0001", "A",
                     now, null,
                     now, false,
-                    List.of(new BomLineDto("RM-001", 1.0, "EA", 0.0),
-                            new BomLineDto("RM-002", 0.5, "EA", 0.0),
-                            new BomLineDto("RM-003", 2.0, "EA", 0.0))
+                    List.of(new BomLineDto(1,"RM-001", 1.0, "EA", 0.0, now, false),
+                            new BomLineDto(2,"RM-002", 0.5, "EA", 0.0, now, false),
+                            new BomLineDto(3,"RM-003", 2.0, "EA", 0.0, now, false))
             ));
         }
     }
