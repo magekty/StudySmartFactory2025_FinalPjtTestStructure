@@ -980,3 +980,17 @@ CREATE TABLE IF NOT EXISTS tb_sync_audit (
   PRIMARY KEY (audit_id),
   KEY idx_kind_time (kind, started_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- src/main/resources/db/migration/Vxx__alter_bom_for_altcode_and_lineno.sql
+ALTER TABLE `tb_bom_header`
+  ADD COLUMN `alt_code` VARCHAR(20) NOT NULL DEFAULT 'STD' AFTER `revision`,
+  ADD UNIQUE INDEX `uq_bom_header_nat` (`item_id`,`revision`,`alt_code`);
+
+ALTER TABLE `tb_bom_line`
+  ADD COLUMN `line_no` INT NOT NULL AFTER `bom_id`;
+
+ALTER TABLE `tb_bom_line`
+  DROP INDEX `uk_bom_comp`;
+
+CREATE UNIQUE INDEX `uq_bom_line_nat` ON `tb_bom_line` (`bom_id`,`line_no`);
+CREATE INDEX `ix_bomline_comp` ON `tb_bom_line` (`component_id`);
