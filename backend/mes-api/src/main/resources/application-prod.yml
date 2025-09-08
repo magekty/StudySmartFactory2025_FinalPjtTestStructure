@@ -61,20 +61,12 @@ management:
         include: health,info
 
 sync:
-  fixedDelay: 300000
+  fixedDelay: 30000
   initialDelay: 10000
   audit:
     enabled: true
-  boms:
-    enabled: true
-    maxHops: 1000               # A: HOP 상한(운영은 1000이면 넉넉)
-    skipUnknownComponent: true # C: 컴포넌트 미존재 라인 스킵 토글(운영은 false 권장, QA에선 true로도 점검)
   cursor:
     epsilon-nanos: 1
-  items:
-    enabled: true
-  plans:
-    enabled: true
-  scheduler:
-    # 증분 스케줄 주기(초)
-    interval-seconds: 30
+  boms:
+    maxHops: 1000               # A: HOP 상한(운영은 1000이면 넉넉)
+    skipUnknownComponent: true # C: 컴포넌트 미존재 라인 스킵 토글(운영은 false 권장, QA에선 true로도 점검)

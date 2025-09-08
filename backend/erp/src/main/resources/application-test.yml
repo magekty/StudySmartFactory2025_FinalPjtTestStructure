@@ -32,14 +32,12 @@ management:
 logging:
   level:
     org.springframework.security: INFO
-    root: info
-    com.demo.erp.web.mock: info
 
 mock:
-  enabled: false
+  enabled: true
   api-key: change-me-demo-key           # 필요 시 X-API-KEY 체크 사용. 비우면 체크 안함
   items:
     max-rows: 100
   boms:
-    max-rows: 2        # HOP 동작 눈에 보이게 작게. 필요 시 500 등으로
+    max-rows: 5        # HOP 동작 눈에 보이게 작게. 필요 시 500 등으로
 

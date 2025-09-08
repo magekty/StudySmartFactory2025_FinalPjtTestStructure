@@ -10,12 +10,14 @@ import com.demo.erp.web.dto.PlanLineView;
 import com.demo.erp.web.dto.PlanUpsertDto;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping
 public class ErpIncrementalController {
@@ -61,6 +63,7 @@ public class ErpIncrementalController {
                                                     @RequestParam(defaultValue = "0") int page,
                                                     @RequestParam(defaultValue = "100") int size) {
         if (size > 100) size = 100;
+        log.info("//{}//", ResponseEntity.ok(planService.list(updatedSince, page, size)));
         return ResponseEntity.ok(planService.list(updatedSince, page, size));
     }
 

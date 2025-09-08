@@ -155,6 +155,10 @@ Content-Type: application/json
 @host = http://localhost:8081/mock
 @apiKey = change-me-demo-key
 
+###
+GET http://localhost:8081/items?updatedSince=1970-01-01T00:00:00Z
+X-API-Key: {{apiKey}}
+Content-Type: application/json
 
 ### items 시드 확인
 GET  {{host}}/items
@@ -187,10 +191,10 @@ X-API-Key: {{apiKey}}
 Content-Type: application/json
 
 ### boms deletes 카운트 증가 확인
-POST {{host}}/dev/boms/seed-bulk?count=5
+POST {{host}}/dev/boms/seed-bulk?count=10
 X-API-Key: {{apiKey}}
 ### boms deletes 카운트 증가 확인
-POST {{host}}/dev/boms/touch-bulk?count=5
+POST {{host}}/dev/boms/touch-bulk?count=10
 X-API-Key: {{apiKey}}
 
 ### boms 1

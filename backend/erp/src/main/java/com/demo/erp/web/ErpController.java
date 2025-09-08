@@ -13,8 +13,8 @@ import java.util.UUID;
 @RequestMapping("/erp") // ← 클래스 레벨 베이스 경로 고정
 public class ErpController {
 
-    private final com.demo.erp.web.IdempotencyService idem;
-    public ErpController(com.demo.erp.web.IdempotencyService idem) { this.idem = idem; }
+    private final IdempotencyService idem;
+    public ErpController(IdempotencyService idem) { this.idem = idem; }
 
     private ResponseEntity<?> replayOrNull(HttpServletRequest r) {
         return idem.replayIfPresent(r.getMethod(), r.getRequestURI(), r.getHeader("X-Idempotency-Key"));

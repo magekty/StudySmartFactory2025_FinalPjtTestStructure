@@ -47,8 +47,8 @@ public class SecurityConfig {
                         "/actuator/**", "/mock/**", "/error", "/items", "/boms", "/dev/**", "/favicon.ico"
                 ).permitAll()
                 .anyRequest()
-                .permitAll()
-//                .authenticated() // 운영시 활성
+//                .permitAll()
+                .authenticated() // 운영시 활성
         );
 
         http.addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter.class);
