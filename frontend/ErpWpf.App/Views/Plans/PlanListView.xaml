@@ -1,7 +1,12 @@
-﻿<!-- ErpWpf.App/Views/Plans/PlanListView.xaml -->
+﻿<!-- PlanListView.xaml (수정본) -->
+<!-- 핵심 수정: 컨버터 네임스페이스에 assembly 지정 + UserControl.Resources 추가 -->
 <UserControl x:Class="ErpWpf.App.Views.Plans.PlanListView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:conv="clr-namespace:ErpWpf.App.Converters">
+
+
+
     <DockPanel Margin="8">
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8" VerticalAlignment="Center">
             <TextBlock Text="기간:" VerticalAlignment="Center"/>
@@ -28,6 +33,37 @@
               IsReadOnly="True"
               AutoGenerateColumns="False">
             <DataGrid.Columns>
+
+                <DataGridTemplateColumn Header="배지" Width="180">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="0">
+                                <Border Background="#e0e0e0" Padding="4,2" CornerRadius="4"
+                        Visibility="{Binding Workflow, Converter={conv:FlagEnumToVisibilityConverter}, ConverterParameter=Created}">
+                                    <TextBlock Text="생성"/>
+                                </Border>
+                                <Border Background="#d0f0d0" Padding="4,2" CornerRadius="4"
+                        Visibility="{Binding Workflow, Converter={conv:FlagEnumToVisibilityConverter}, ConverterParameter=Approved}">
+                                    <TextBlock Text="승인"/>
+                                </Border>
+                                <Border Background="#d0e8ff" Padding="4,2" CornerRadius="4"
+                        Visibility="{Binding Workflow, Converter={conv:FlagEnumToVisibilityConverter}, ConverterParameter=Released}">
+                                    <TextBlock Text="배포"/>
+                                </Border>
+                                <Border Background="#fff4c2" Padding="4,2" CornerRadius="4"
+                        Visibility="{Binding Workflow, Converter={conv:FlagEnumToVisibilityConverter}, ConverterParameter=OnHold}">
+                                    <TextBlock Text="보류"/>
+                                </Border>
+                                <Border Background="#f0f0f0" Padding="4,2" CornerRadius="4"
+                        Visibility="{Binding Workflow, Converter={conv:FlagEnumToVisibilityConverter}, ConverterParameter=Canceled}">
+                                    <TextBlock Text="취소"/>
+                                </Border>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- 기존 컬럼 -->
                 <DataGridTextColumn Header="PlanId" Binding="{Binding PlanId}" Width="*" />
                 <DataGridTextColumn Header="LineNo" Binding="{Binding PlanLineNo}" Width="80" />
                 <DataGridTextColumn Header="Item" Binding="{Binding ItemId}" Width="*" />
@@ -39,6 +75,5 @@
                 <DataGridTextColumn Header="UpdatedAt" Binding="{Binding UpdatedAt}" Width="200" />
             </DataGrid.Columns>
         </DataGrid>
-        
     </DockPanel>
 </UserControl>

@@ -22,3 +22,31 @@ public sealed class PlanPage
     public int size { get; set; }
     public bool last { get; set; }
 }
+public sealed record PlanListItem(
+    string PlanId,
+    int LineNo,
+    string ItemId,
+    string ItemName,
+    decimal Qty,
+    string Uom,
+    System.DateTimeOffset Due,
+    int Priority,
+    bool Deleted,
+    System.DateTimeOffset UpdatedAt,
+    string? BomRev,
+    string? BomAlt,
+    string Source // "ERP" | "MES"
+);
+
+public sealed record PlanDetailDto(
+    string PlanId,
+    string ItemId,
+    decimal Qty,
+    string Uom,
+    System.DateTimeOffset Due,
+    int Priority,
+    System.DateTimeOffset UpdatedAt,
+    string? BomRev,
+    string? BomAlt,
+    ErpWpf.App.Domain.Plans.WorkflowBadge Workflow
+);
