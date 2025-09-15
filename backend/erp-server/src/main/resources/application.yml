@@ -1,25 +1,35 @@
 spring:
+  application:
+    name: erp-mvp
   datasource:
+    url: jdbc:mysql://localhost:3308/erp_mvp?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=utf8&serverTimezone=UTC
+    username: root
+    password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3308/erp_fd_db?useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
-    username: root # 실제 MySQL 사용자 이름으로 변경
-    password: root # 실제 MySQL 비밀번호로 변경
   jpa:
     hibernate:
-      ddl-auto: update # 개발 단계에서는 'update'로 설정
-    show-sql: true # 실행되는 SQL 쿼리를 콘솔에 출력
+      ddl-auto: none
+    open-in-view: false
     properties:
       hibernate:
-        format_sql: true # SQL 쿼리를 보기 좋게 포맷
+        format_sql: true
+        show_sql: false
+        jdbc.time_zone: UTC
+        dialect: org.hibernate.dialect.MySQL8Dialect
+  jackson:
+    time-zone: UTC
 
 server:
   port: 8081
 
 springdoc:
   api-docs:
-    path: /api-docs
+    path: /v3/api-docs
   swagger-ui:
-    path: /swagger-ui.html
+    path: /swagger-ui
 
-jwt:
-  secret: your-secret-key-that-is-at-least-256-bits # 256비트 이상(32자 이상)의 비밀키
+logging:
+  level:
+    root: INFO
+    org.springframework.web: DEBUG
+    org.springdoc: DEBUG
