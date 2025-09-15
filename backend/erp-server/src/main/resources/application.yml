@@ -18,6 +18,10 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
   jackson:
     time-zone: UTC
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
 
 server:
   port: 8081
@@ -33,3 +37,16 @@ logging:
     root: INFO
     org.springframework.web: DEBUG
     org.springdoc: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: info, health
+  endpoint:
+    health:
+      show-details: never
+info:
+  app:
+    name: erp-mvp
+    version: 0.1.0

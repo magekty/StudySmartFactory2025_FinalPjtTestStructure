@@ -17,4 +17,10 @@ public interface BomLineRepository extends JpaRepository<BomLine, String> {
           and l.deleted = false
         """)
     List<BomLine> findWithComponentByBomId(String bomId);
+
+    @Query(""" 
+            select l from BomLine l join fetch l.component c
+             where l.bom.id = :bomId and l.deleted = false
+            """)
+    List findLinesWithComponent(String bomId);
 }

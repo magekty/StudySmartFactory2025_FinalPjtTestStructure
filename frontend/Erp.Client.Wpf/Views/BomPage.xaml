@@ -1,0 +1,65 @@
+﻿<Window x:Class="Erp.Client.Wpf.Views.BomPage"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="BOM 관리" Height="720" Width="1100">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 상단 검색/입력 영역 -->
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+            <TextBlock Text="BOM ID" VerticalAlignment="Center"/>
+            <TextBox x:Name="txtBomId" Width="320" Margin="8,0,0,0"/>
+            <Button x:Name="btnLoad" Content="라인 조회" Width="120" Margin="8,0,0,0"/>
+
+            <TextBlock Text="ParentLineId" Margin="24,0,0,0" VerticalAlignment="Center"/>
+            <TextBox x:Name="txtParent" Width="180" Margin="8,0,0,0"/>
+
+            <TextBlock Text="Component ProductId" Margin="24,0,0,0" VerticalAlignment="Center"/>
+            <TextBox x:Name="txtComp" Width="220" Margin="8,0,0,0"/>
+        </StackPanel>
+
+        <!-- 중단: 그리드 + 추가 입력 -->
+        <DockPanel Grid.Row="1">
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="0,0,0,8">
+                <TextBlock Text="Qty" VerticalAlignment="Center"/>
+                <TextBox x:Name="txtQty" Width="100" Margin="8,0,0,0" Text="1.000000"/>
+                <TextBlock Text="ScrapRate" VerticalAlignment="Center" Margin="16,0,0,0"/>
+                <TextBox x:Name="txtScrap" Width="100" Margin="8,0,0,0" Text="0.000000"/>
+                <TextBlock Text="Note" VerticalAlignment="Center" Margin="16,0,0,0"/>
+                <TextBox x:Name="txtNote" Width="260" Margin="8,0,0,0"/>
+                <Button x:Name="btnAdd" Content="라인 추가" Width="120" Margin="16,0,0,0"/>
+            </StackPanel>
+
+            <DataGrid x:Name="gridLines" AutoGenerateColumns="False" IsReadOnly="True" ItemsSource="{Binding Lines}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="LineId" Binding="{Binding BomLineId}" Width="*"/>
+                    <DataGridTextColumn Header="Parent" Binding="{Binding ParentLineId}" Width="120"/>
+                    <DataGridTextColumn Header="ComponentId" Binding="{Binding ComponentProductId}" Width="*"/>
+                    <DataGridTextColumn Header="Code" Binding="{Binding ComponentCode}" Width="120"/>
+                    <DataGridTextColumn Header="Name" Binding="{Binding ComponentName}" Width="200"/>
+                    <DataGridTextColumn Header="Qty" Binding="{Binding Qty}" Width="100"/>
+                    <DataGridTextColumn Header="Scrap" Binding="{Binding ScrapRate}" Width="100"/>
+                    <DataGridTextColumn Header="Note" Binding="{Binding Note}" Width="200"/>
+                    <DataGridTemplateColumn Header="Action" Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="삭제" Padding="6,2" Click="OnDeleteLineClick"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
+
+        <!-- 하단 상태 -->
+        <StatusBar Grid.Row="2">
+            <StatusBarItem>
+                <TextBlock Text="{Binding StatusMessage}"/>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>

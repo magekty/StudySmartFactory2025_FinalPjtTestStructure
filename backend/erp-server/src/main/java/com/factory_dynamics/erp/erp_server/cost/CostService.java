@@ -22,9 +22,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 
-@Service
-@Transactional
-public class CostService {
+@Service public class CostService {
+
 
     private final BomHeaderRepository bomHeaderRepo;
     private final BomLineRepository bomLineRepo;
@@ -50,41 +49,69 @@ public class CostService {
         this.detailRepo = detailRepo;
     }
 
-    public CostSnapshotResponse calculateByPlan(String planId, BigDecimal laborRate, BigDecimal overheadRate) {
+    // 미리보기 — 저장 안 함
+    public CostSnapshotResponse previewByPlan(String planId, BigDecimal laborRate, BigDecimal overheadRate) {
         ProductionPlan plan = planRepo.findById(planId)
                 .orElseThrow(() -> new BizException(HttpStatus.NOT_FOUND, "생산계획을 찾을 수 없음: " + planId));
-        CostSnapshot snapshot = calculateInternal(plan.getProduct(), plan.getQty(), plan, laborRate, overheadRate, LocalDate.now(ZoneOffset.UTC));
-        var details = detailRepo.findAllWithComponentBySnapshotId(snapshot.getId());
-        var detailDtos = details.stream().map(CostSnapshotDetailResponse::of).toList();
-        return CostSnapshotResponse.of(snapshot, detailDtos);
+
+        CalcResult result = calcOnly(plan.getProduct(), plan.getQty(), plan.getId(), laborRate, overheadRate, LocalDate.now(ZoneOffset.UTC));
+        return result.toResponse();
     }
 
-    public CostSnapshotResponse calculateByProduct(String productId, BigDecimal qty, BigDecimal laborRate, BigDecimal overheadRate, LocalDate baseDate) {
+    // 미리보기 — 저장 안 함
+    public CostSnapshotResponse previewByProduct(String productId, BigDecimal qty, BigDecimal laborRate, BigDecimal overheadRate, LocalDate baseDate) {
         Product product = productRepo.findById(productId)
                 .orElseThrow(() -> new BizException(HttpStatus.NOT_FOUND, "제품 없음: " + productId));
-        CostSnapshot snapshot = calculateInternal(product, qty, null, laborRate, overheadRate, baseDate == null ? LocalDate.now(ZoneOffset.UTC) : baseDate);
-        var details = detailRepo.findAllWithComponentBySnapshotId(snapshot.getId());
-        var detailDtos = details.stream().map(CostSnapshotDetailResponse::of).toList();
-        return CostSnapshotResponse.of(snapshot, detailDtos);
+
+        CalcResult result = calcOnly(product, qty, null, laborRate, overheadRate,
+                baseDate == null ? LocalDate.now(ZoneOffset.UTC) : baseDate);
+        return result.toResponse();
     }
 
-    private CostSnapshot calculateInternal(Product product, BigDecimal planQty, ProductionPlan plan,
-                                           BigDecimal laborRate, BigDecimal overheadRate, LocalDate baseDate) {
+    // 저장 — by-product
+    @Transactional
+    public CostSnapshotResponse saveByProduct(CostSaveByProductRequest req) {
+        Product product = productRepo.findById(req.productId())
+                .orElseThrow(() -> new BizException(HttpStatus.NOT_FOUND, "제품 없음: " + req.productId()));
+
+        CalcResult result = calcOnly(product, req.qty(), null, req.laborRate(), req.overheadRate(),
+                req.baseDate() == null ? LocalDate.now(ZoneOffset.UTC) : req.baseDate());
+
+        SavedResult saved = saveSnapshot(result, req.note());
+        return saved.toResponse();
+    }
+
+    // 저장 — by-plan
+    @Transactional
+    public CostSnapshotResponse saveByPlan(CostSaveByPlanRequest req) {
+        ProductionPlan plan = planRepo.findById(req.planId())
+                .orElseThrow(() -> new BizException(HttpStatus.NOT_FOUND, "생산계획 없음: " + req.planId()));
+
+        CalcResult result = calcOnly(plan.getProduct(), plan.getQty(), plan.getId(), req.laborRate(), req.overheadRate(), LocalDate.now(ZoneOffset.UTC));
+        SavedResult saved = saveSnapshot(result, req.note());
+        return saved.toResponse();
+    }
+
+    // 계산만 수행 — 엔티티 직접 노출 금지(필요 문자열/ID를 계산 시점에 복제)
+    private CalcResult calcOnly(Product product, BigDecimal planQty, String planId,
+                                BigDecimal laborRate, BigDecimal overheadRate, LocalDate baseDate) {
 
         BomHeader bom = bomHeaderRepo.findEffectiveActiveBom(product.getId(), baseDate)
                 .orElseThrow(() -> new BizException(HttpStatus.BAD_REQUEST, "유효한 활성 BOM이 없음"));
 
-        List<BomLine> lines = bomLineRepo.findByBom_IdAndDeletedFalse(bom.getId());
+        // fetch join으로 component 즉시 로딩(보수적 안전장치)
+        List<BomLine> lines = bomLineRepo.findLinesWithComponent(bom.getId());
+
         Map<String, List<BomLine>> children = new HashMap<>();
         for (BomLine l : lines) {
-            String parentKey = l.getParent() == null ? "ROOT" : l.getParent().getId();
+            String parentKey = (l.getParent() == null) ? "ROOT" : l.getParent().getId();
             children.computeIfAbsent(parentKey, k -> new ArrayList<>()).add(l);
         }
 
         List<ComponentRow> exploded = new ArrayList<>();
         dfsExplode("ROOT", children, BigDecimal.ONE, 0, new HashSet<>(), exploded, baseDate);
 
-        BigDecimal Q = scale6(planQty == null ? BigDecimal.ONE : planQty);
+        BigDecimal Q = scale6((planQty == null) ? BigDecimal.ONE : planQty);
 
         BigDecimal totalMaterial = BigDecimal.ZERO;
         for (ComponentRow row : exploded) {
@@ -100,29 +127,55 @@ public class CostService {
         BigDecimal overhead = scale6(totalMaterial.multiply(overheadRate));
         BigDecimal total = scale6(totalMaterial.add(labor).add(overhead));
 
+        return new CalcResult(
+                planId,
+                product.getId(),
+                Q, totalMaterial, labor, overhead, total,
+                scale6(laborRate), scale6(overheadRate),
+                "RATE",
+                LocalDateTime.now(ZoneOffset.UTC),
+                exploded
+        );
+    }
+
+    // 저장 — 연관은 반드시 영속 참조 사용
+    private SavedResult saveSnapshot(CalcResult calc, String note) {
+        Product productRef = productRepo.getReferenceById(calc.productId());
+        ProductionPlan planRef = null;
+        if (calc.planId() != null) {
+            planRef = planRepo.findById(calc.planId())
+                    .orElseThrow(() -> new BizException(HttpStatus.NOT_FOUND, "생산계획 없음: " + calc.planId()));
+            productRef = planRef.getProduct();
+        }
+
         CostSnapshot snapshot = CostSnapshot.builder()
                 .id(Uuids.newId())
-                .plan(plan)
-                .product(product)
-                .qty(Q)
-                .totalMaterial(totalMaterial)
-                .labor(labor)
-                .overhead(overhead)
-                .totalCost(total)
-                .laborRate(scale6(laborRate))
-                .overheadRate(scale6(overheadRate))
-                .method("RATE")
-                .calculatedAt(LocalDateTime.now(ZoneOffset.UTC))
+                .plan(planRef)
+                .product(productRef)
+                .qty(calc.qty())
+                .totalMaterial(calc.totalMaterial())
+                .labor(calc.labor())
+                .overhead(calc.overhead())
+                .totalCost(calc.totalCost())
+                .laborRate(calc.laborRate())
+                .overheadRate(calc.overheadRate())
+                .method(calc.method())
+                .calculatedAt(calc.calculatedAt())
+                .note(note)
                 .build();
-        snapshot.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
-        snapshot.setModifiedAt(snapshot.getCreatedAt());
-        snapshotRepo.save(snapshot);
+
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+        snapshot.setCreatedAt(now);
+        snapshot.setModifiedAt(now);
+
+        snapshot = snapshotRepo.save(snapshot);
 
         List<CostSnapshotDetail> details = new ArrayList<>();
-        for (ComponentRow r : exploded) {
+        for (ComponentRow r : calc.rows()) {
+            Product compRef = productRepo.getReferenceById(r.componentId); // 영속 참조
             CostSnapshotDetail d = CostSnapshotDetail.builder()
                     .snapshot(snapshot)
-                    .component(r.component)
+                    .component(compRef)
                     .level(r.level)
                     .baseQty(scale6(r.baseQty))
                     .scrapRate(scale6(r.scrapRate))
@@ -134,7 +187,9 @@ public class CostService {
         }
         detailRepo.saveAll(details);
 
-        return snapshot;
+        var savedDetails = detailRepo.findAllWithComponentBySnapshotId(snapshot.getId());
+        var detailDtos = savedDetails.stream().map(CostSnapshotDetailResponse::of).toList();
+        return new SavedResult(snapshot, detailDtos);
     }
 
     private void dfsExplode(String parentKey,
@@ -155,12 +210,20 @@ public class CostService {
 
             BigDecimal baseQty = scale6(multiplier.multiply(line.getQty().multiply(BigDecimal.ONE.add(line.getScrapRate()))));
 
-            MaterialCost cost = costRepo.findEffectiveCost(line.getComponent().getId(), baseDate)
-                    .orElseThrow(() -> new BizException(HttpStatus.BAD_REQUEST, "표준단가 없음: " + line.getComponent().getId()));
+            // 세션 안에서 필요한 값만 복제(엔티티 직접 노출 금지)
+            Product comp = line.getComponent();
+            String compId = comp.getId();
+            String compCode = comp.getProductCode();
+            String compName = comp.getName();
+
+            MaterialCost cost = costRepo.findEffectiveCost(compId, baseDate)
+                    .orElseThrow(() -> new BizException(HttpStatus.BAD_REQUEST, "표준단가 없음: " + compId));
 
             ComponentRow row = new ComponentRow();
             row.level = level;
-            row.component = line.getComponent();
+            row.componentId = compId;
+            row.componentCode = compCode;
+            row.componentName = compName;
             row.baseQty = baseQty;
             row.scrapRate = line.getScrapRate();
             row.unitCost = cost.getStdCost();
@@ -171,9 +234,65 @@ public class CostService {
         }
     }
 
+    // 내부 계산 결과(엔티티 아님)
+    private record CalcResult(
+            String planId,
+            String productId,
+            BigDecimal qty,
+            BigDecimal totalMaterial,
+            BigDecimal labor,
+            BigDecimal overhead,
+            BigDecimal totalCost,
+            BigDecimal laborRate,
+            BigDecimal overheadRate,
+            String method,
+            LocalDateTime calculatedAt,
+            List<ComponentRow> rows
+    ) {
+        CostSnapshotResponse toResponse() {
+            var detailDtos = rows.stream().map(r -> new CostSnapshotDetailResponse(
+                    null,               // snapshotDetailId (미리보기)
+                    r.componentId,
+                    r.componentCode,
+                    r.componentName,
+                    r.level,
+                    r.baseQty,
+                    r.scrapRate,
+                    r.explodedQty,
+                    r.unitCost,
+                    r.materialCost
+            )).toList();
+
+            return new CostSnapshotResponse(
+                    null,               // snapshotId (미리보기)
+                    planId,
+                    productId,
+                    qty,
+                    totalMaterial,
+                    labor,
+                    overhead,
+                    totalCost,
+                    laborRate,
+                    overheadRate,
+                    method,
+                    calculatedAt,
+                    null,
+                    detailDtos
+            );
+        }
+    }
+
+    private record SavedResult(CostSnapshot snapshot, List<CostSnapshotDetailResponse> details) {
+        CostSnapshotResponse toResponse() {
+            return CostSnapshotResponse.of(snapshot, details);
+        }
+    }
+
     private static class ComponentRow {
         int level;
-        Product component;
+        String componentId;
+        String componentCode;
+        String componentName;
         BigDecimal baseQty;
         BigDecimal scrapRate;
         BigDecimal unitCost;
@@ -182,6 +301,6 @@ public class CostService {
     }
 
     private static BigDecimal scale6(BigDecimal v) {
-        return v == null ? BigDecimal.ZERO : v.setScale(6, java.math.RoundingMode.HALF_UP);
+        return (v == null) ? BigDecimal.ZERO : v.setScale(6, java.math.RoundingMode.HALF_UP);
     }
 }
