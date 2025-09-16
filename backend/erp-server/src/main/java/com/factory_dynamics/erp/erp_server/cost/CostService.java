@@ -102,10 +102,11 @@ import java.util.*;
         // fetch join으로 component 즉시 로딩(보수적 안전장치)
         List<BomLine> lines = bomLineRepo.findLinesWithComponent(bom.getId());
 
-        Map<String, List<BomLine>> children = new HashMap<>();
+        // 수정된 코드
+        Map<String, List<BomLine>> children = new HashMap<String, List<BomLine>>();
         for (BomLine l : lines) {
             String parentKey = (l.getParent() == null) ? "ROOT" : l.getParent().getId();
-            children.computeIfAbsent(parentKey, k -> new ArrayList<>()).add(l);
+            children.computeIfAbsent(parentKey, k -> new ArrayList<BomLine>()).add(l);
         }
 
         List<ComponentRow> exploded = new ArrayList<>();
@@ -187,7 +188,7 @@ import java.util.*;
         }
         detailRepo.saveAll(details);
 
-        var savedDetails = detailRepo.findAllWithComponentBySnapshotId(snapshot.getId());
+        List<CostSnapshotDetail> savedDetails = detailRepo.findAllWithComponentBySnapshotId(snapshot.getId());
         var detailDtos = savedDetails.stream().map(CostSnapshotDetailResponse::of).toList();
         return new SavedResult(snapshot, detailDtos);
     }

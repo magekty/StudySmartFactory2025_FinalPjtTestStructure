@@ -22,5 +22,5 @@ public interface BomLineRepository extends JpaRepository<BomLine, String> {
             select l from BomLine l join fetch l.component c
              where l.bom.id = :bomId and l.deleted = false
             """)
-    List findLinesWithComponent(String bomId);
+    List<BomLine> findLinesWithComponent(String bomId);
 }
