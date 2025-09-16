@@ -54,7 +54,7 @@ namespace Erp.Client.Wpf.ViewModels
             CopyQueryToAddCommand = new RelayCommand(_ => AddBomId = QueryBomId);
             AddLineCommand = new RelayCommand(async _ => await AddLineAsync(), _ => CanAddLine());
             //AddChildCommand = new RelayCommand(async p => { System.Diagnostics.Debug.WriteLine($"AddChild param={p?.GetType().FullName} Can={CanAddLineBase()}"); await AddChildAsync(p); }, p => p is BomTreeNodeResponse && CanAddLineBase());
-            AddChildCommand = new RelayCommand(async p => { System.Diagnostics.Debug.WriteLine($"DeleteNode CanExecute: {p?.GetType().Name ?? "null"}"); await AddChildAsync(p); }, p => p is BomTreeNodeResponse && CanAddLineBase());
+            AddChildCommand = new RelayCommand(async p => { System.Diagnostics.Debug.WriteLine($"AddChildCommand CanExecute: {p?.GetType().Name ?? "null"}"); await AddChildAsync(p); }, p => p is BomTreeNodeResponse && CanAddLineBase());
             DeleteNodeCommand = new RelayCommand(async p => { System.Diagnostics.Debug.WriteLine($"DeleteNode CanExecute: {p?.GetType().Name ?? "null"}"); await DeleteNodeAsync(p); }, p => p is BomTreeNodeResponse);
             DeleteLineCommand = new RelayCommand(async p => await DeleteLineAsync(p), p => p is BomLineResponse);
         }

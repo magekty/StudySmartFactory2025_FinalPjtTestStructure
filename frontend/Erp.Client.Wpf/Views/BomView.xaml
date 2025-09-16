@@ -52,13 +52,13 @@
                     <Style TargetType="TreeViewItem">
                         <Setter Property="ContextMenu">
                             <Setter.Value>
-                                <ContextMenu DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}">
+                                <ContextMenu>
                                     <MenuItem Header="여기에 자식 라인 추가"
-                                  Command="{Binding AddChildCommand}"
-                                  CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Mode=Self}}" />
+                          Command="{Binding Data.AddChildCommand, Source={StaticResource proxy}}"
+                          CommandParameter="{Binding DataContext, RelativeSource={RelativeSource Mode=Self}}" />
                                     <MenuItem Header="이 라인 삭제"
-                                  Command="{Binding DeleteNodeCommand}"
-                                  CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Mode=Self}}" />
+                          Command="{Binding Data.DeleteNodeCommand, Source={StaticResource proxy}}"
+                          CommandParameter="{Binding DataContext, RelativeSource={RelativeSource Mode=Self}}" />
                                 </ContextMenu>
                             </Setter.Value>
                         </Setter>
