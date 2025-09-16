@@ -35,9 +35,4 @@ public class BomController {
         return ResponseEntity.ok(bomService.createHeader(productId, revision, active, effectiveFrom, effectiveTo, note, "system"));
     }
 
-    @Operation(summary = "BOM 라인 목록 조회")
-    @GetMapping("/{bomId}/lines")
-    public ResponseEntity<?> listLines(@PathVariable String bomId) {
-        return ResponseEntity.ok(bomQueryService.getLines(bomId));
-    }
 }

@@ -1,0 +1,115 @@
+<!-- 2) Views/BomView.xaml - MVVM Command 바인딩 (트리 컨텍스트 메뉴 + 그리드 삭제 버튼) -->
+<UserControl x:Class="Erp.Client.Wpf.Views.BomView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:Erp.Client.Wpf.Utils" 
+             mc:Ignorable="d"
+             d:DesignWidth="1100" d:DesignHeight="700">
+    <UserControl.Resources>
+        <local:BindingProxy x:Key="proxy" Data="{Binding}" />
+    </UserControl.Resources>
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <GroupBox Header="조회" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" Margin="12">
+                <TextBlock Text="BOM ID *" Foreground="IndianRed" VerticalAlignment="Center"/>
+                <TextBox Width="360" Margin="8,0,0,0" Text="{Binding QueryBomId, UpdateSourceTrigger=PropertyChanged}"/>
+                <Button Content="조회" Width="100" Margin="12,0,0,0" Command="{Binding QueryCommand}"/>
+                <Button Content="↓ 추가로 복사" Width="120" Margin="8,0,0,0" Command="{Binding CopyQueryToAddCommand}"/>
+            </StackPanel>
+        </GroupBox>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="7*"/>
+            </Grid.ColumnDefinitions>
+
+            <TreeView x:Name="tvBom" ItemsSource="{Binding Tree}">
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                        <TextBlock>
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}{0} {1} (Qty={2:0.######}, Scrap={3:0.######})">
+                                    <Binding Path="ComponentCode"/>
+                                    <Binding Path="ComponentName"/>
+                                    <Binding Path="Qty"/>
+                                    <Binding Path="ScrapRate"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
+
+                <TreeView.ItemContainerStyle>
+                    <Style TargetType="TreeViewItem">
+                        <Setter Property="ContextMenu">
+                            <Setter.Value>
+                                <ContextMenu DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}">
+                                    <MenuItem Header="여기에 자식 라인 추가"
+                                  Command="{Binding AddChildCommand}"
+                                  CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Mode=Self}}" />
+                                    <MenuItem Header="이 라인 삭제"
+                                  Command="{Binding DeleteNodeCommand}"
+                                  CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Mode=Self}}" />
+                                </ContextMenu>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </TreeView.ItemContainerStyle>
+            </TreeView>
+
+            <DataGrid Grid.Column="1"
+                ItemsSource="{Binding Lines}"
+                AutoGenerateColumns="False"
+                IsReadOnly="True"
+                CanUserAddRows="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="LineId" Binding="{Binding BomLineId}" Width="*"/>
+                    <DataGridTextColumn Header="Parent" Binding="{Binding ParentLineId}" Width="140"/>
+                    <DataGridTextColumn Header="ComponentId" Binding="{Binding ComponentProductId}" Width="*"/>
+                    <DataGridTextColumn Header="Code" Binding="{Binding ComponentCode}" Width="140"/>
+                    <DataGridTextColumn Header="Name" Binding="{Binding ComponentName}" Width="220"/>
+                    <DataGridTextColumn Header="Qty" Binding="{Binding Qty}" Width="100"/>
+                    <DataGridTextColumn Header="Scrap" Binding="{Binding ScrapRate}" Width="100"/>
+                    <DataGridTextColumn Header="Note" Binding="{Binding Note}" Width="220"/>
+                    <DataGridTemplateColumn Header="Action" Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="삭제"
+                        Padding="6,2"
+                        Command="{Binding DataContext.DeleteLineCommand, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}"
+                        CommandParameter="{Binding .}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+        <GroupBox Header="라인 추가" Grid.Row="2" Margin="0,12,0,0">
+            <StackPanel Orientation="Horizontal" Margin="12">
+                <TextBlock Text="BOM ID *" Foreground="IndianRed" VerticalAlignment="Center"/>
+                <TextBox Width="320" Margin="8,0,0,0" Text="{Binding AddBomId, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBlock Text="ParentLineId" Margin="16,0,0,0" VerticalAlignment="Center"/>
+                <TextBox Width="200" Margin="8,0,0,0" Text="{Binding AddParentLineId, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBlock Text="Component ProductId *" Foreground="IndianRed" Margin="16,0,0,0" VerticalAlignment="Center"/>
+                <TextBox Width="260" Margin="8,0,0,0" Text="{Binding AddComponentProductId, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBlock Text="Qty *" Foreground="IndianRed" Margin="16,0,0,0" VerticalAlignment="Center"/>
+                <TextBox Width="120" Margin="8,0,0,0" Text="{Binding AddQty, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBlock Text="Scrap" Margin="16,0,0,0" VerticalAlignment="Center"/>
+                <TextBox Width="120" Margin="8,0,0,0" Text="{Binding AddScrapRate, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBlock Text="Note" Margin="16,0,0,0" VerticalAlignment="Center"/>
+                <TextBox Width="260" Margin="8,0,0,0" Text="{Binding AddNote, UpdateSourceTrigger=PropertyChanged}"/>
+                <Button Content="추가" Width="120" Margin="16,0,0,0" Command="{Binding AddLineCommand}"/>
+            </StackPanel>
+        </GroupBox>
+    </Grid>
+</UserControl>

@@ -1,39 +1,28 @@
+// 9) Java BE - 트리도 서비스에서 모두 로딩 후 DTO 구성 (no session 방지)
 package com.factory_dynamics.erp.erp_server.bom;
 
+import com.factory_dynamics.erp.erp_server.bom.dto.BomTreeNodeResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.factory_dynamics.erp.erp_server.bom.dto.BomTreeNodeResponse;
-import com.factory_dynamics.erp.erp_server.common.BizException;
-import org.springframework.http.HttpStatus;
 
 import java.util.*;
 
 @Service
-
-public class BomQueryService {
+public class BomTreeQueryService {
 
     private final BomHeaderRepository headerRepo;
     private final BomLineRepository lineRepo;
 
-    public BomQueryService(BomHeaderRepository headerRepo, BomLineRepository lineRepo) {
+    public BomTreeQueryService(BomHeaderRepository headerRepo, BomLineRepository lineRepo) {
         this.headerRepo = headerRepo;
         this.lineRepo = lineRepo;
     }
 
-
     @Transactional(readOnly = true)
-    public List<BomLineResponse> getLines(String bomId) {
-        return lineRepo.findLinesWithComponent(bomId)
-                .stream()
-                .map(BomLineResponse::from)
-                .toList();
-    }
     public List<BomTreeNodeResponse> getTree(String bomId) {
-        var header = headerRepo.findById(bomId)
-                .orElseThrow(() -> new BizException(HttpStatus.NOT_FOUND, "BOM 헤더 없음: " + bomId));
+        headerRepo.findById(bomId).orElseThrow();
 
-        var lines = lineRepo.findLinesWithComponent(header.getId());
-
+        var lines = lineRepo.findLinesWithComponent(bomId);
         Map<String, List<BomLine>> byParent = new HashMap<>();
         for (var l : lines) {
             var key = l.getParent() == null ? "ROOT" : l.getParent().getId();
@@ -41,13 +30,13 @@ public class BomQueryService {
         }
 
         List<BomTreeNodeResponse> roots = new ArrayList<>();
-        for (var rootLine : byParent.getOrDefault("ROOT", List.of())) {
-            roots.add(buildNode(rootLine, byParent));
+        for (var root : byParent.getOrDefault("ROOT", List.of())) {
+            roots.add(build(root, byParent));
         }
         return roots;
     }
 
-    private BomTreeNodeResponse buildNode(BomLine l, Map<String, List<BomLine>> byParent) {
+    private BomTreeNodeResponse build(BomLine l, Map<String, List<BomLine>> byParent) {
         var n = new BomTreeNodeResponse();
         n.bomLineId = l.getId();
         n.parentLineId = l.getParent() == null ? null : l.getParent().getId();
@@ -59,15 +48,8 @@ public class BomQueryService {
         n.note = l.getNote();
 
         for (var child : byParent.getOrDefault(l.getId(), List.of())) {
-            n.children.add(buildNode(child, byParent));
+            n.children.add(build(child, byParent));
         }
         return n;
-    }
-
-    public void assertNoChildren(String lineId) {
-        var children = lineRepo.findChildren(lineId);
-        if (!children.isEmpty()) {
-            throw new BizException(HttpStatus.BAD_REQUEST, "자식 라인이 있어 삭제 불가: " + lineId);
-        }
     }
 }

@@ -18,15 +18,3 @@ public record BomLineCreateRequest(
     decimal ScrapRate,
     string? Note
 );
-
-public record BomLineResponse(
-    string BomLineId,
-    string BomId,
-    string? ParentLineId,
-    string ComponentProductId,
-    string ComponentCode,
-    string ComponentName,
-    decimal Qty,
-    decimal ScrapRate,
-    string? Note
-);
