@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
         xmlns:System="clr-namespace:System;assembly=mscorlib" 
         xmlns:views="clr-namespace:Erp.Client.Wpf.Views"
-        Title="ERP WPF Client - Main" Height="780" Width="1220"
+        Title="ERP WPF Client - Main" Height="780" Width="1400"
         WindowStartupLocation="CenterScreen">
     <DockPanel>
         <!-- 헤더 -->
@@ -21,75 +21,17 @@
         </Grid>
 
         <TabControl>
+            
             <!-- 탭 1: 원가 계산 -->
             <TabItem Header="원가 계산">
-                <Grid Margin="12">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-
-                    <!-- by-product -->
-                    <GroupBox Header="By Product" Margin="0,0,0,12">
-                        <StackPanel Orientation="Horizontal" Margin="12">
-                            <TextBlock Text="ProductId *" Foreground="IndianRed" VerticalAlignment="Center"/>
-                            <TextBox x:Name="prod_ProductId" Width="320" Margin="8,0,0,0"/>
-                            <TextBlock Text="Qty *" Foreground="IndianRed" Margin="16,0,0,0" VerticalAlignment="Center"/>
-                            <TextBox x:Name="prod_Qty" Width="120" Margin="8,0,0,0" Text="1.000000"/>
-                            <TextBlock Text="Labor" Margin="16,0,0,0" VerticalAlignment="Center"/>
-                            <TextBox x:Name="prod_Labor" Width="100" Margin="8,0,0,0" Text="0.100000"/>
-                            <TextBlock Text="OH" Margin="16,0,0,0" VerticalAlignment="Center"/>
-                            <TextBox x:Name="prod_Oh" Width="100" Margin="8,0,0,0" Text="0.100000"/>
-                            <TextBlock Text="BaseDate" Margin="16,0,0,0" VerticalAlignment="Center"/>
-                            <DatePicker x:Name="prod_BaseDate" Width="150" Margin="8,0,0,0" SelectedDate="{x:Static System:DateTime.Now}">
-                                <DatePicker.Resources>
-                                    <ResourceDictionary xmlns:System="clr-namespace:System;assembly=mscorlib"/>
-                                </DatePicker.Resources>
-                            </DatePicker>
-                            <Button x:Name="btnCalcByProduct" Content="계산" Width="100" Margin="16,0,0,0"/>
-                            <Button x:Name="btnSaveByProduct" Content="저장(By Product)" Width="100" Margin="8,0,0,0"/>
-                        </StackPanel>
-                    </GroupBox>
-
-                    <!-- by-plan -->
-                    <GroupBox Header="By Plan" Grid.Row="1" Margin="0,0,0,12">
-                        <StackPanel Margin="12">
-                            <!-- A. PlanId 직접 -->
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                <TextBlock Text="PlanId" VerticalAlignment="Center"/>
-                                <TextBox x:Name="plan_PlanId" Width="360" Margin="8,0,0,0"/>
-                                <TextBlock Text="Labor" Margin="16,0,0,0" VerticalAlignment="Center"/>
-                                <TextBox x:Name="plan_Labor" Width="100" Margin="8,0,0,0" Text="0.100000"/>
-                                <TextBlock Text="OH" Margin="16,0,0,0" VerticalAlignment="Center"/>
-                                <TextBox x:Name="plan_Oh" Width="100" Margin="8,0,0,0" Text="0.100000"/>
-                                <Button x:Name="btnCalcByPlan" Content="계산(PlanId)" Width="100" Margin="16,0,0,0"/>
-                                <Button x:Name="btnSaveByPlan" Content="저장(By Plan)" Width="100" Margin="8,0,0,0"/>
-                            </StackPanel>
-
-                        </StackPanel>
-                    </GroupBox>
-
-                    <!-- 결과 -->
-                    <DataGrid Grid.Row="2" x:Name="gridCostDetails" AutoGenerateColumns="False" IsReadOnly="True">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Level" Binding="{Binding Level}" Width="80"/>
-                            <DataGridTextColumn Header="Code" Binding="{Binding ComponentCode}" Width="140"/>
-                            <DataGridTextColumn Header="Name" Binding="{Binding ComponentName}" Width="240"/>
-                            <DataGridTextColumn Header="BaseQty" Binding="{Binding BaseQty}" Width="120"/>
-                            <DataGridTextColumn Header="ExplodedQty" Binding="{Binding ExplodedQty}" Width="120"/>
-                            <DataGridTextColumn Header="UnitCost" Binding="{Binding UnitCost}" Width="120"/>
-                            <DataGridTextColumn Header="MaterialCost" Binding="{Binding MaterialCost}" Width="140"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </Grid>
+                <ContentControl x:Name="costHost"/>
             </TabItem>
             
+            <!-- 탭 2: BOM 관리 -->
             <TabItem Header="BOM 관리">
                 <ContentControl x:Name="bomHost"/>
             </TabItem>
 
-            <!-- 탭 2: BOM 관리 -->
         </TabControl>
     </DockPanel>
 </Window>

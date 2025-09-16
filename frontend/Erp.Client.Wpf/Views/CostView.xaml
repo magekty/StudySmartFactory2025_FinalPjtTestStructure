@@ -1,0 +1,158 @@
+<!-- Views/CostView.xaml (MVVM 입력 검증/경고 + Busy + 컬럼 자동 너비 + 스크롤) -->
+<UserControl x:Class="Erp.Client.Wpf.Views.CostView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <Style x:Key="BusyDimmerStyle" TargetType="Grid">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                    <Setter Property="Opacity" Value="0.6"/>
+                    <Setter Property="IsEnabled" Value="False"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ValidatedTextBox" TargetType="TextBox">
+            <Setter Property="Validation.ErrorTemplate">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <DockPanel LastChildFill="True">
+                            <Border Width="14" Height="14" Background="Transparent" Margin="4,0,0,0" DockPanel.Dock="Right">
+                                <Path Data="M12,0 L24,24 0,24 z" Fill="#FFE57373" Stretch="Uniform"/>
+                            </Border>
+                            <Border BorderBrush="#FFE57373" BorderThickness="1" CornerRadius="3">
+                                <AdornedElementPlaceholder/>
+                            </Border>
+                        </DockPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="ToolTip" Value="{Binding (Validation.Errors)[0].ErrorContent, RelativeSource={RelativeSource Self}}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="LabelText" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="Foreground" Value="#FF444444"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- By Product -->
+        <GroupBox Header="By Product" Margin="0,0,0,12">
+            <Grid Margin="12" Style="{StaticResource BusyDimmerStyle}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="120"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="120"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="160"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="ProductId *" Style="{StaticResource LabelText}"/>
+                <TextBox Grid.Column="1" Style="{StaticResource ValidatedTextBox}"
+                 Text="{Binding ProductId, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True, NotifyOnValidationError=True}"/>
+
+                <TextBlock Grid.Column="3" Text="Qty *" Style="{StaticResource LabelText}"/>
+                <TextBox Grid.Column="4" Style="{StaticResource ValidatedTextBox}"
+                 Text="{Binding Qty, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
+
+                <TextBlock Grid.Column="6" Text="Labor" Style="{StaticResource LabelText}"/>
+                <TextBox Grid.Column="7" Style="{StaticResource ValidatedTextBox}"
+                 Text="{Binding Labor, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
+
+                <TextBlock Grid.Column="9" Text="OH" Style="{StaticResource LabelText}"/>
+                <TextBox Grid.Column="10" Style="{StaticResource ValidatedTextBox}"
+                 Text="{Binding Overhead, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
+
+                <TextBlock Grid.Column="12" Text="BaseDate" Style="{StaticResource LabelText}"/>
+                <DatePicker Grid.Column="13" SelectedDate="{Binding BaseDate, UpdateSourceTrigger=PropertyChanged}" Width="160"/>
+
+                <StackPanel Grid.Column="14" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="계산" Margin="8,0,0,0" MinWidth="100"
+                  Command="{Binding CalcByProductCommand}"/>
+                    <Button Content="저장(By Product)" Margin="8,0,0,0" MinWidth="120"
+                  Command="{Binding SaveByProductCommand}"/>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <!-- By Plan -->
+        <GroupBox Header="By Plan" Grid.Row="1" Margin="0,0,0,12">
+            <Grid Margin="12" Style="{StaticResource BusyDimmerStyle}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="300"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="PlanId *" Style="{StaticResource LabelText}"/>
+                <TextBox Grid.Column="1" Style="{StaticResource ValidatedTextBox}"
+                 Text="{Binding PlanId, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True, NotifyOnValidationError=True}"/>
+
+                <TextBlock Grid.Column="3" Text="Labor" Style="{StaticResource LabelText}"/>
+                <TextBox Grid.Column="4" Style="{StaticResource ValidatedTextBox}"
+                 Text="{Binding PlanLabor, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
+
+                <TextBlock Grid.Column="6" Text="OH" Style="{StaticResource LabelText}"/>
+                <TextBox Grid.Column="7" Style="{StaticResource ValidatedTextBox}"
+                 Text="{Binding PlanOverhead, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
+
+                <StackPanel Grid.Column="8" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="계산(PlanId)" Margin="8,0,0,0" MinWidth="120"
+                  Command="{Binding CalcByPlanCommand}"/>
+                    <Button Content="저장(By Plan)" Margin="8,0,0,0" MinWidth="120"
+                  Command="{Binding SaveByPlanCommand}"/>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <!-- 결과 -->
+        <DataGrid Grid.Row="2"
+              ItemsSource="{Binding ResultItems}"
+              AutoGenerateColumns="False"
+              IsReadOnly="True"
+              CanUserAddRows="False"
+              ColumnWidth="*"
+              HeadersVisibility="All"
+              ScrollViewer.CanContentScroll="True"
+              ScrollViewer.HorizontalScrollBarVisibility="Auto"
+              ScrollViewer.VerticalScrollBarVisibility="Auto">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Level" Binding="{Binding Level}" Width="SizeToHeader" MinWidth="70"/>
+                <DataGridTextColumn Header="Code" Binding="{Binding ComponentCode}" Width="*" MinWidth="140"/>
+                <DataGridTextColumn Header="Name" Binding="{Binding ComponentName}" Width="2*" MinWidth="220"/>
+                <DataGridTextColumn Header="BaseQty" Binding="{Binding BaseQty}" Width="SizeToCells" MinWidth="110"/>
+                <DataGridTextColumn Header="ExplodedQty" Binding="{Binding ExplodedQty}" Width="SizeToCells" MinWidth="120"/>
+                <DataGridTextColumn Header="UnitCost" Binding="{Binding UnitCost}" Width="SizeToCells" MinWidth="110"/>
+                <DataGridTextColumn Header="MaterialCost" Binding="{Binding MaterialCost}" Width="SizeToCells" MinWidth="130"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>
