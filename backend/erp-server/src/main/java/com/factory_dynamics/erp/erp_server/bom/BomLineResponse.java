@@ -1,17 +1,18 @@
+// src/main/java/com/factory_dynamics/erp/erp_server/bom/BomLineResponse.java
 package com.factory_dynamics.erp.erp_server.bom;
 
 import java.math.BigDecimal;
 
 public record BomLineResponse(
-        String bomLineId,
-        String bomId,
-        String parentLineId,
-        String componentProductId,
-        String componentCode,
-        String componentName,
-        BigDecimal qty,
-        BigDecimal scrapRate,
-        String note
+        String BomLineId,
+        String BomId,
+        String ParentLineId,
+        String ComponentProductId,
+        String ComponentCode,
+        String ComponentName,
+        BigDecimal Qty,
+        BigDecimal ScrapRate,
+        String Note
 ) {
     public static BomLineResponse from(BomLine l) {
         return new BomLineResponse(

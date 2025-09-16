@@ -1,3 +1,4 @@
+// src/main/java/com/factory_dynamics/erp/erp_server/bom/BomLineCommandController.java
 package com.factory_dynamics.erp.erp_server.bom;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,16 +18,20 @@ public class BomLineCommandController {
         this.cmdSvc = cmdSvc;
     }
 
-    @Operation(summary = "BOM 라인 추가")
+    @Operation(summary = "BOM 라인 추가(중복 시 소프트삭제 레코드 리사이클)")
     @PostMapping
-    public ResponseEntity<BomLineResponse> add(@Valid @RequestBody BomLineCreateRequest req) {
-        return ResponseEntity.ok(cmdSvc.addLine(req, "system"));
+    public ResponseEntity<BomLineResponse> add(@Valid @RequestBody BomLineCreateRequest req,
+                                               @RequestHeader(value = "X-Actor", required = false) String actor) {
+        var who = actor == null ? "system" : actor;
+        return ResponseEntity.ok(cmdSvc.addLineWithRecycle(req, who));
     }
 
     @Operation(summary = "BOM 라인 삭제(논리)")
     @DeleteMapping("/{lineId}")
-    public ResponseEntity<Void> delete(@PathVariable String lineId) {
-        cmdSvc.removeLine(lineId, "system");
+    public ResponseEntity<Void> delete(@PathVariable String lineId,
+                                       @RequestHeader(value = "X-Actor", required = false) String actor) {
+        var who = actor == null ? "system" : actor;
+        cmdSvc.removeLine(lineId, who);
         return ResponseEntity.noContent().build();
     }
 }

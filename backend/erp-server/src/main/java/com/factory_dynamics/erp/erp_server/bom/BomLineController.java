@@ -1,4 +1,5 @@
-// 8) Java BE - Controller: 라인 조회는 서비스 경유
+// src/main/java/com/factory_dynamics/erp/erp_server/bom/BomLineController.java
+// 조회는 그대로(참고: fetch join 사용)
 package com.factory_dynamics.erp.erp_server.bom;
 
 import org.springframework.http.ResponseEntity;
@@ -10,14 +11,16 @@ import java.util.List;
 @RequestMapping("/api/boms")
 public class BomLineController {
 
-    private final BomQueryService queryService;
+    private final BomLineRepository lineRepo;
 
-    public BomLineController(BomQueryService queryService) {
-        this.queryService = queryService;
+    public BomLineController(BomLineRepository lineRepo) {
+        this.lineRepo = lineRepo;
     }
 
     @GetMapping("/{bomId}/lines")
     public ResponseEntity<List<BomLineResponse>> lines(@PathVariable String bomId) {
-        return ResponseEntity.ok(queryService.getLines(bomId));
+        var lines = lineRepo.findLinesWithComponent(bomId).stream()
+                .map(BomLineResponse::from).toList();
+        return ResponseEntity.ok(lines);
     }
 }

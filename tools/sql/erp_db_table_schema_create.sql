@@ -207,6 +207,37 @@ CREATE TABLE tb_cost_snapshot_detail (
   KEY idx_cost_detail_component (component_product_id)
 ) ENGINE=InnoDB;
 
+-- 1) 기존 유니크 키 제거 (이미 있으면 드롭)
+ALTER TABLE tb_bom_line DROP INDEX uq_bom_parent_component;
+
+-- 2) active_key 컬럼 추가 (없으면만)
+ALTER TABLE tb_bom_line
+  ADD COLUMN active_key CHAR(1) NOT NULL DEFAULT 'A';
+
+-- 3) 활성 레코드만 유니크 보장
+CREATE UNIQUE INDEX ux_bomline_active
+  ON tb_bom_line (bom_id, parent_line_id, component_product_id, active_key);
+
+-- 4) 기존 데이터 정합성 보정
+UPDATE tb_bom_line
+SET active_key = CASE WHEN is_deleted = 1 THEN 'Z' ELSE 'A' END;
+
+-- 5) 삭제/복구 시 active_key 동기화 트리거
+DELIMITER $$
+
+CREATE TRIGGER trg_tb_bom_line_sync_active_key
+BEFORE UPDATE ON tb_bom_line
+FOR EACH ROW
+BEGIN
+  IF NEW.is_deleted = 1 THEN
+    SET NEW.active_key = 'Z';
+  ELSE
+    SET NEW.active_key = 'A';
+  END IF;
+END$$
+
+DELIMITER ;
+
 -- 상태/타입 시드
 INSERT INTO tb_code (code_type, code, code_name, sort_order) VALUES
 ('PRODUCT_TYPE','FG','완제품',10),
