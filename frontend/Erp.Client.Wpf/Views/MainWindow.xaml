@@ -14,10 +14,6 @@
             </Grid.ColumnDefinitions>
             <TextBlock Text=" ERP WPF Client" Foreground="White" FontSize="16"
                  VerticalAlignment="Center" Margin="12,0,0,0"/>
-            <StackPanel Orientation="Horizontal" Grid.Column="1">
-                <Button x:Name="btnOpenCostWindow" Content="원가 창" Margin="12,8,0,8" Padding="10,4"/>
-                <Button x:Name="btnOpenBomWindow" Content="BOM 창" Margin="8,8,12,8" Padding="10,4"/>
-            </StackPanel>
         </Grid>
 
         <TabControl>

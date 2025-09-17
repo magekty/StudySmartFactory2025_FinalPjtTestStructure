@@ -1,14 +1,13 @@
-<!-- Views/BomView.xaml (검증 스타일, 트리-그리드 선택 연동, 컨텍스트 메뉴 Command, 컬럼 자동 너비) -->
+<!-- Views/BomView.xaml (상단 조회 제거본: 트리/그리드/하단 라인 추가만 유지) -->
 <UserControl x:Class="Erp.Client.Wpf.Views.BomView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:local="clr-namespace:Erp.Client.Wpf.Utils" 
              mc:Ignorable="d"
-             d:DesignWidth="1100" d:DesignHeight="700">
+             d:DesignWidth="1200" d:DesignHeight="800">
     <UserControl.Resources>
-        <!-- 입력 검증 스타일: 붉은 테두리 + 경고 아이콘 -->
+        <!-- 검증 스타일 등 기존 리소스 유지 -->
         <Style x:Key="ValidatedTextBox" TargetType="TextBox">
             <Setter Property="Validation.ErrorTemplate">
                 <Setter.Value>
@@ -30,23 +29,11 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-
-        <!-- TreeViewItem 선택 하이라이트 강화 -->
-        <Style TargetType="TreeViewItem">
-            <Setter Property="Margin" Value="0,2,0,2"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Style.Triggers>
-                <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="#FFBBDEFB"/>
-                    <Setter Property="Foreground" Value="#FF0D47A1"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
     </UserControl.Resources>
 
     <Grid Margin="12">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
+            <!-- 상단 조회 제거: 첫 행 Auto 삭제 -->
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -55,20 +42,9 @@
             <ColumnDefinition Width="7*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- 조회 -->
-        <GroupBox Header="조회" Grid.ColumnSpan="2" Margin="0,0,0,12">
-            <StackPanel Orientation="Horizontal" Margin="12">
-                <TextBlock Text="BOM ID *" Foreground="IndianRed" VerticalAlignment="Center"/>
-                <TextBox Width="360" Margin="8,0,0,0" Style="{StaticResource ValidatedTextBox}"
-                 Text="{Binding QueryBomId, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
-                <Button Content="조회" Width="100" Margin="12,0,0,0" Command="{Binding QueryCommand}"/>
-                <Button Content="↓ 추가로 복사" Width="120" Margin="8,0,0,0" Command="{Binding CopyQueryToAddCommand}"/>
-            </StackPanel>
-        </GroupBox>
-
-        <!-- 트리 -->
+        <!-- 트리 (좌측) -->
         <TreeView x:Name="tvBom"
-              Grid.Row="1"
+              Grid.Row="0"
               ItemsSource="{Binding Tree}"
               SelectedItemChanged="TreeView_SelectedItemChanged">
             <TreeView.ItemTemplate>
@@ -85,32 +61,10 @@
                     </TextBlock>
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
-
-            <!-- 컨텍스트 메뉴: BindingProxy 사용(안정) -->
-            <TreeView.Resources>
-                <local:BindingProxy x:Key="proxy" Data="{Binding}"/>
-            </TreeView.Resources>
-
-            <TreeView.ItemContainerStyle>
-                <Style TargetType="TreeViewItem">
-                    <Setter Property="ContextMenu">
-                        <Setter.Value>
-                            <ContextMenu>
-                                <MenuItem Header="여기에 자식 라인 추가"
-                          Command="{Binding Data.AddChildCommand, Source={StaticResource proxy}}"
-                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                                <MenuItem Header="이 라인 삭제"
-                          Command="{Binding Data.DeleteNodeCommand, Source={StaticResource proxy}}"
-                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                            </ContextMenu>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </TreeView.ItemContainerStyle>
         </TreeView>
 
-        <!-- 그리드 -->
-        <DataGrid Grid.Row="1" Grid.Column="1"
+        <!-- 그리드 (우측) -->
+        <DataGrid Grid.Row="0" Grid.Column="1"
               ItemsSource="{Binding Lines}"
               SelectedItem="{Binding SelectedLine, Mode=TwoWay}"
               AutoGenerateColumns="False"
@@ -123,13 +77,12 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="LineId" Binding="{Binding BomLineId}" Width="2*" MinWidth="180"/>
                 <DataGridTextColumn Header="Parent" Binding="{Binding ParentLineId}" Width="*" MinWidth="120"/>
-                <DataGridTextColumn Header="ComponentId" Binding="{Binding ComponentProductId}" Width="*" MinWidth="160"/>
                 <DataGridTextColumn Header="Code" Binding="{Binding ComponentCode}" Width="*" MinWidth="140"/>
                 <DataGridTextColumn Header="Name" Binding="{Binding ComponentName}" Width="2*" MinWidth="220"/>
                 <DataGridTextColumn Header="Qty" Binding="{Binding Qty}" Width="SizeToCells" MinWidth="100"/>
                 <DataGridTextColumn Header="Scrap" Binding="{Binding ScrapRate}" Width="SizeToCells" MinWidth="100"/>
                 <DataGridTextColumn Header="Note" Binding="{Binding Note}" Width="2*" MinWidth="220"/>
-                <DataGridTemplateColumn Header="Action" Width="80" MinWidth="80">
+                <DataGridTemplateColumn Header="Action" Width="120">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button Content="삭제" Padding="6,2"
@@ -141,87 +94,61 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <!-- 추가 -->
-        <GroupBox Header="라인 추가" Grid.Row="2" Grid.ColumnSpan="2" Margin="0,12,0,0">
+        <!-- 하단 라인 추가 -->
+        <GroupBox Header="라인 추가" Grid.Row="1" Grid.ColumnSpan="2" Margin="0,12,0,0">
             <Grid Margin="12">
-                <!-- 고정 폭/가변 폭 혼합: Auto 레이블, 입력은 고정폭, Note는 남은 공간 Star -->
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
-                    <!-- BOM ID label -->
-                    <ColumnDefinition Width="140"/>
-                    <!-- BOM ID input -->
+                    <ColumnDefinition Width="260"/>
                     <ColumnDefinition Width="16"/>
-                    <!-- gap -->
                     <ColumnDefinition Width="Auto"/>
-                    <!-- Parent label -->
-                    <ColumnDefinition Width="140"/>
-                    <!-- Parent input -->
+                    <ColumnDefinition Width="220"/>
                     <ColumnDefinition Width="16"/>
-                    <!-- gap -->
                     <ColumnDefinition Width="Auto"/>
-                    <!-- Component label -->
-                    <ColumnDefinition Width="140"/>
-                    <!-- Component input -->
+                    <ColumnDefinition Width="280"/>
                     <ColumnDefinition Width="16"/>
-                    <!-- gap -->
                     <ColumnDefinition Width="Auto"/>
-                    <!-- Qty label -->
-                    <ColumnDefinition Width="80"/>
-                    <!-- Qty input -->
+                    <ColumnDefinition Width="120"/>
                     <ColumnDefinition Width="16"/>
-                    <!-- gap -->
                     <ColumnDefinition Width="Auto"/>
-                    <!-- Scrap label -->
-                    <ColumnDefinition Width="80"/>
-                    <!-- Scrap input -->
+                    <ColumnDefinition Width="120"/>
                     <ColumnDefinition Width="16"/>
-                    <!-- gap -->
                     <ColumnDefinition Width="Auto"/>
-                    <!-- Note label -->
-                    <ColumnDefinition Width="200"/>
-                    <!-- Note input (가변, 남은 공간) -->
-                    <ColumnDefinition Width="12"/>
-                    <!-- gap -->
-                    <ColumnDefinition Width="Auto"/>
-                    <!-- 추가 버튼 -->
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- BOM ID -->
                 <TextBlock Grid.Column="0" Text="BOM ID *" Foreground="IndianRed" VerticalAlignment="Center"/>
                 <TextBox Grid.Column="1" Style="{StaticResource ValidatedTextBox}"
-             Text="{Binding AddBomId, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
+                 Text="{Binding AddBomId, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
 
-                <!-- Parent -->
+                <!-- Parent Line -->
                 <TextBlock Grid.Column="3" Text="ParentLineId" VerticalAlignment="Center"/>
                 <TextBox Grid.Column="4" Text="{Binding AddParentLineId, UpdateSourceTrigger=PropertyChanged}"/>
 
-                <!-- Component -->
-                <TextBlock Grid.Column="6" Text="Component ProductId *" Foreground="IndianRed" VerticalAlignment="Center"/>
-                <TextBox Grid.Column="7" Style="{StaticResource ValidatedTextBox}"
-             Text="{Binding AddComponentProductId, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
+                <!-- 자재 선택(다중) -->
+                <TextBlock Grid.Column="6" Text="자재 선택" VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="7" Orientation="Horizontal">
+                    <TextBox Width="220" IsReadOnly="True" Text="{Binding SelectedProductName}" Margin="0,0,8,0"/>
+                    <Button Content="검색(다중)" Width="100" Command="{Binding OpenMultiSelectDialogCommand}"/>
+                </StackPanel>
 
                 <!-- Qty -->
                 <TextBlock Grid.Column="9" Text="Qty *" Foreground="IndianRed" VerticalAlignment="Center"/>
                 <TextBox Grid.Column="10" Style="{StaticResource ValidatedTextBox}"
-             Text="{Binding AddQty, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
+                 Text="{Binding AddQty, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
 
                 <!-- Scrap -->
                 <TextBlock Grid.Column="12" Text="Scrap" VerticalAlignment="Center"/>
                 <TextBox Grid.Column="13" Style="{StaticResource ValidatedTextBox}"
-             Text="{Binding AddScrapRate, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
+                 Text="{Binding AddScrapRate, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
 
-                <!-- Note -->
+                <!-- Note + 단일 추가 버튼 -->
                 <TextBlock Grid.Column="15" Text="Note" VerticalAlignment="Center"/>
-                <TextBox Grid.Column="16"
-             Text="{Binding AddNote, UpdateSourceTrigger=PropertyChanged}"
-             HorizontalAlignment="Stretch"
-             MinWidth="200"
-             MaxWidth="{x:Static SystemParameters.PrimaryScreenWidth}"
-             Padding="4,2"
-             />
-
-                <!-- 추가 버튼 -->
-                <Button Grid.Column="18" Content="추가" Width="80" Command="{Binding AddLineCommand}"/>
+                <StackPanel Grid.Column="16" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBox Width="260" Text="{Binding AddNote, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
+                    <Button Content="추가(단일)" Width="100" Command="{Binding AddLineCommand}"/>
+                </StackPanel>
             </Grid>
         </GroupBox>
     </Grid>

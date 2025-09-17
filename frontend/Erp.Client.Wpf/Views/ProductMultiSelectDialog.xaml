@@ -1,0 +1,72 @@
+<!-- Views/ProductMultiSelectDialog.xaml -->
+<Window x:Class="Erp.Client.Wpf.Views.ProductMultiSelectDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="추가할 품목 선택(다중)" Height="680" Width="1024"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanResize">
+    <Window.Resources>
+        <Style x:Key="BadgeTextBlock" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="6,2"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <DataTemplate x:Key="ActiveBadgeTemplate">
+            <Border Background="{Binding active, Converter={StaticResource BoolToBrushActiveGray}}"
+              CornerRadius="10" Padding="0" Margin="6,0">
+                <TextBlock Style="{StaticResource BadgeTextBlock}"
+                   Text="{Binding active, Converter={StaticResource BoolToActiveText}}"/>
+            </Border>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 검색바 -->
+        <DockPanel Grid.Row="0" LastChildFill="False" Margin="0,0,0,8">
+            <TextBox x:Name="tbQuery" Width="360" Margin="0,0,8,0" ToolTip="품명/품번 검색"/>
+            <ComboBox x:Name="cbStatus" Width="140" Margin="0,0,8,0" SelectedIndex="0">
+                <ComboBoxItem Content="전체" Tag="ALL"/>
+                <ComboBoxItem Content="활성" Tag="ACTIVE"/>
+                <ComboBoxItem Content="비활성" Tag="INACTIVE"/>
+            </ComboBox>
+            <Button x:Name="btnSearch" Content="검색" Width="100"/>
+        </DockPanel>
+
+        <!-- 목록(다중 선택) -->
+        <DataGrid x:Name="grid"
+              Grid.Row="1"
+              AutoGenerateColumns="False"
+              CanUserAddRows="False"
+              IsReadOnly="True"
+              SelectionMode="Extended"
+              ColumnWidth="*"
+              ScrollViewer.HorizontalScrollBarVisibility="Auto">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="품번" Binding="{Binding productCode}" Width="160"/>
+                <DataGridTextColumn Header="품명" Binding="{Binding name}" Width="2*"/>
+                <DataGridTextColumn Header="규격" Binding="{Binding description}" Width="*" MinWidth="180"/>
+                <DataGridTextColumn Header="단위" Binding="{Binding unit}" Width="100"/>
+                <DataGridTemplateColumn Header="상태" Width="110" CellTemplate="{StaticResource ActiveBadgeTemplate}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- 하단 -->
+        <Grid Grid.Row="2" Margin="0,8,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="txtInfo" VerticalAlignment="Center"/>
+            <Button x:Name="btnApply" Grid.Column="1" Content="선택 적용" Width="120" Margin="8,0,0,0"/>
+            <Button Grid.Column="2" Content="취소" Width="100" IsCancel="True" Margin="8,0,0,0"/>
+        </Grid>
+    </Grid>
+</Window>

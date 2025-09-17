@@ -1,5 +1,11 @@
 ﻿<Application x:Class="Erp.Client.Wpf.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:cvt="clr-namespace:Erp.Client.Wpf.Converters"
              StartupUri="Views/MainWindow.xaml">
+
+        <Application.Resources>
+        <cvt:BoolToActiveTextConverter x:Key="BoolToActiveText"/>
+        <cvt:BoolToBrushActiveGrayConverter x:Key="BoolToBrushActiveGray"/>
+    </Application.Resources>
 </Application>

@@ -12,7 +12,7 @@ using Erp.Client.Wpf.Services;
 
 namespace Erp.Client.Wpf.ViewModels
 {
-    public class BomViewModel : INotifyPropertyChanged, IDataErrorInfo
+    public partial class BomViewModel : INotifyPropertyChanged, IDataErrorInfo
     {
         private readonly ApiClient _api;
         public BomViewModel(ApiClient api) { _api = api; }
