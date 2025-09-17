@@ -1,19 +1,20 @@
-﻿using System.Windows;
+﻿// Views/BindingProxy.cs (컨텍스트 메뉴 바인딩 보조)
+using System.Windows;
+using System.Windows.Media;
 
-namespace Erp.Client.Wpf.Utils;
-public class BindingProxy : Freezable
+namespace Erp.Client.Wpf.Utils
 {
-    protected override Freezable CreateInstanceCore()
+    public class BindingProxy : Freezable
     {
-        return new BindingProxy();
-    }
+        protected override Freezable CreateInstanceCore() => new BindingProxy();
 
-    public static readonly DependencyProperty DataProperty =
-        DependencyProperty.Register("Data", typeof(object), typeof(BindingProxy), new UIPropertyMetadata(null));
+        public object Data
+        {
+            get => GetValue(DataProperty);
+            set => SetValue(DataProperty, value);
+        }
 
-    public object Data
-    {
-        get { return (object)GetValue(DataProperty); }
-        set { SetValue(DataProperty, value); }
+        public static readonly DependencyProperty DataProperty =
+            DependencyProperty.Register("Data", typeof(object), typeof(BindingProxy), new UIPropertyMetadata(null));
     }
 }

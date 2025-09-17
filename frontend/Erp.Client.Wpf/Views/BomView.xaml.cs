@@ -1,4 +1,4 @@
-﻿// Views/BomView.xaml.cs (DataContext 세팅 + 선택 변경 시 ParentLineId 채우기)
+﻿// Views/BomView.xaml.cs (트리 선택을 VM.SelectedNode로 전달)
 using System.Windows;
 using System.Windows.Controls;
 using Erp.Client.Wpf.Models;
@@ -18,9 +18,7 @@ namespace Erp.Client.Wpf.Views
         private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             if (DataContext is BomViewModel vm && e.NewValue is BomTreeNodeResponse node)
-            {
-                vm.AddParentLineId = node.BomLineId;
-            }
+                vm.SelectedNode = node;
         }
     }
 }
