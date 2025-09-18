@@ -64,7 +64,6 @@ namespace Erp.Client.Wpf.ViewModels
 
         // Commands
         public ICommand QueryCommand => new RelayCommand(async _ => await QueryAsync(), _ => !IsBusy && string.IsNullOrWhiteSpace(this[nameof(QueryBomId)]));
-        public ICommand CopyQueryToAddCommand => new RelayCommand(_ => AddBomId = QueryBomId);
         public ICommand AddLineCommand => new RelayCommand(async _ => await AddLineAsync(), _ => !IsBusy && CanAddLine());
         public ICommand AddChildCommand => new RelayCommand(async p => await AddChildAsync(p), p => !IsBusy && p is BomTreeNodeResponse && CanAddLineBase());
         public ICommand DeleteNodeCommand => new RelayCommand(async p => await DeleteNodeAsync(p), p => !IsBusy && p is BomTreeNodeResponse);
@@ -87,6 +86,7 @@ namespace Erp.Client.Wpf.ViewModels
 
                 var nodes = await _api.GetAsync<System.Collections.Generic.List<BomTreeNodeResponse>>(Endpoints.BomTree(QueryBomId!.Trim()));
                 if (nodes != null) foreach (var n in nodes) Tree.Add(n);
+                AddBomId = QueryBomId;
             }
             catch (Exception ex) { MessageBox.Show($"조회 실패: {ex.Message}"); }
             finally { IsBusy = false; }

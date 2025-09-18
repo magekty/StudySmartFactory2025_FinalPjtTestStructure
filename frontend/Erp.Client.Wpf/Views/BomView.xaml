@@ -43,7 +43,6 @@
                 <TextBlock Text="BOM ID *" Foreground="IndianRed" VerticalAlignment="Center"/>
                 <TextBox Width="360" Margin="8,0,0,0" Text="{Binding QueryBomId, UpdateSourceTrigger=PropertyChanged}"/>
                 <Button Content="조회" Width="100" Margin="12,0,0,0" Command="{Binding QueryCommand}"/>
-                <Button Content="↓ 추가로 복사" Width="120" Margin="8,0,0,0" Command="{Binding CopyQueryToAddCommand}"/>
             </StackPanel>
         </GroupBox>
         <Grid Grid.Row="1">
@@ -109,13 +108,13 @@
             <Grid Margin="12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="260"/>
-                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="0"/>
+                    <ColumnDefinition Width="0"/>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="220"/>
-                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="0"/>
+                    <ColumnDefinition Width="0"/>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="280"/>
+                    <ColumnDefinition Width="100"/>
                     <ColumnDefinition Width="16"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="120"/>
@@ -128,19 +127,19 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- BOM ID -->
-                <TextBlock Grid.Column="0" Text="BOM ID *" Foreground="IndianRed" VerticalAlignment="Center"/>
-                <TextBox Grid.Column="1" Style="{StaticResource ValidatedTextBox}"
+                <TextBlock Grid.Column="0" Visibility="Collapsed" Text="BOM ID *" Foreground="IndianRed" VerticalAlignment="Center"/>
+                <TextBox Grid.Column="1" Visibility="Hidden" Style="{StaticResource ValidatedTextBox}" IsReadOnly="True"
                  Text="{Binding AddBomId, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
 
                 <!-- Parent Line -->
-                <TextBlock Grid.Column="3" Text="ParentLineId" VerticalAlignment="Center"/>
-                <TextBox Grid.Column="4" Text="{Binding AddParentLineId, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBlock Grid.Column="3" Visibility="Collapsed" Text="ParentLineId" VerticalAlignment="Center"/>
+                <TextBox Grid.Column="4" Visibility="Hidden" IsReadOnly="True" Text="{Binding AddParentLineId, UpdateSourceTrigger=PropertyChanged}"/>
 
                 <!-- 자재 선택(다중) -->
-                <TextBlock Grid.Column="6" Text="자재 선택" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="6" Text="라인 추가 자재 선택" VerticalAlignment="Center"/>
                 <StackPanel Grid.Column="7" Orientation="Horizontal">
-                    <TextBox Width="220" IsReadOnly="True" Text="{Binding SelectedProductName}" Margin="0,0,8,0"/>
-                    <Button Content="검색(다중)" Width="100" Command="{Binding OpenMultiSelectDialogCommand}"/>
+                    <TextBox Width="0" Visibility="Hidden" IsReadOnly="True" Text="{Binding SelectedProductName}" Margin="0,0,8,0"/>
+                    <Button Content="추가 자재 검색" Width="100" Command="{Binding OpenMultiSelectDialogCommand}"/>
                 </StackPanel>
 
                 <!-- Qty -->
