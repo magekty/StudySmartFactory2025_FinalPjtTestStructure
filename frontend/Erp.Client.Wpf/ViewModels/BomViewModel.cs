@@ -2,6 +2,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -63,10 +64,10 @@ namespace Erp.Client.Wpf.ViewModels
         public bool IsBusy { get => _isBusy; set { _isBusy = value; OnChanged(); CommandManager.InvalidateRequerySuggested(); } }
 
         // Commands
-        public ICommand QueryCommand => new RelayCommand(async _ => await QueryAsync(), _ => !IsBusy && string.IsNullOrWhiteSpace(this[nameof(QueryBomId)]));
+        public ICommand QueryCommand => new RelayCommand(async _ => { Debug.WriteLine("쿼리"); await QueryAsync(); }, _ => !IsBusy && string.IsNullOrWhiteSpace(this[nameof(QueryBomId)]));
         public ICommand AddLineCommand => new RelayCommand(async _ => await AddLineAsync(), _ => !IsBusy && CanAddLine());
         public ICommand AddChildCommand => new RelayCommand(async p => await AddChildAsync(p), p => !IsBusy && p is BomTreeNodeResponse && CanAddLineBase());
-        public ICommand DeleteNodeCommand => new RelayCommand(async p => await DeleteNodeAsync(p), p => !IsBusy && p is BomTreeNodeResponse);
+        public ICommand DeleteNodeCommand => new RelayCommand(async p => { Debug.WriteLine("삭제"); await DeleteNodeAsync(p); }, p => !IsBusy && p is BomTreeNodeResponse);
         public ICommand DeleteLineCommand => new RelayCommand(async p => await DeleteLineAsync(p), p => !IsBusy && p is BomLineResponse);
 
         public event PropertyChangedEventHandler? PropertyChanged;

@@ -70,6 +70,20 @@
                         </TextBlock>
                     </HierarchicalDataTemplate>
                 </TreeView.ItemTemplate>
+
+                <TreeView.ItemContainerStyle>
+                    <Style TargetType="TreeViewItem">
+                        <Setter Property="ContextMenu">
+                            <Setter.Value>
+                                <ContextMenu DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}">
+                                    <MenuItem Header="이 라인 삭제"
+          Command="{Binding Path=DataContext.DeleteNodeCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type TreeViewItem}}}"
+          CommandParameter="{Binding Path=DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type TreeViewItem}}}" />
+                                </ContextMenu>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </TreeView.ItemContainerStyle>
             </TreeView>
 
             <!-- 그리드 (우측) -->
