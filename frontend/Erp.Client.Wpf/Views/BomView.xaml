@@ -34,68 +34,78 @@
     <Grid Margin="12">
         <Grid.RowDefinitions>
             <!-- 상단 조회 제거: 첫 행 Auto 삭제 -->
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="7*"/>
-        </Grid.ColumnDefinitions>
+        <GroupBox Header="조회" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" Margin="12">
+                <TextBlock Text="BOM ID *" Foreground="IndianRed" VerticalAlignment="Center"/>
+                <TextBox Width="360" Margin="8,0,0,0" Text="{Binding QueryBomId, UpdateSourceTrigger=PropertyChanged}"/>
+                <Button Content="조회" Width="100" Margin="12,0,0,0" Command="{Binding QueryCommand}"/>
+                <Button Content="↓ 추가로 복사" Width="120" Margin="8,0,0,0" Command="{Binding CopyQueryToAddCommand}"/>
+            </StackPanel>
+        </GroupBox>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="7*"/>
+            </Grid.ColumnDefinitions>
 
-        <!-- 트리 (좌측) -->
-        <TreeView x:Name="tvBom"
-              Grid.Row="0"
-              ItemsSource="{Binding Tree}"
-              SelectedItemChanged="TreeView_SelectedItemChanged">
-            <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate ItemsSource="{Binding Children}">
-                    <TextBlock>
-                        <TextBlock.Text>
-                            <MultiBinding StringFormat="{}{0} {1} (Qty={2:0.######}, Scrap={3:0.######})">
-                                <Binding Path="ComponentCode"/>
-                                <Binding Path="ComponentName"/>
-                                <Binding Path="Qty"/>
-                                <Binding Path="ScrapRate"/>
-                            </MultiBinding>
-                        </TextBlock.Text>
-                    </TextBlock>
-                </HierarchicalDataTemplate>
-            </TreeView.ItemTemplate>
-        </TreeView>
+            <!-- 트리 (좌측) -->
+            <TreeView x:Name="tvBom"
+                  Grid.Row="0"
+                  ItemsSource="{Binding Tree}"
+                  SelectedItemChanged="TreeView_SelectedItemChanged">
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                        <TextBlock>
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}{0} {1} (Qty={2:0.######}, Scrap={3:0.######})">
+                                    <Binding Path="ComponentCode"/>
+                                    <Binding Path="ComponentName"/>
+                                    <Binding Path="Qty"/>
+                                    <Binding Path="ScrapRate"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
 
-        <!-- 그리드 (우측) -->
-        <DataGrid Grid.Row="0" Grid.Column="1"
-              ItemsSource="{Binding Lines}"
-              SelectedItem="{Binding SelectedLine, Mode=TwoWay}"
-              AutoGenerateColumns="False"
-              IsReadOnly="True"
-              CanUserAddRows="False"
-              ColumnWidth="*"
-              HeadersVisibility="All"
-              ScrollViewer.HorizontalScrollBarVisibility="Auto"
-              ScrollViewer.VerticalScrollBarVisibility="Auto">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="LineId" Binding="{Binding BomLineId}" Width="2*" MinWidth="180"/>
-                <DataGridTextColumn Header="Parent" Binding="{Binding ParentLineId}" Width="*" MinWidth="120"/>
-                <DataGridTextColumn Header="Code" Binding="{Binding ComponentCode}" Width="*" MinWidth="140"/>
-                <DataGridTextColumn Header="Name" Binding="{Binding ComponentName}" Width="2*" MinWidth="220"/>
-                <DataGridTextColumn Header="Qty" Binding="{Binding Qty}" Width="SizeToCells" MinWidth="100"/>
-                <DataGridTextColumn Header="Scrap" Binding="{Binding ScrapRate}" Width="SizeToCells" MinWidth="100"/>
-                <DataGridTextColumn Header="Note" Binding="{Binding Note}" Width="2*" MinWidth="220"/>
-                <DataGridTemplateColumn Header="Action" Width="120">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Button Content="삭제" Padding="6,2"
-                      Command="{Binding DataContext.DeleteLineCommand, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}"
-                      CommandParameter="{Binding .}"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </DataGrid>
-
+            <!-- 그리드 (우측) -->
+            <DataGrid Grid.Row="0" Grid.Column="1"
+                  ItemsSource="{Binding Lines}"
+                  SelectedItem="{Binding SelectedLine, Mode=TwoWay}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  CanUserAddRows="False"
+                  ColumnWidth="*"
+                  HeadersVisibility="All"
+                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                  ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="LineId" Binding="{Binding BomLineId}" Width="2*" MinWidth="180"/>
+                    <DataGridTextColumn Header="Parent" Binding="{Binding ParentLineId}" Width="*" MinWidth="120"/>
+                    <DataGridTextColumn Header="Code" Binding="{Binding ComponentCode}" Width="*" MinWidth="140"/>
+                    <DataGridTextColumn Header="Name" Binding="{Binding ComponentName}" Width="2*" MinWidth="220"/>
+                    <DataGridTextColumn Header="Qty" Binding="{Binding Qty}" Width="SizeToCells" MinWidth="100"/>
+                    <DataGridTextColumn Header="Scrap" Binding="{Binding ScrapRate}" Width="SizeToCells" MinWidth="100"/>
+                    <DataGridTextColumn Header="Note" Binding="{Binding Note}" Width="2*" MinWidth="220"/>
+                    <DataGridTemplateColumn Header="Action" Width="120">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="삭제" Padding="6,2"
+                          Command="{Binding DataContext.DeleteLineCommand, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}"
+                          CommandParameter="{Binding .}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
         <!-- 하단 라인 추가 -->
-        <GroupBox Header="라인 추가" Grid.Row="1" Grid.ColumnSpan="2" Margin="0,12,0,0">
+        <GroupBox Header="라인 추가" Grid.Row="2" Grid.ColumnSpan="2" Margin="0,12,0,0">
             <Grid Margin="12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
