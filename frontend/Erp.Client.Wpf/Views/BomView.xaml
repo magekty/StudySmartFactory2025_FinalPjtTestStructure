@@ -71,7 +71,7 @@
                     </HierarchicalDataTemplate>
                 </TreeView.ItemTemplate>
 
-                <TreeView.ItemContainerStyle>
+                <!--<TreeView.ItemContainerStyle>
                     <Style TargetType="TreeViewItem">
                         <Setter Property="ContextMenu">
                             <Setter.Value>
@@ -83,7 +83,7 @@
                             </Setter.Value>
                         </Setter>
                     </Style>
-                </TreeView.ItemContainerStyle>
+                </TreeView.ItemContainerStyle>-->
             </TreeView>
 
             <!-- 그리드 (우측) -->
@@ -98,8 +98,8 @@
                   ScrollViewer.HorizontalScrollBarVisibility="Auto"
                   ScrollViewer.VerticalScrollBarVisibility="Auto">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="LineId" Binding="{Binding BomLineId}" Width="2*" MinWidth="180"/>
-                    <DataGridTextColumn Header="Parent" Binding="{Binding ParentLineId}" Width="*" MinWidth="120"/>
+                    <DataGridTextColumn Header="LineId" Binding="{Binding BomLineId}" Width="0*" MinWidth="0" Visibility="Hidden"/>
+                    <DataGridTextColumn Header="Parent" Binding="{Binding ParentLineId}" Width="0" MinWidth="0" Visibility="Hidden"/>
                     <DataGridTextColumn Header="Code" Binding="{Binding ComponentCode}" Width="*" MinWidth="140"/>
                     <DataGridTextColumn Header="Name" Binding="{Binding ComponentName}" Width="2*" MinWidth="220"/>
                     <DataGridTextColumn Header="Qty" Binding="{Binding Qty}" Width="SizeToCells" MinWidth="100"/>
@@ -128,13 +128,15 @@
                     <ColumnDefinition Width="0"/>
                     <ColumnDefinition Width="0"/>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="16"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="120"/>
                     <ColumnDefinition Width="16"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="120"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="220"/>
                     <ColumnDefinition Width="16"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
@@ -166,12 +168,17 @@
                 <TextBox Grid.Column="13" Style="{StaticResource ValidatedTextBox}"
                  Text="{Binding AddScrapRate, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
 
+                <!-- Scrap -->
+                <TextBlock Grid.Column="14" Text="Note" VerticalAlignment="Center"/>
+                <TextBox Grid.Column="15" Style="{StaticResource ValidatedTextBox}"
+                Text="{Binding AddNote, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
+
                 <!-- Note + 단일 추가 버튼 -->
-                <TextBlock Grid.Column="15" Text="Note" VerticalAlignment="Center"/>
+                <!--<TextBlock Grid.Column="15" Text="Note" VerticalAlignment="Center"/>
                 <StackPanel Grid.Column="16" Orientation="Horizontal" HorizontalAlignment="Right">
                     <TextBox Width="260" Text="{Binding AddNote, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
                     <Button Content="추가(단일)" Width="100" Command="{Binding AddLineCommand}"/>
-                </StackPanel>
+                </StackPanel>-->
             </Grid>
         </GroupBox>
     </Grid>
