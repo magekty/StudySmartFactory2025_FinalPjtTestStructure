@@ -1,12 +1,12 @@
 ﻿// ViewModels/ProductionPlanViewModel.cs
-using System;
+using Erp.Client.Wpf.Models;
+using Erp.Client.Wpf.Services;
+using Erp.Client.Wpf.Views;
+using System.Windows;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using System.Windows.Input;
-using Erp.Client.Wpf.Models;
-using Erp.Client.Wpf.Services;
 
 namespace Erp.Client.Wpf.ViewModels
 {
@@ -38,6 +38,8 @@ namespace Erp.Client.Wpf.ViewModels
             ConfirmCommand = new RelayCommand(async _ => await ChangeStatusAsync("CONFIRMED"), _ => CanConfirm);
             CancelCommand = new RelayCommand(async _ => await ChangeStatusAsync("CANCELED"), _ => CanCancel);
             DeleteCommand = new RelayCommand(async _ => await DeleteAsync(), _ => CanDelete);
+
+            OpenProductPickerCommand = new RelayCommand(_ => OpenProductPicker(), _ => !IsBusy);
 
             _ = LoadAsync();
         }
@@ -137,6 +139,7 @@ namespace Erp.Client.Wpf.ViewModels
         public ICommand ConfirmCommand { get; }
         public ICommand CancelCommand { get; }
         public ICommand DeleteCommand { get; }
+        public ICommand OpenProductPickerCommand { get; }
 
         public bool CanCreate => !IsBusy && !string.IsNullOrWhiteSpace(Detail.planCode?.Trim()) && !string.IsNullOrWhiteSpace(Detail.productId?.Trim()) && Detail.qty > 0 && Detail.startDate != default && Detail.endDate != default;
         public bool CanUpdate => !IsBusy && !string.IsNullOrWhiteSpace(Detail.planId) && Detail.version >= 0;
@@ -265,6 +268,24 @@ namespace Erp.Client.Wpf.ViewModels
                 Detail = new ProductionPlanDetailDto();
             }
             finally { IsBusy = false; }
+        }
+
+        private void OpenProductPicker()
+        {
+            var dlg = new ProductSingleSelectDialog(_api)
+            {
+                Owner = Application.Current?.MainWindow
+            };
+            var ok = dlg.ShowDialog();
+            if (ok != true || dlg.SelectedItem == null) return;
+
+            Detail.productId = dlg.SelectedItem.productId;
+            Detail.productName = dlg.SelectedItem.name;
+            Detail.productCode = dlg.SelectedItem.productCode;
+
+            CommandManager.InvalidateRequerySuggested();
+            OnChanged(nameof(Detail));
+            // RaiseGuards(); // 필요하면
         }
 
         public record StatusOption(string Label, string Value);

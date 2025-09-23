@@ -67,20 +67,26 @@
 				<ColumnDefinition Width="*"/>
 			</Grid.ColumnDefinitions>
 
-			<TextBlock Grid.Row="0" Grid.Column="0" Text="계획코드" VerticalAlignment="Center"/>
-			<TextBox   Grid.Row="0" Grid.Column="1" Text="{Binding Detail.planCode, UpdateSourceTrigger=PropertyChanged}" />
+			<TextBlock Grid.Row="0" Grid.Column="0" Text="계획코드" Margin="0,0,8,8" VerticalAlignment="Center"/>
+			<TextBox   Grid.Row="0" Grid.Column="1" Margin="0,0,0,8" Text="{Binding Detail.planCode, UpdateSourceTrigger=PropertyChanged}" />
 
-			<TextBlock Grid.Row="1" Grid.Column="0" Text="품목ID" VerticalAlignment="Center"/>
-			<TextBox   Grid.Row="1" Grid.Column="1" Text="{Binding Detail.productId, UpdateSourceTrigger=PropertyChanged}" />
-
-			<TextBlock Grid.Row="2" Grid.Column="0" Text="기간" VerticalAlignment="Center"/>
-			<StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" >
-				<DatePicker SelectedDate="{Binding Detail.startDate, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
-				<DatePicker SelectedDate="{Binding Detail.endDate, UpdateSourceTrigger=PropertyChanged}"/>
+			<TextBlock Grid.Row="1" Grid.Column="0" Text="품목" VerticalAlignment="Center"/>
+			<StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" >
+				<TextBox Width="190" IsReadOnly="True" Margin="0,0,8,8"
+						 Text="{Binding Detail.productName}" ToolTip="품목명"/>
+				<TextBox Width="120" IsReadOnly="True" Margin="0,0,8,8"
+						 Text="{Binding Detail.productId}" ToolTip="품목ID"/>
+				<Button Content="선택" Width="80" Margin="7,0,0,8" Command="{Binding OpenProductPickerCommand}"/>
 			</StackPanel>
 
-			<TextBlock Grid.Row="3" Grid.Column="0" Text="수량" VerticalAlignment="Center"/>
-			<TextBox   Grid.Row="3" Grid.Column="1"  Text="{Binding Detail.qty, UpdateSourceTrigger=PropertyChanged}" />
+			<TextBlock Grid.Row="2" Grid.Column="0" Text="기간" Margin="0,0,8,8" VerticalAlignment="Center"/>
+			<StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" >
+				<DatePicker SelectedDate="{Binding Detail.startDate, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
+				<DatePicker SelectedDate="{Binding Detail.endDate, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,8"/>
+			</StackPanel>
+
+			<TextBlock Grid.Row="3" Grid.Column="0" Text="수량" Margin="0,0,0,8" VerticalAlignment="Center"/>
+			<TextBox   Grid.Row="3" Grid.Column="1" Margin="0,0,0,8"  Text="{Binding Detail.qty, UpdateSourceTrigger=PropertyChanged}" />
 
 			<TextBlock Grid.Row="4" Grid.Column="0" Text="비고" VerticalAlignment="Center"/>
 			<TextBox   Grid.Row="4" Grid.Column="1" Text="{Binding Detail.note}" />

@@ -1,9 +1,12 @@
 ﻿// Views/ProductSingleSelectDialog.xaml.cs
+using Erp.Client.Wpf.Models;
+using Erp.Client.Wpf.Services;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using Erp.Client.Wpf.Services;
+using System.Windows.Input;
 
 namespace Erp.Client.Wpf.Views
 {
@@ -28,10 +31,11 @@ namespace Erp.Client.Wpf.Views
         {
             var q = tbQuery.Text?.Trim() ?? "";
             var status = ((ComboBoxItem)cbStatus.SelectedItem)?.Tag?.ToString() ?? "ALL";
+            var page = 0; var size = 100;
             // 엔드포인트는 프로젝트에 맞춰 변경
-            var url = $"/api/products?q={System.Uri.EscapeDataString(q)}&status={status}&page=0&size=50&sort=productCode,asc";
+            var url = $"/api/products/search?q={Uri.EscapeDataString(q)}&status={status}&page={page}&size={size}&sort=productCode,asc";
 
-            var res = await _api.GetAsync<Paged<ProductLite>>(url);
+            var res = await _api.GetAsync<Models.Paged<ProductLite>>(url);
             grid.ItemsSource = res?.content ?? new List<ProductLite>();
         }
     }
@@ -46,12 +50,5 @@ namespace Erp.Client.Wpf.Views
         public string unit { get; set; } = "";
     }
 
-    public class Paged<T>
-    {
-        public List<T> content { get; set; } = new();
-        public int totalPages { get; set; }
-        public long totalElements { get; set; }
-        public int size { get; set; }
-        public int number { get; set; }
-    }
+
 }
