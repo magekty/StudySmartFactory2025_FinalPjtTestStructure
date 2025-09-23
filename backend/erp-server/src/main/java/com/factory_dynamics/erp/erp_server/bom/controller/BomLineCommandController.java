@@ -1,6 +1,9 @@
 // src/main/java/com/factory_dynamics/erp/erp_server/bom/BomLineCommandController.java
-package com.factory_dynamics.erp.erp_server.bom;
+package com.factory_dynamics.erp.erp_server.bom.controller;
 
+import com.factory_dynamics.erp.erp_server.bom.BomLineCreateRequest;
+import com.factory_dynamics.erp.erp_server.bom.BomLineResponse;
+import com.factory_dynamics.erp.erp_server.bom.service.BomLineCommandService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

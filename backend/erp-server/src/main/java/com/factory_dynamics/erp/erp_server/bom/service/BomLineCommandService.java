@@ -1,6 +1,10 @@
 // src/main/java/com/factory_dynamics/erp/erp_server/bom/BomLineCommandService.java
-package com.factory_dynamics.erp.erp_server.bom;
+package com.factory_dynamics.erp.erp_server.bom.service;
 
+import com.factory_dynamics.erp.erp_server.bom.*;
+import com.factory_dynamics.erp.erp_server.bom.entity.BomLine;
+import com.factory_dynamics.erp.erp_server.bom.repository.BomHeaderRepository;
+import com.factory_dynamics.erp.erp_server.bom.repository.BomLineRepository;
 import com.factory_dynamics.erp.erp_server.common.BizException;
 import com.factory_dynamics.erp.erp_server.common.Uuids;
 import com.factory_dynamics.erp.erp_server.product.ProductRepository;

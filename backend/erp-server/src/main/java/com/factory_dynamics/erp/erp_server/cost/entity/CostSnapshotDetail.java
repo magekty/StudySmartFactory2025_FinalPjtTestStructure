@@ -1,4 +1,4 @@
-package com.factory_dynamics.erp.erp_server.cost;
+package com.factory_dynamics.erp.erp_server.cost.entity;
 
 import com.factory_dynamics.erp.erp_server.product.Product;
 import jakarta.persistence.*;

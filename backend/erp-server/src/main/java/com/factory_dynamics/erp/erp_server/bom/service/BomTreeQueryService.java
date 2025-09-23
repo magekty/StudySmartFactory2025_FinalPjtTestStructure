@@ -1,7 +1,10 @@
 // 9) Java BE - 트리도 서비스에서 모두 로딩 후 DTO 구성 (no session 방지)
-package com.factory_dynamics.erp.erp_server.bom;
+package com.factory_dynamics.erp.erp_server.bom.service;
 
+import com.factory_dynamics.erp.erp_server.bom.entity.BomLine;
 import com.factory_dynamics.erp.erp_server.bom.dto.BomTreeNodeResponse;
+import com.factory_dynamics.erp.erp_server.bom.repository.BomHeaderRepository;
+import com.factory_dynamics.erp.erp_server.bom.repository.BomLineRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

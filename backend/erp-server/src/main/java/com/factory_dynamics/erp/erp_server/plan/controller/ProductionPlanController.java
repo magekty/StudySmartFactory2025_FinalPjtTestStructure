@@ -1,5 +1,7 @@
-package com.factory_dynamics.erp.erp_server.plan;
+package com.factory_dynamics.erp.erp_server.plan.controller;
 
+import com.factory_dynamics.erp.erp_server.plan.ProductionPlan;
+import com.factory_dynamics.erp.erp_server.plan.ProductionPlanService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;

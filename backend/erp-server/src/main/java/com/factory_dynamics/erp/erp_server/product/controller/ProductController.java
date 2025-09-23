@@ -1,5 +1,9 @@
-package com.factory_dynamics.erp.erp_server.product;
+package com.factory_dynamics.erp.erp_server.product.controller;
 
+import com.factory_dynamics.erp.erp_server.product.Product;
+import com.factory_dynamics.erp.erp_server.product.ProductCreateRequest;
+import com.factory_dynamics.erp.erp_server.product.ProductResponse;
+import com.factory_dynamics.erp.erp_server.product.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

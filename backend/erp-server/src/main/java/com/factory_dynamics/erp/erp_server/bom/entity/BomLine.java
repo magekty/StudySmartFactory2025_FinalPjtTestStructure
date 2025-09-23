@@ -1,5 +1,5 @@
 // src/main/java/com/factory_dynamics/erp/erp_server/bom/BomLine.java
-package com.factory_dynamics.erp.erp_server.bom;
+package com.factory_dynamics.erp.erp_server.bom.entity;
 
 import com.factory_dynamics.erp.erp_server.common.AuditableEntity;
 import com.factory_dynamics.erp.erp_server.product.Product;

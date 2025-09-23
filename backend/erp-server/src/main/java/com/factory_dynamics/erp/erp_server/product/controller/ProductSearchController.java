@@ -1,5 +1,7 @@
-package com.factory_dynamics.erp.erp_server.product;
+package com.factory_dynamics.erp.erp_server.product.controller;
 
+import com.factory_dynamics.erp.erp_server.product.ProductListItem;
+import com.factory_dynamics.erp.erp_server.product.ProductRepository;
 import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

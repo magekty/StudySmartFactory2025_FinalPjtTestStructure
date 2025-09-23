@@ -1,6 +1,7 @@
 // 10) Java BE - 트리 컨트롤러 (서비스 경유)
-package com.factory_dynamics.erp.erp_server.bom;
+package com.factory_dynamics.erp.erp_server.bom.controller;
 
+import com.factory_dynamics.erp.erp_server.bom.service.BomTreeQueryService;
 import com.factory_dynamics.erp.erp_server.bom.dto.BomTreeNodeResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

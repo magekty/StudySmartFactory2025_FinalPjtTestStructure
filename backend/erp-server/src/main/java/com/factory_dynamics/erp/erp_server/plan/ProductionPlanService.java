@@ -1,6 +1,6 @@
 package com.factory_dynamics.erp.erp_server.plan;
 
-import com.factory_dynamics.erp.erp_server.bom.BomHeaderRepository;
+import com.factory_dynamics.erp.erp_server.bom.repository.BomHeaderRepository;
 import com.factory_dynamics.erp.erp_server.common.BizException;
 import com.factory_dynamics.erp.erp_server.common.Uuids;
 import com.factory_dynamics.erp.erp_server.product.Product;

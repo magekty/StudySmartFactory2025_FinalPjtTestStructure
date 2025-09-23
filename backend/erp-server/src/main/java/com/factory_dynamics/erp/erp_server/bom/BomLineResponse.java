@@ -1,6 +1,8 @@
 // src/main/java/com/factory_dynamics/erp/erp_server/bom/BomLineResponse.java
 package com.factory_dynamics.erp.erp_server.bom;
 
+import com.factory_dynamics.erp.erp_server.bom.entity.BomLine;
+
 import java.math.BigDecimal;
 
 public record BomLineResponse(

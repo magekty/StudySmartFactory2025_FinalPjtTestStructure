@@ -1,5 +1,6 @@
-package com.factory_dynamics.erp.erp_server.bom;
+package com.factory_dynamics.erp.erp_server.bom.repository;
 
+import com.factory_dynamics.erp.erp_server.bom.entity.BomLine;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

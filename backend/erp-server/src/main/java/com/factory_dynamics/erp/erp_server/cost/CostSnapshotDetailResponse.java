@@ -1,5 +1,7 @@
 package com.factory_dynamics.erp.erp_server.cost;
 
+import com.factory_dynamics.erp.erp_server.cost.entity.CostSnapshotDetail;
+
 import java.math.BigDecimal;
 
 public record CostSnapshotDetailResponse(

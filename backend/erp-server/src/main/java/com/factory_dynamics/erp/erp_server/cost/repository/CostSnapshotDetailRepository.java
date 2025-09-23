@@ -1,5 +1,6 @@
-package com.factory_dynamics.erp.erp_server.cost;
+package com.factory_dynamics.erp.erp_server.cost.repository;
 
+import com.factory_dynamics.erp.erp_server.cost.entity.CostSnapshotDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

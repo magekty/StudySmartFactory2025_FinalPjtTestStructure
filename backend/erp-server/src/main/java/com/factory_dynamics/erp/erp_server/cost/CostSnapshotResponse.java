@@ -1,5 +1,7 @@
 package com.factory_dynamics.erp.erp_server.cost;
 
+import com.factory_dynamics.erp.erp_server.cost.entity.CostSnapshot;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
