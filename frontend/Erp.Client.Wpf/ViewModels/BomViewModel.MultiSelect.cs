@@ -41,6 +41,10 @@ namespace Erp.Client.Wpf.ViewModels
                 {
                     try
                     {
+                        if(AddBomId is null) {
+                            MessageBox.Show("추가할 상위 제품을 선택하지 않았습니다.");
+                            break; 
+                        }
                         var req = new BomLineCreateRequest(
                             AddBomId!.Trim(),
                             string.IsNullOrWhiteSpace(parentId) ? null : parentId,

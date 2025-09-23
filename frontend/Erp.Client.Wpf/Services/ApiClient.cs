@@ -1,6 +1,7 @@
 ﻿using Erp.Client.Wpf.Utils;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 
@@ -35,13 +36,37 @@ public class ApiClient
         return JsonSerializer.Deserialize<T>(json, _json);
     }
 
-    public async Task<T?> PatchAsync<T>(string path, CancellationToken ct = default)
+    public async Task PostAsync(string path, object? body, CancellationToken ct = default)
     {
-        var req = new HttpRequestMessage(new HttpMethod("PATCH"), path);
+        var res = await _http.PostAsJsonAsync(path, body, ct);
+        res.EnsureSuccessStatusCode();
+    }
+
+    public async Task<T?> PutAsync<T>(string path, object body, CancellationToken ct = default)
+    {
+        var res = await _http.PutAsJsonAsync(path, body, ct);
+        res.EnsureSuccessStatusCode();
+        return await res.Content.ReadFromJsonAsync<T>(cancellationToken: ct);
+    }
+
+    public async Task<T?> PatchAsync<T>(string path, object body, CancellationToken ct = default)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Patch, path)
+        {
+            Content = JsonContent.Create(body)
+        };
         using var res = await _http.SendAsync(req, ct);
-        await EnsureSuccess(res);
-        var json = await res.Content.ReadAsStringAsync(ct);
-        return JsonSerializer.Deserialize<T>(json, _json);
+        res.EnsureSuccessStatusCode();
+        return await res.Content.ReadFromJsonAsync<T>(cancellationToken: ct);
+    }
+    public async Task PatchAsync(string path, object body, CancellationToken ct = default)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Patch, path)
+        {
+            Content = JsonContent.Create(body)
+        };
+        using var res = await _http.SendAsync(req, ct);
+        res.EnsureSuccessStatusCode();
     }
 
     public async Task DeleteAsync(string path, CancellationToken ct = default)

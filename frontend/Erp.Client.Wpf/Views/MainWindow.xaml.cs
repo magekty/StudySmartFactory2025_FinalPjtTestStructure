@@ -1,10 +1,6 @@
-﻿using Erp.Client.Wpf.Models;
-using Erp.Client.Wpf.Services;
+﻿using Erp.Client.Wpf.Services;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace Erp.Client.Wpf.Views
 {
@@ -21,10 +17,13 @@ namespace Erp.Client.Wpf.Views
             var timeoutSec = json.TryGetProperty("TimeoutSeconds", out var t) ? t.GetInt32() : 15;
             _api = new ApiClient(baseUrl, TimeSpan.FromSeconds(timeoutSec));
 
-            // 원가 - by plan
+            // 생산계획
+            planHost.Content = new ProductionPlanView(_api);
+
+            // 원가 - by plan (기존 유지)
             costHost.Content = new CostView(_api);
 
-            // BOM
+            // BOM (기존 유지)
             bomHost.Content = new BomView(_api);
         }
     }

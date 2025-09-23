@@ -35,8 +35,4 @@ public class Product extends AuditableEntity {
     @Column(name = "description", length = 255)
     private String description;
 
-    // 추가: 상태(활성/비활성) 매핑 - JPQL에서는 p.deleted로 사용
-    @Builder.Default
-    @Column(name = "is_deleted", nullable = false)
-    private boolean deleted = false;
 }

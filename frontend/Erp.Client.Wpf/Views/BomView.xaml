@@ -41,7 +41,7 @@
         <GroupBox Header="조회" Margin="0,0,0,12">
             <StackPanel Orientation="Horizontal" Margin="12">
                 <TextBlock Text="BOM ID *" Foreground="IndianRed" VerticalAlignment="Center"/>
-                <TextBox Width="360" Margin="8,0,0,0" Text="{Binding QueryBomId, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBox Width="360" Margin="8,0,0,0" Text="{Binding QueryBomId, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True, NotifyOnValidationError=True}" Style="{StaticResource ValidatedTextBox}"/>
                 <Button Content="조회" Width="100" Margin="12,0,0,0" Command="{Binding QueryCommand}"/>
             </StackPanel>
         </GroupBox>
