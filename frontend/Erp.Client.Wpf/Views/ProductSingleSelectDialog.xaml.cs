@@ -20,12 +20,13 @@ namespace Erp.Client.Wpf.Views
 
             btnSearch.Click += async (_, __) => await SearchAsync();
             btnOk.Click += (_, __) => {
-                if (grid.SelectedItem is ProductLite vm) { SelectedItem = vm; DialogResult = true; }
+                if (grid.SelectedItem is ProductListItem vm) { SelectedItem = vm; DialogResult = true; }
                 else MessageBox.Show("품목을 선택하세요.");
             };
+            Loaded += async (_, __) => await SearchAsync();
         }
 
-        public ProductLite? SelectedItem { get; private set; }
+        public ProductListItem? SelectedItem { get; private set; }
 
         private async Task SearchAsync()
         {
@@ -35,20 +36,9 @@ namespace Erp.Client.Wpf.Views
             // 엔드포인트는 프로젝트에 맞춰 변경
             var url = $"/api/products/search?q={Uri.EscapeDataString(q)}&status={status}&page={page}&size={size}&sort=productCode,asc";
 
-            var res = await _api.GetAsync<Models.Paged<ProductLite>>(url);
-            grid.ItemsSource = res?.content ?? new List<ProductLite>();
+            var res = await _api.GetAsync<Models.Paged<ProductListItem>>(url);
+            grid.ItemsSource = res?.content ?? new List<ProductListItem>();
         }
     }
-
-    // 가벼운 목록용 DTO
-    public class ProductLite
-    {
-        public string productId { get; set; } = "";
-        public string productCode { get; set; } = "";
-        public string name { get; set; } = "";
-        public string type { get; set; } = "";
-        public string unit { get; set; } = "";
-    }
-
 
 }

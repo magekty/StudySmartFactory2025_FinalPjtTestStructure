@@ -4,13 +4,22 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="품목 선택(단일)" Height="640" Width="960"
         WindowStartupLocation="CenterOwner" ResizeMode="CanResize">
-    <Window.Resources>
-        <!-- 필요 시 기존 리소스 재사용 -->
-        <Style x:Key="TableHeader" TargetType="TextBlock">
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#444"/>
-        </Style>
-    </Window.Resources>
+	<Window.Resources>
+		<Style x:Key="BadgeTextBlock" TargetType="TextBlock">
+			<Setter Property="HorizontalAlignment" Value="Center"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+			<Setter Property="Padding" Value="6,2"/>
+			<Setter Property="FontSize" Value="12"/>
+			<Setter Property="Foreground" Value="White"/>
+		</Style>
+		<DataTemplate x:Key="ActiveBadgeTemplate">
+			<Border Background="{Binding active, Converter={StaticResource BoolToBrushActiveGray}}"
+              CornerRadius="10" Padding="0" Margin="6,0">
+				<TextBlock Style="{StaticResource BadgeTextBlock}"
+                   Text="{Binding active, Converter={StaticResource BoolToActiveText}}"/>
+			</Border>
+		</DataTemplate>
+	</Window.Resources>
 
     <Grid Margin="12">
         <Grid.RowDefinitions>
@@ -40,11 +49,12 @@
                   ColumnWidth="*"
                   ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="품목ID" Binding="{Binding productId}" Width="180"/>
+                <!--<DataGridTextColumn Header="품목ID" Binding="{Binding productId}" Width="180"/>-->
                 <DataGridTextColumn Header="품번" Binding="{Binding productCode}" Width="180"/>
                 <DataGridTextColumn Header="품명" Binding="{Binding name}" Width="*"/>
-                <DataGridTextColumn Header="유형" Binding="{Binding type}" Width="100"/>
-                <DataGridTextColumn Header="단위" Binding="{Binding unit}" Width="100"/>
+				<DataGridTextColumn Header="규격" Binding="{Binding description}" Width="*" MinWidth="180"/>
+				<DataGridTextColumn Header="단위" Binding="{Binding unit}" Width="100"/>
+				<DataGridTemplateColumn Header="상태" Width="110" CellTemplate="{StaticResource ActiveBadgeTemplate}"/>
             </DataGrid.Columns>
         </DataGrid>
 
