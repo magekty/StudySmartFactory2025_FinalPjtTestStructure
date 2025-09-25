@@ -77,11 +77,11 @@
                 <TextBox Grid.Column="4" Style="{StaticResource ValidatedTextBox}"
                  Text="{Binding Qty, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
 
-                <TextBlock Grid.Column="6" Text="Labor" Style="{StaticResource LabelText}"/>
+                <TextBlock Grid.Column="6" Text="직접 노무비" Style="{StaticResource LabelText}"/>
                 <TextBox Grid.Column="7" Style="{StaticResource ValidatedTextBox}"
                  Text="{Binding Labor, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
 
-                <TextBlock Grid.Column="9" Text="OH" Style="{StaticResource LabelText}"/>
+                <TextBlock Grid.Column="9" Text="제조 간접비" Style="{StaticResource LabelText}"/>
                 <TextBox Grid.Column="10" Style="{StaticResource ValidatedTextBox}"
                  Text="{Binding Overhead, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
 
