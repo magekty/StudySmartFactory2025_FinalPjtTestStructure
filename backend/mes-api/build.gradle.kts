@@ -25,7 +25,7 @@ dependencies {
 //	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0")
 	implementation("org.apache.commons:commons-lang3:3.18.0")
-	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.1")
+
 	// 마이그레이션(원하면) — 아직 사용 안 하면 주석
 	// implementation("org.flywaydb:flyway-core")
 
@@ -46,12 +46,9 @@ dependencies {
 	// captcha (캡챠 사용)
 	implementation("com.github.whvcse:easy-captcha:1.6.2")
 
-	implementation("org.springframework.boot:spring-boot-starter-actuator")
-
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.withType<Test> {
 	useJUnitPlatform()
-	enabled = false // 이 부분이 모든 Test 태스크를 비활성화합니다.
 }

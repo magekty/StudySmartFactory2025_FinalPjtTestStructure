@@ -6,6 +6,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
@@ -23,9 +24,9 @@ public class JwtUtil {
     }
 
     public String issue(String userId, List<String> roles){
-        var key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-        var now = Instant.now();
-        var exp = now.plusSeconds(ttlMinutes * 60);
+        SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        Instant now = Instant.now();
+        Instant exp = now.plusSeconds(ttlMinutes * 60);
         return Jwts.builder()
                 .subject(userId)
                 .claim("roles", roles)

@@ -6,4 +6,6 @@ import java.util.Optional;
 
 public interface CodeRepo extends JpaRepository<CodeEntity, Long> {
     Optional<CodeEntity> findByGroupCodeAndCodeAndUseYn(String groupCode, String code, char useYn);
+    Optional<CodeEntity> findByGroupCodeAndCode(String groupCode, String code);
+
 }

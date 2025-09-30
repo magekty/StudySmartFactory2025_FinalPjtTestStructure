@@ -5,7 +5,7 @@ package com.globalmed.mes.mes_api.auth.domain;
 import jakarta.persistence.*;
 import lombok.Getter; import lombok.Setter;
 
-@Entity @Table(name="TB_USER")
+@Entity @Table(name="tb_user")
 @Getter @Setter
 public class UserEntity {
     @Id @Column(name="user_id", length=36) private String userId;

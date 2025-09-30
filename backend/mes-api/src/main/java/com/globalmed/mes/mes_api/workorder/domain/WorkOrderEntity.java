@@ -1,9 +1,11 @@
-// src/main/java/com/globalmed/mes/mes_api/workorder/domain/WorkOrderEntity.java
 package com.globalmed.mes.mes_api.workorder.domain;
 
+import com.globalmed.mes.mes_api.code.CodeEntity;
+import com.globalmed.mes.mes_api.process.domain.ProcessEntity;
+import com.globalmed.mes.mes_api.item.ItemEntity;
+import com.globalmed.mes.mes_api.equipstatus.domain.EquipmentEntity;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -26,14 +28,20 @@ public class WorkOrderEntity {
     @Column(name = "work_order_number", length = 50, nullable = false)
     private String workOrderNumber;
 
-    @Column(name = "item_id", length = 36, nullable = false)
-    private String itemId;
+    // 기존의 itemId 컬럼을 제거하고, ItemEntity와의 관계로 대체
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_id", nullable = false)
+    private ItemEntity itemId;
 
-    @Column(name = "process_id", length = 36, nullable = false)
-    private String processId;
+    // 기존의 processId 컬럼을 제거하고, ProcessEntity와의 관계로 대체
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "process_id", nullable = false)
+    private ProcessEntity processId;
 
-    @Column(name = "equipment_id", length = 36, nullable = false)
-    private String equipmentId;
+    // 기존의 equipmentId 컬럼을 제거하고, EquipmentEntity와의 관계로 대체
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "equipment_id", nullable = false)
+    private EquipmentEntity equipmentId;
 
     @Column(name = "order_qty", nullable = false, precision = 10, scale = 4)
     private BigDecimal orderQty;
@@ -47,14 +55,14 @@ public class WorkOrderEntity {
     @Column(name = "end_ts")
     private LocalDateTime endTs;
 
-    // FK(CodeEntity) 제거 → 코드값 직접 보관(P/R/C)
-    @Column(name = "status_code", length = 1, nullable = false)
-    private String statusCode;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "status_code_id", nullable = false)
+    private CodeEntity statusCode; // wo_status: P/R/C
 
     @Column(name = "created_by", nullable = false, length = 50)
     private String createdBy;
 
-    // DB DEFAULT/ON UPDATE 사용 → 읽기 전용
+    // DB에서 DEFAULT CURRENT_TIMESTAMP / ON UPDATE 사용 → 읽기 전용 매핑
     @Column(name = "created_at", columnDefinition = "datetime", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -64,9 +72,6 @@ public class WorkOrderEntity {
     @PrePersist
     void prePersist() {
         if (producedQty == null) producedQty = BigDecimal.ZERO;
-        if (statusCode == null || statusCode.isBlank()) statusCode = "P";
-        else statusCode = statusCode.trim().toUpperCase();
-
         if (createdBy == null || createdBy.isBlank()) {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             createdBy = (auth != null && auth.isAuthenticated())

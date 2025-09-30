@@ -1,10 +1,15 @@
-// src/main/java/com/globalmed/mes/mes_api/performance/service/PerformanceService.java
 package com.globalmed.mes.mes_api.performance.service;
 
-import com.globalmed.mes.mes_api.backflush.service.BomConsumptionService;
-import com.globalmed.mes.mes_api.log.ProdLogService;
+import com.globalmed.mes.mes_api.code.CodeService;
+import com.globalmed.mes.mes_api.code.CodeEntity;
+import com.globalmed.mes.mes_api.code.CodeRepo;
+import com.globalmed.mes.mes_api.equipstatus.domain.EquipmentEntity;
+import com.globalmed.mes.mes_api.item.ItemEntity;
+import com.globalmed.mes.mes_api.kpi.service.RealTimeKpiService;
 import com.globalmed.mes.mes_api.performance.domain.ProductionPerformanceEntity;
 import com.globalmed.mes.mes_api.performance.repository.PerformanceRepo;
+import com.globalmed.mes.mes_api.process.domain.ProcessEntity;
+import com.globalmed.mes.mes_api.production.service.ProductionLogService;
 import com.globalmed.mes.mes_api.workorder.domain.WorkOrderEntity;
 import com.globalmed.mes.mes_api.workorder.repository.WorkOrderRepo;
 import jakarta.transaction.Transactional;
@@ -13,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.*;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -20,13 +26,15 @@ public class PerformanceService {
 
     private final PerformanceRepo performanceRepo;
     private final WorkOrderRepo workOrderRepo;
-    private final ProdLogService prodLogService;
-    private final BomConsumptionService bomConsumptionService;
+    private final CodeRepo codeRepo;
+    private final ProductionLogService productionLogService;
+    private final RealTimeKpiService realTimeKpiService;
+    private final CodeService codeService;
 
     public record Req(
             String workOrderId, String itemId, String processId, String equipmentId,
             BigDecimal producedQty, BigDecimal defectQty,
-            String startTime, String endTime, String requestId
+            String startTime, String endTime, String requestId // ISO8601, 예: 2025-08-10T09:00:00Z
     ) {}
 
     public record Res(Long performanceId, BigDecimal goodQty) {}
@@ -39,40 +47,60 @@ public class PerformanceService {
         String eqp  = t(req.equipmentId());
         String rid  = t(req.requestId());
 
+        // 필수값
         if (req.producedQty() == null || req.defectQty() == null
                 || req.workOrderId() == null || req.itemId() == null
                 || req.processId() == null || req.equipmentId() == null
                 || req.startTime() == null || req.endTime() == null) {
             throw new IllegalArgumentException("VALIDATION_ERROR");
         }
+
+        // 수량 검증
         if (req.producedQty().compareTo(BigDecimal.ZERO) < 0) throw new IllegalArgumentException("VALIDATION_ERROR");
         if (req.defectQty().compareTo(BigDecimal.ZERO) < 0) throw new IllegalArgumentException("VALIDATION_ERROR");
         if (req.defectQty().compareTo(req.producedQty()) > 0) throw new IllegalArgumentException("VALIDATION_ERROR");
 
+        // 시간 파싱(UTC) 및 검증
         LocalDateTime st = toUtcLdt(req.startTime());
         LocalDateTime et = toUtcLdt(req.endTime());
         if (et.isBefore(st)) throw new IllegalArgumentException("TIME_ORDER_INVALID");
 
-        WorkOrderEntity wo = workOrderRepo.findById(woId)
+        // WO 상태 검증(Released만 허용)
+        WorkOrderEntity wo = workOrderRepo.findById(req.workOrderId())
                 .orElseThrow(() -> new IllegalArgumentException("NOT_FOUND"));
-        String cur = (wo.getStatusCode() != null ? wo.getStatusCode() : null);
+        String cur = (wo.getStatusCode() != null ? wo.getStatusCode().getCode() : null);
         if (!"R".equals(cur)) throw new IllegalStateException("WO_STATUS_INVALID");
 
+        // WorkOrderEntity 조회 직후, 상태 R 검증 바로 다음에 배치
         LocalDateTime baseline = (wo.getStartTs() != null) ? wo.getStartTs() : wo.getCreatedAt();
+        // st/et는 이미 OffsetDateTime→UTC LocalDateTime 변환된 값
         if (baseline != null) {
             if (st.isBefore(baseline) || et.isBefore(baseline)) {
-                throw new IllegalArgumentException("PERF_BEFORE_WO");
+                throw new IllegalArgumentException("PERF_BEFORE_WO"); // 400으로 매핑됨
             }
         }
         if (rid != null && !rid.isEmpty() && performanceRepo.findByRequestId(rid).isPresent()) {
             throw new IllegalStateException("DUPLICATE_KEY");
         }
 
+        // 저장
         var p = new ProductionPerformanceEntity();
-        p.setWorkOrderId(woId);
-        p.setItemId(item);
-        p.setProcessId(proc);
-        p.setEquipmentId(eqp);
+        WorkOrderEntity woRef = new WorkOrderEntity();
+        woRef.setWorkOrderId(woId);
+        p.setWorkOrder(woRef);
+
+        ItemEntity itemRef = new ItemEntity();
+        itemRef.setItemId(item);
+        p.setItem(itemRef);
+
+        ProcessEntity procRef = new ProcessEntity();
+        procRef.setProcessId(proc);
+        p.setProcess(procRef);
+
+        EquipmentEntity eqpRef = new EquipmentEntity();
+        eqpRef.setEquipmentId(eqp);
+        p.setEquipment(eqpRef);
+
         p.setProducedQty(req.producedQty());
         p.setDefectQty(req.defectQty());
         p.setStartTime(st);
@@ -81,42 +109,29 @@ public class PerformanceService {
 
         try {
             p = performanceRepo.save(p);
+
         } catch (org.springframework.dao.DataIntegrityViolationException ex) {
             throw new IllegalStateException("DUPLICATE_KEY");
         }
+        //KPI DATA 실시간 저장
+        realTimeKpiService.saveKpiFromPerformance(p);
 
-        if (wo.getProducedQty() == null) {
-            wo.setProducedQty(BigDecimal.ZERO);
-        }
         wo.setProducedQty(wo.getProducedQty().add(req.producedQty()));
-
         BigDecimal good = req.producedQty().subtract(req.defectQty());
 
-        // 듀얼 라이트(B안): 저장 직후 로그 적재
-        OffsetDateTime endUtc = et.atOffset(ZoneOffset.UTC);
-        String goodKey = (rid != null && !rid.isEmpty())
-                ? "REQ:" + rid + ":GOOD"
-                : "PERF:" + p.getPerformanceId() + ":GOOD";
-        String defectKey = (rid != null && !rid.isEmpty())
-                ? "REQ:" + rid + ":DEFECT"
-                : "PERF:" + p.getPerformanceId() + ":DEFECT";
+        if (wo.getProducedQty().compareTo(wo.getOrderQty()) >= 0) {
+            CodeEntity completed = codeService.getCode("WO_STATUS", "C");
+            wo.setStatusCode(completed);
+        }
 
+// Good/Defect 이벤트 로그 남기기
         if (good.compareTo(BigDecimal.ZERO) > 0) {
-            prodLogService.goodQty(woId, item, proc, eqp, good.doubleValue(), "EA", endUtc, goodKey);
-        }
-        if (req.defectQty().compareTo(BigDecimal.ZERO) > 0) {
-            prodLogService.defectQty(woId, item, proc, eqp, req.defectQty().doubleValue(), "EA", endUtc, defectKey);
-        }
-        String perfKey = (rid != null && !rid.isBlank()) ? ("REQ:" + rid) : ("PERF:" + p.getPerformanceId());
-        if (good.signum() > 0) {
-            bomConsumptionService.enqueueBackflushAndCost(woId, good, "EA", endUtc, perfKey);
-        }
-
-        return new Res(p.getPerformanceId(), good);
-    }
+            productionLogService.logGood(woId, eqp, proc, good.intValue()); } if (req.defectQty().compareTo(BigDecimal.ZERO) > 0)
+        {productionLogService.logDefect(woId, eqp, proc, req.defectQty().intValue()); }
+        return new Res(p.getPerformanceId(), good);}
 
     private static String t(String s){ return s==null ? null : s.trim(); }
-    private LocalDateTime toUtcLdt(String isoZ) {
+    private LocalDateTime toUtcLdt(String isoZ){
         return OffsetDateTime.parse(isoZ).atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
     }
 }

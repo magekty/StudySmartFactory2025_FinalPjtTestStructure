@@ -1,6 +1,7 @@
 package com.globalmed.mes.mes_api.auth.service;
 
 import com.globalmed.mes.mes_api.auth.JwtUtil;
+import com.globalmed.mes.mes_api.auth.domain.UserEntity;
 import com.globalmed.mes.mes_api.auth.repository.UserRepo;
 import com.globalmed.mes.mes_api.rbac.repository.UserRoleRepo;
 import lombok.RequiredArgsConstructor;
@@ -17,14 +18,14 @@ public class UserService {
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10);
 
     public AuthResult authenticate(String username, String rawPassword){
-        var user = userRepo.findByUsername(username)
+        UserEntity user = userRepo.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("AUTH_REQUIRED"));
         if (user.getIsActive() != 1) throw new IllegalStateException("FORBIDDEN");
         if (!encoder.matches(rawPassword, user.getPasswordHash()))
             throw new IllegalArgumentException("AUTH_REQUIRED");
 
-        var roles = userRoleRepo.findRoleCodes(user.getUserId()); // ← 여기로 변경
-        var token = jwtUtil.issue(user.getUserId(), roles);
+        List<String> roles = userRoleRepo.findRoleCodes(user.getUserId()); // ← 여기로 변경
+        String token = jwtUtil.issue(user.getUserId(), roles);
         return new AuthResult(user.getUserId(), roles, token);
     }
     public record AuthResult(String userId, List<String> roles, String token){}

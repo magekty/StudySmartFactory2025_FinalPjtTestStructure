@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name="TB_CODE",
+@Table(name="tb_code",
         uniqueConstraints = @UniqueConstraint(name="uk_code_group_code", columnNames={"group_code","code"}))
 @Getter
 @Setter

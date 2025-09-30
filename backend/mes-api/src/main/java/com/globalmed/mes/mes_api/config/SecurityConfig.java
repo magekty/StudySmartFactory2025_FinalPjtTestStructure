@@ -40,8 +40,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // preflight 허용
-                        .requestMatchers("/", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
-                                "/actuator/**", "/error", "/favicon.ico", "/internal/**", "/auth/login").permitAll()
+                        .requestMatchers("/auth/**","/v3/api-docs/**","/swagger-ui/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

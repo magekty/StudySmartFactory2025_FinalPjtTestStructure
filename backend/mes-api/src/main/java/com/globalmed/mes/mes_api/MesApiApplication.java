@@ -2,11 +2,10 @@ package com.globalmed.mes.mes_api;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@EnableScheduling
-@ConfigurationPropertiesScan(basePackages = "com.globalmed.mes.mes_api.config")
+
+@EnableScheduling // @Scheduled 을 활성화하는 코드
 @SpringBootApplication
 public class MesApiApplication {
 

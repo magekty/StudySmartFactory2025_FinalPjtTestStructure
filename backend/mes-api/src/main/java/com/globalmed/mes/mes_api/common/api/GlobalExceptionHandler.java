@@ -1,11 +1,13 @@
 package com.globalmed.mes.mes_api.common.api;
 
+import com.globalmed.mes.mes_api.auth.exception.CaptchaException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -65,6 +67,26 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(403).body(Map.of(
                 "code","FORBIDDEN",
                 "message","Access Denied",
+                "path", req.getRequestURI(),
+                "method", req.getMethod()
+        ));
+    }
+    @ExceptionHandler(CaptchaException.class)
+    public ResponseEntity<?> handleCaptcha(CaptchaException ex, HttpServletRequest req) {
+        return ResponseEntity.status(ex.getStatus())
+                .body(Map.of(
+                        "code", ex.getCode(),
+                        "message", ex.getMessage(),
+                        "path", req.getRequestURI(),
+                        "method", req.getMethod()
+                ));
+    }
+    // 메소드 불일치 익셉션
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<?> handleTypeMismatch(MethodArgumentTypeMismatchException ex, HttpServletRequest req) {
+        return ResponseEntity.status(400).body(Map.of(
+                "code", "Type Mismatch",
+                "message", ex.getMessage(),
                 "path", req.getRequestURI(),
                 "method", req.getMethod()
         ));

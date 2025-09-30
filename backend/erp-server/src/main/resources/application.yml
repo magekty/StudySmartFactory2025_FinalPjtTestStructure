@@ -50,3 +50,7 @@ info:
   app:
     name: erp-mvp
     version: 0.1.0
+
+mes:
+  api:
+    base-url: http://localhost:3307 # MES 백엔드 서버 주소
