@@ -53,4 +53,4 @@ info:
 
 mes:
   api:
-    base-url: http://localhost:3307 # MES 백엔드 서버 주소
+    base-url: http://localhost:8080 # MES 백엔드 서버 주소
