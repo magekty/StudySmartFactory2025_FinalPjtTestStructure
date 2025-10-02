@@ -1,6 +1,7 @@
 package com.factory_dynamics.erp.erp_server.plan;
 
 import com.factory_dynamics.erp.erp_server.common.AuditableEntity;
+import com.factory_dynamics.erp.erp_server.plan.dto.ProductionPlanDetailDto;
 import com.factory_dynamics.erp.erp_server.product.Product;
 import jakarta.persistence.*;
 import lombok.*;
@@ -47,4 +48,20 @@ public class ProductionPlan extends AuditableEntity {
 
     @Column(name = "note", length = 255)
     private String note;
+
+    public ProductionPlanDetailDto toDetailDto() {
+        return new ProductionPlanDetailDto(
+                this.id,
+                this.planCode,
+                this.product.getId(),
+                this.product.getProductCode(), // Product 엔티티에 getCode()가 있다고 가정
+                this.product.getName(), // Product 엔티티에 getName()이 있다고 가정
+                this.startDate,
+                this.endDate,
+                this.qty,
+                this.status,
+                this.note,
+                this.getVersion() // AuditableEntity에서 version 필드에 접근 가능하다고 가정
+        );
+    }
 }

@@ -60,12 +60,10 @@ namespace Erp.Client.Wpf.Models
         public long version { get; set; }
     }
 
-    //public class Paged<T>
-    //{
-    //    public List<T> content { get; set; } = new();
-    //    public int totalPages { get; set; }
-    //    public long totalElements { get; set; }
-    //    public int size { get; set; }
-    //    public int number { get; set; }
-    //}
+    // 🚨 1.1. MES 전송 요청 모델 추가
+    // 백엔드에서 Plan ID는 URL 경로로 받고, 본문(Body)에는 요청자 정보만 보낸다고 가정합니다.
+    public class SendToMesRequest
+    {
+        public string modifier { get; set; } = "erp_user"; // 실제 로그인 사용자명으로 대체 필요
+    }
 }

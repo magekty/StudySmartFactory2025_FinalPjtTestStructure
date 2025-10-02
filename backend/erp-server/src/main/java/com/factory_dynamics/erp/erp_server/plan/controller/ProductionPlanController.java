@@ -1,10 +1,11 @@
-// plan/controller/ProductionPlanController.java
 package com.factory_dynamics.erp.erp_server.plan.controller;
 
+import com.factory_dynamics.erp.erp_server.mes_adapter.service.ToMesProductionPlanService; // 🚨 추가
 import com.factory_dynamics.erp.erp_server.plan.ProductionPlanService;
 import com.factory_dynamics.erp.erp_server.plan.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor; // Lombok 사용 권장
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -16,13 +17,16 @@ import java.time.LocalDate;
 @RestController
 @RequestMapping("/api/plans")
 @Tag(name = "Plan", description = "생산 계획 API")
+@RequiredArgsConstructor // final 필드에 대한 생성자 자동 생성
 public class ProductionPlanController {
 
     private final ProductionPlanService svc;
+    private final ToMesProductionPlanService toMesService; // 🚨 MES 전송 서비스 추가
 
-    public ProductionPlanController(ProductionPlanService svc) {
-        this.svc = svc;
-    }
+    // 기존 생성자는 Lombok의 @RequiredArgsConstructor로 대체 가능
+    // public ProductionPlanController(ProductionPlanService svc) {
+    //     this.svc = svc;
+    // }
 
     @Operation(summary = "목록 조회")
     @GetMapping
@@ -69,4 +73,29 @@ public class ProductionPlanController {
         svc.softDelete(planId, "system");
         return ResponseEntity.noContent().build();
     }
+
+    // ----------------------------------------------------------------------
+    // 🚨 MES 연동 기능 추가: CONFIRMED 계획을 MES로 전송
+    // ----------------------------------------------------------------------
+    /**
+     * 프론트엔드 호출: POST /api/plans/{planId}/send-to-mes
+     */
+    @Operation(summary = "MES 전송", description = "확정된 계획을 MES로 전송하고, 상태를 PENDING으로 변경")
+    @PostMapping("/{planId}/send-to-mes")
+    public ResponseEntity<ProductionPlanDetailDto> sendPlanToMes(@PathVariable String planId,
+                                                                 @RequestBody MesTransferRequest req) {
+
+        // 1. MES 전송 및 ERP 상태 업데이트 (PENDING)
+        // Service는 Plan Entity를 업데이트하고, MES API를 호출합니다.
+        // Service에서 업데이트된 Plan DTO를 반환하도록 가정합니다.
+        ProductionPlanDetailDto updatedDto = toMesService.sendPlanToMes(planId, req.modifier());
+
+        // 2. 업데이트된 Plan 상세 정보를 프론트엔드에 반환
+        return ResponseEntity.ok(updatedDto);
+    }
+
+    /**
+     * C# 프론트엔드의 SendToMesRequest에 매핑될 요청 DTO (Inner Class)
+     */
+    public record MesTransferRequest(String modifier) {}
 }

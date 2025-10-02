@@ -39,6 +39,10 @@ namespace Erp.Client.Wpf.ViewModels
             CancelCommand = new RelayCommand(async _ => await ChangeStatusAsync("CANCELED"), _ => CanCancel);
             DeleteCommand = new RelayCommand(async _ => await DeleteAsync(), _ => CanDelete);
 
+            // 🚨 1.3. MES 전송 Command 정의
+            SendToMesCommand = new RelayCommand(async _ => await SendToMesAsync(), _ => CanSendToMes);
+
+
             OpenProductPickerCommand = new RelayCommand(_ => OpenProductPicker(), _ => !IsBusy);
 
             _ = LoadAsync();
@@ -141,12 +145,17 @@ namespace Erp.Client.Wpf.ViewModels
         public ICommand DeleteCommand { get; }
         public ICommand OpenProductPickerCommand { get; }
 
+        // 🚨 1.3. MES 전송 Command 필드 추가
+        public ICommand SendToMesCommand { get; }
+
         public bool CanCreate => !IsBusy && !string.IsNullOrWhiteSpace(Detail.planCode?.Trim()) && !string.IsNullOrWhiteSpace(Detail.productId?.Trim()) && Detail.qty > 0 && Detail.startDate != default && Detail.endDate != default;
         public bool CanUpdate => !IsBusy && !string.IsNullOrWhiteSpace(Detail.planId) && Detail.version >= 0;
         public bool CanConfirm => !IsBusy && SelectedPlan != null && SelectedPlan.status == "DRAFT";
         public bool CanCancel => !IsBusy && SelectedPlan != null && SelectedPlan.status != "CANCELED" && SelectedPlan.status != "COMPLETED" && SelectedPlan.status != "IN_PRODUCTION" && SelectedPlan.status != "PENDING";
         public bool CanDelete => !IsBusy && SelectedPlan != null && SelectedPlan.status != "COMPLETED" && SelectedPlan.status != "IN_PRODUCTION" && SelectedPlan.status != "PENDING";
-
+        // 🚨 1.3. CanSendToMes 가드 로직 추가
+        // '확정(CONFIRMED)' 상태의 Plan만 MES로 전송 가능하다고 가정합니다.
+        public bool CanSendToMes => !IsBusy && SelectedPlan != null && SelectedPlan.status == "CONFIRMED";
         private async Task LoadAsync()
         {
             IsBusy = true;
@@ -268,6 +277,45 @@ namespace Erp.Client.Wpf.ViewModels
                 Detail = new ProductionPlanDetailDto();
             }
             finally { IsBusy = false; }
+        }
+
+        // 🚨 1.3. SendToMesAsync 비즈니스 로직 추가
+        private async Task SendToMesAsync()
+        {
+            if (!CanSendToMes) return;
+            IsBusy = true;
+            try
+            {
+                // 1. 요청 모델 준비
+                var req = new SendToMesRequest
+                {
+                    // TODO: 실제 로그인된 사용자 이름으로 변경 필요
+                    modifier = "erp_user_01"
+                };
+
+                // 2. API 호출
+                // 백엔드에서 Plan의 상태가 PENDING으로 업데이트된 Detail DTO를 반환한다고 가정
+                var updated = await _api.PostToMesAsync<ProductionPlanDetailDto>(
+                    $"/api/plans/{SelectedPlan!.planId}/send-to-mes", // 백엔드 엔드포인트
+                    req
+                );
+
+                // 3. UI 업데이트
+                Detail = updated ?? Detail;
+                await LoadAsync();
+
+                MessageBox.Show($"계획코드 {SelectedPlan!.planCode}가 MES로 전송되었습니다. 상태: {Detail.status}", "MES 전송 완료", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            }
+            catch (Exception ex)
+            {
+                // ErrorHandler를 사용하는 것이 좋으나, 예시를 위해 MessageBox 사용
+                MessageBox.Show($"MES 전송 실패: {ex.Message}", "오류", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
         private void OpenProductPicker()
