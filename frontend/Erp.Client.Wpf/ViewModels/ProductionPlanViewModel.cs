@@ -300,11 +300,12 @@ namespace Erp.Client.Wpf.ViewModels
                     req
                 );
 
-                // 3. UI 업데이트
-                Detail = updated ?? Detail;
-                await LoadAsync();
+                string previouslySelectedId = SelectedPlan!.planId;
 
-                MessageBox.Show($"계획코드 {SelectedPlan!.planCode}가 MES로 전송되었습니다. 상태: {Detail.status}", "MES 전송 완료", MessageBoxButton.OK, MessageBoxImage.Information);
+                // 3. UI 업데이트
+                await LoadAsync();
+                SelectedPlan = Plans.FirstOrDefault(p => p.planId == previouslySelectedId);
+                MessageBox.Show($"계획코드 {SelectedPlan!.planCode}가 MES로 전송되었습니다. 상태: PENDING", "MES 전송 완료", MessageBoxButton.OK, MessageBoxImage.Information);
 
             }
             catch (Exception ex)

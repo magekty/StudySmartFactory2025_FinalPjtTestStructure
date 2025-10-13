@@ -9,6 +9,10 @@ CREATE TABLE IF NOT EXISTS if_plan_queue (
 ) ENGINE=InnoDB;
 
 -- UPDATE 트리거: 상태 변경 (CONFIRMED -> PENDING 전송), 핵심 필드 변경, 소프트 삭제 감지
+-- 1. 종결자(DELIMITER)를 임시로 $$로 변경합니다.
+--    (BEGIN...END 블록 내의 세미콜론이 오류를 일으키지 않도록 합니다.)
+DELIMITER $$
+
 CREATE TRIGGER trg_plan_after_update
 AFTER UPDATE ON tb_production_plan
 FOR EACH ROW
@@ -17,7 +21,7 @@ BEGIN
     -- DRAFT 등 이전 상태에서 CONFIRMED로 변경될 때 'C' 이벤트로 전송
     IF OLD.status <> 'CONFIRMED' AND NEW.status = 'CONFIRMED' THEN
         INSERT INTO if_plan_queue (plan_id, change_type)
-        VALUES (NEW.plan_id, 'C'); -- MES는 이 메시지를 받고 PENDING으로 저장 후, ERP 상태를 PENDING으로 변경 요청
+        VALUES (NEW.plan_id, 'C'); -- 'C' (Create/New Plan)
 
     -- 2. 핵심 필드 UPDATE 감지 (Confirmed 상태에서 계획 변경 시)
     -- QTY, START_DATE, END_DATE 중 하나라도 바뀌었을 때 'U' 이벤트로 전송
@@ -27,12 +31,15 @@ BEGIN
         OLD.end_date <> NEW.end_date
     ) THEN
         INSERT INTO if_plan_queue (plan_id, change_type)
-        VALUES (NEW.plan_id, 'U');
+        VALUES (NEW.plan_id, 'U'); -- 'U' (Update/Change Plan)
 
     -- 3. 소프트 삭제 감지 (DRAFT/CONFIRMED 상태의 계획이 is_deleted=1로 변경될 때)
     ELSEIF OLD.is_deleted = 0 AND NEW.is_deleted = 1 THEN
         -- MES에서도 이 계획을 취소(CANCELED) 처리하도록 'D' 이벤트 전송
         INSERT INTO if_plan_queue (plan_id, change_type)
-        VALUES (NEW.plan_id, 'D');
+        VALUES (NEW.plan_id, 'D'); -- 'D' (Delete/Cancel Plan)
     END IF;
-END;
+END$$
+
+-- 2. 종결자(DELIMITER)를 다시 세미콜론(;)으로 복구합니다.
+DELIMITER ;

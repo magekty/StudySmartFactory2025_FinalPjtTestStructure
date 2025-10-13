@@ -994,3 +994,6 @@ ALTER TABLE `tb_bom_line`
 
 CREATE UNIQUE INDEX `uq_bom_line_nat` ON `tb_bom_line` (`bom_id`,`line_no`);
 CREATE INDEX `ix_bomline_comp` ON `tb_bom_line` (`component_id`);
+
+alter table `tb_production_plan`
+add column `version` bigint not null;

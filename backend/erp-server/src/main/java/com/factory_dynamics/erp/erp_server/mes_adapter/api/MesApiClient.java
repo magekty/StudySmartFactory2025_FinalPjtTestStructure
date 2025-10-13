@@ -14,14 +14,11 @@ public class MesApiClient {
 
     private final WebClient webClient;
 
-    public MesApiClient(        @Value("${mes.api.base-url}") String mesApiBaseUrl,
-                                @Value("${mes.api.username}") String mesUsername, // 설정 파일에서 읽어옴
-                                @Value("${mes.api.password}") String mesPassword  // 설정 파일에서 읽어옴
+    public MesApiClient(@Value("${mes.api.base-url}") String mesApiBaseUrl
     ) {
         this.webClient = WebClient.builder()
                 .baseUrl(mesApiBaseUrl)
                 // 🚨 Basic Auth 헤더 추가
-                .defaultHeaders(header -> header.setBasicAuth(mesUsername, mesPassword))
                 .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }
