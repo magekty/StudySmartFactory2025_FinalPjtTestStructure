@@ -996,4 +996,6 @@ CREATE UNIQUE INDEX `uq_bom_line_nat` ON `tb_bom_line` (`bom_id`,`line_no`);
 CREATE INDEX `ix_bomline_comp` ON `tb_bom_line` (`component_id`);
 
 alter table `tb_production_plan`
-add column `version` bigint not null;
+add column `version` bigint not null
+
+INSERT INTO `globalmed`.`tb_role_menu` (`role_menu_id`, `role_id`, `menu_id`, `allow_read`, `allow_write`, `allow_exec`, `created_by`, `created_at`) VALUES ('53', '3', '15', '1', '1', '0', 'seed', '2025-09-30 08:25:08');
